@@ -1,4 +1,4 @@
-package Controller;
+package Utility;
 
 public class TimerController {
     private long startTime;

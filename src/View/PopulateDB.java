@@ -2,7 +2,7 @@ package View;
 
 import Model.*;
 import Utility.RndData;
-import Controller.TimerController;
+import Utility.TimerController;
 import DAO.DAO;
 import DAO.BatchResult;
 
@@ -185,9 +185,9 @@ public class PopulateDB {
     }
 
     private static void generateListOfSegue(List<Segue> listOfSegue, List<Utente> listOfUtente, List<Annuncio> listOfAnnuncio) {
-        for (int utenteIndex = 0; utenteIndex < listOfUtente.size(); utenteIndex++) {
+        for (Utente utente : listOfUtente) {
             for (int segueIndex = 0; segueIndex < N_SEGUE_PER_USER; segueIndex++) {
-                Segue lastSegue = new Segue(listOfUtente.get(utenteIndex).getID(), RndData.getRandomInt(0, listOfAnnuncio.size() - 1));
+                Segue lastSegue = new Segue(utente.getID(), RndData.getRandomInt(0, listOfAnnuncio.size() - 1));
                 listOfSegue.add(lastSegue);
             }
         }

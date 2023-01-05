@@ -47,30 +47,30 @@ public class RndData {
     }
 
     public static String getRandomCF() {
-        String result = "";
-        for (int i = 0; i < 6; i++) result += getRandomUppercaseChar();
-        for (int i = 0; i < 2; i++) result += getRandomDigitChar();
-        for (int i = 0; i < 1; i++) result += getRandomUppercaseChar();
-        for (int i = 0; i < 2; i++) result += getRandomDigitChar();
-        for (int i = 0; i < 1; i++) result += getRandomUppercaseChar();
-        for (int i = 0; i < 3; i++) result += getRandomDigitChar();
-        for (int i = 0; i < 1; i++) result += getRandomUppercaseChar();
-        return result;
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 6; i++) result.append(getRandomUppercaseChar());
+        for (int i = 0; i < 2; i++) result.append(getRandomDigitChar());
+        for (int i = 0; i < 1; i++) result.append(getRandomUppercaseChar());
+        for (int i = 0; i < 2; i++) result.append(getRandomDigitChar());
+        for (int i = 0; i < 1; i++) result.append(getRandomUppercaseChar());
+        for (int i = 0; i < 3; i++) result.append(getRandomDigitChar());
+        for (int i = 0; i < 1; i++) result.append(getRandomUppercaseChar());
+        return result.toString();
     }
 
     public static String randomString(int length) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            result += (i == 0) ? getRandomUppercaseChar() : getRandomLowercaseChar();
+            result.append((i == 0) ? getRandomUppercaseChar() : getRandomLowercaseChar());
         }
-        return result;
+        return result.toString();
     }
     public static String randomStringWithBlanks(int length) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            result += (i == 0) ? getRandomUppercaseChar() : getRandomLowercaseChar(true);
+            result.append((i == 0) ? getRandomUppercaseChar() : getRandomLowercaseChar(true));
         }
-        return result;
+        return result.toString();
     }
 
     public static LocalDate randomDate() {
