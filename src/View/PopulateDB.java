@@ -37,6 +37,8 @@ public class PopulateDB {
         List<Annuncio> listOfAnnuncio = new ArrayList<>();
         List<Segue> listOfSegue = new ArrayList<>();
 
+        ActiveUser.setRole(Role.ROOT);
+
         /*
             Delete all bound to `utente`
          */
@@ -117,7 +119,7 @@ public class PopulateDB {
 
         insertBatchProcedure("anagrafica", listOfAnagrafica, () -> insertedResult = DAO.insertBatchAnagrafica(Role.ROOT, listOfAnagrafica));
 
-        insertBatchProcedure("recapito", listOfRecapito, () -> insertedResult = DAO.insertBatchRecapito(Role.ROOT, listOfRecapito));
+        insertBatchProcedure("recapito", listOfRecapito, () -> insertedResult = DAO.insertBatchRecapito(listOfRecapito));
 
         insertBatchProcedure("recapito_preferito", listOfRecapitoPreferito, () -> insertedResult = DAO.insertBatchRecapitoPreferito(Role.ROOT, listOfRecapitoPreferito));
 

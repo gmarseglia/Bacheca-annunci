@@ -17,6 +17,9 @@ public class DAO {
     private static final String BASE_USER = "base";
     private static final String BASE_PASS = "base";
 
+    private static final String REGISTRATORE_USER = "registratore";
+    private static final String REGISTRATORE_PASS = "registratore";
+
 
     private static Connection conn;
     private static Statement stmt = null;
@@ -39,6 +42,10 @@ public class DAO {
                     targetUser = BASE_USER;
                     targetPass = BASE_PASS;
                     break;
+                case REGISTRATORE:
+                    targetUser = REGISTRATORE_USER;
+                    targetPass = REGISTRATORE_PASS;
+                    break;
                 case ROOT:
                 default:
                     targetUser = ROOT_USER;
@@ -50,7 +57,41 @@ public class DAO {
         }
     }
 
-    public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica  anagrafica, List<Recapito> recapitoList) {
+    public static boolean loginUtente(Credenziali credenziali) {
+        boolean result = false;
+        try {
+            openRoleConnection(ActiveUser.getRole());
+
+            String query = "SELECT `ruolo` FROM `credenziali` " +
+                    "WHERE `username`=? AND `password`=?;";
+
+            ResultSet rs;
+            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ps.setString(1, credenziali.getUsername());
+            ps.setString(2, credenziali.getPassword());
+            rs = ps.executeQuery();
+
+            if (!rs.first()) return false;
+
+            Role role = switch (rs.getString(1)) {
+                case "base" -> Role.BASE;
+                case "gestore" -> Role.GESTORE;
+                default -> throw new RuntimeException("Invalid role");
+            };
+            credenziali.setRole(role);
+
+            result = true;
+
+            rs.close();
+            ps.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) {
         boolean valueReturn = false;
 
         try {
@@ -84,7 +125,6 @@ public class DAO {
             cs.setString(9, anagrafica.getComuneNascita());
             cs.setString(10, anagrafica.getIndirizzoResidenza());
             cs.setString(11, anagrafica.getIndirizzoFatturazione());
-            Recapito recapitoPreferito = recapitoList.get(0);
             cs.setString(12, recapitoPreferito.getValore());
             String tipoRecapito = switch (recapitoPreferito.getTipo()) {
                 case EMAIL -> "email";
@@ -93,21 +133,14 @@ public class DAO {
             };
             cs.setString(13, tipoRecapito);
 
-            // #4: execute query
-            cs.executeQuery();
+            cs.execute();
+
+            cs.close();
 
             valueReturn = true;
 
         } catch (Exception e) {
-            System.out.println("Exception caught!\n");
             e.printStackTrace();
-        } finally {
-            try {
-                stmt.close();
-//                conn.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
         return valueReturn;
@@ -282,17 +315,18 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static BatchResult insertBatchRecapito(Role role, List<Recapito> listOfRecapito) {
+    public static BatchResult insertBatchRecapito(List<Recapito> listOfRecapito) {
         int[] singlesResult = null;
+        PreparedStatement psmnt;
         try {
-            openRoleConnection(role);
+            openRoleConnection(ActiveUser.getRole());
 
             conn.setAutoCommit(false);
 
             String query = "INSERT IGNORE INTO `recapito` " +
                     "(`valore`, `anagrafica`, `tipo`)" +
                     "VALUES (?, ?, ?)";
-            PreparedStatement psmnt = conn.prepareStatement(query);
+            psmnt = conn.prepareStatement(query);
 
             for (Recapito recapito : listOfRecapito) {
                 psmnt.setString(1, recapito.getValore());
@@ -309,6 +343,8 @@ public class DAO {
 
             singlesResult = psmnt.executeBatch();
             conn.commit();
+
+            psmnt.close();
 
         } catch (SQLException e) {
             e.printStackTrace();

@@ -44,3 +44,7 @@ BEGIN
 END!
 
 DELIMITER ;
+
+-- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
+
+GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`;
