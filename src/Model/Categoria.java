@@ -2,9 +2,9 @@ package Model;
 
 public class Categoria {
     private String nome;
-    private Categoria padre;
+    private String padre;
 
-    public Categoria(String nome, Categoria padre) {
+    public Categoria(String nome, String padre) {
         this.nome = nome;
         this.padre = padre;
     }
@@ -21,11 +21,11 @@ public class Categoria {
         this.nome = nome;
     }
 
-    public Categoria getPadre() {
+    public String getPadre() {
         return padre;
     }
 
-    public void setPadre(Categoria padre) {
+    public void setPadre(String padre) {
         this.padre = padre;
     }
 

@@ -57,10 +57,10 @@ public class DAO {
         }
     }
 
-    public static boolean loginUtente(Credenziali credenziali) {
+    public static boolean loginUtente(Role role, Credenziali credenziali) {
         boolean result = false;
         try {
-            openRoleConnection(ActiveUser.getRole());
+            openRoleConnection(role);
 
             String query = "SELECT `ruolo` FROM `credenziali` " +
                     "WHERE `username`=? AND `password`=?;";
@@ -73,12 +73,12 @@ public class DAO {
 
             if (!rs.first()) return false;
 
-            Role role = switch (rs.getString(1)) {
+            Role selectedRole = switch (rs.getString(1)) {
                 case "base" -> Role.BASE;
                 case "gestore" -> Role.GESTORE;
                 default -> throw new RuntimeException("Invalid role");
             };
-            credenziali.setRole(role);
+            credenziali.setRole(selectedRole);
 
             result = true;
 
@@ -90,6 +90,7 @@ public class DAO {
         }
         return result;
     }
+
 
     public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) {
         boolean valueReturn = false;
@@ -455,7 +456,7 @@ public class DAO {
                 if (categoria.getPadre() == null) {
                     psmnt.setNull(2, Types.VARCHAR);
                 } else {
-                    psmnt.setString(2, categoria.getPadre().getID());
+                    psmnt.setString(2, categoria.getPadre());
                 }
                 psmnt.addBatch();
             }
@@ -474,6 +475,13 @@ public class DAO {
         }
 
         return new BatchResult(singlesResult);
+    }
+
+    public static boolean insertCategoria(Role role, Categoria categoria) {
+        List<Categoria> categoriaList = new ArrayList<>();
+        categoriaList.add(categoria);
+        BatchResult batchResult = insertBatchCategoria(role, categoriaList);
+        return batchResult.getAllTrue();
     }
 
     public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {

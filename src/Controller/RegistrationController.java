@@ -20,6 +20,6 @@ public class RegistrationController {
     }
 
     public static boolean login(Credenziali credenziali) {
-        return DAO.loginUtente(credenziali);
+        return DAO.loginUtente(ActiveUser.getRole(), credenziali);
     }
 }

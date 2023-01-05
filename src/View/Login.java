@@ -49,7 +49,10 @@ public class Login {
         Credenziali credenziali = new Credenziali(username, password, null);
         boolean loginResult = RegistrationController.login(credenziali);
 
-        if (loginResult) ActiveUser.setRole(credenziali.getRole());
+        if (loginResult) {
+            ActiveUser.setRole(credenziali.getRole());
+            ActiveUser.setUsername(credenziali.getUsername());
+        }
 
         dispatch(loginResult);
     }
@@ -124,6 +127,7 @@ public class Login {
         }
 
         ActiveUser.setRole(credenziali.getRole());
+        ActiveUser.setUsername(credenziali.getUsername());
 
         dispatch(registrationResult);
     }
@@ -131,8 +135,8 @@ public class Login {
     private static void dispatch(boolean result) {
         if (result) {
             switch (ActiveUser.getRole()) {
-                case BASE -> Base.dispatch();
-                case GESTORE -> Gestore.dispatch();
+                case BASE -> Base.begin();
+                case GESTORE -> Gestore.begin();
             }
         } else {
             if (false) main(null);

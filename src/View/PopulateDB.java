@@ -168,7 +168,7 @@ public class PopulateDB {
     }
 
     private static void generateSonCategories(List<Categoria> listOfCategories, Categoria padre, int nOfLayers, int nOfCategories) {
-        Categoria newCategoria = new Categoria(RndData.randomString(10), padre);
+        Categoria newCategoria = new Categoria(RndData.randomString(10), padre.getID());
         listOfCategories.add(newCategoria);
         if (nOfLayers > 1) {
             for (int categoriaIndex = 0; categoriaIndex < nOfCategories; categoriaIndex++) {
