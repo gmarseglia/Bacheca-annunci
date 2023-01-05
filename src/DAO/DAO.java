@@ -50,6 +50,69 @@ public class DAO {
         }
     }
 
+    public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica  anagrafica, List<Recapito> recapitoList) {
+        boolean valueReturn = false;
+
+        try {
+            // #1: connect
+            openRoleConnection(ActiveUser.getRole());
+
+            // #2: create statement
+            String callQuery = "{call `registrazione_utente` (" +
+                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            CallableStatement cs = conn.prepareCall(callQuery);
+            stmt = conn.createStatement();
+
+            // Prepare call
+            cs.setString(1, utente.getUsername());
+            cs.setString(2, credenziali.getPassword());
+            String userRole = switch (credenziali.getRole()) {
+                case BASE -> "base";
+                case GESTORE -> "gestore";
+                default -> throw new RuntimeException("Invalid role");
+            };
+            cs.setString(3, userRole);
+            cs.setString(4, anagrafica.getCodiceFiscale());
+            cs.setString(5, anagrafica.getNome());
+            cs.setString(6, anagrafica.getCognome());
+            String userSesso = switch (anagrafica.getSesso()) {
+                case UOMO -> "uomo";
+                case DONNA -> "donna";
+            };
+            cs.setString(7, userSesso);
+            cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
+            cs.setString(9, anagrafica.getComuneNascita());
+            cs.setString(10, anagrafica.getIndirizzoResidenza());
+            cs.setString(11, anagrafica.getIndirizzoFatturazione());
+            Recapito recapitoPreferito = recapitoList.get(0);
+            cs.setString(12, recapitoPreferito.getValore());
+            String tipoRecapito = switch (recapitoPreferito.getTipo()) {
+                case EMAIL -> "email";
+                case TELEFONO -> "telefono";
+                case CELLULARE -> "cellulare";
+            };
+            cs.setString(13, tipoRecapito);
+
+            // #4: execute query
+            cs.executeQuery();
+
+            valueReturn = true;
+
+        } catch (Exception e) {
+            System.out.println("Exception caught!\n");
+            e.printStackTrace();
+        } finally {
+            try {
+                stmt.close();
+//                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return valueReturn;
+    }
+
     public static boolean insertUtenteByUsername(String username) {
         boolean valueReturn = false;
 
@@ -83,6 +146,7 @@ public class DAO {
 
         return valueReturn;
     }
+
     public static boolean resetAutoincrement() {
         boolean valueReturn = false;
 
@@ -116,7 +180,6 @@ public class DAO {
 
         return valueReturn;
     }
-
 
     public static BatchResult insertBatchUtenteOnlyUsername(Role role, List<Utente> utenti) {
         int[] singlesResult = null;
@@ -234,20 +297,12 @@ public class DAO {
             for (Recapito recapito : listOfRecapito) {
                 psmnt.setString(1, recapito.getValore());
                 psmnt.setString(2, recapito.getAnagraficaID());
-                String tipo;
-                switch (recapito.getTipo()) {
-                    case CELLULARE:
-                        tipo = "cellulare";
-                        break;
-                    case TELEFONO:
-                        tipo = "telefono";
-                        break;
-                    case EMAIL:
-                        tipo = "email";
-                        break;
-                    default:
-                        throw new RuntimeException("No type found in Recapito");
-                }
+                String tipo = switch (recapito.getTipo()) {
+                    case CELLULARE -> "cellulare";
+                    case TELEFONO -> "telefono";
+                    case EMAIL -> "email";
+                    default -> throw new RuntimeException("No type found in Recapito");
+                };
                 psmnt.setString(3, tipo);
                 psmnt.addBatch();
             }

@@ -96,4 +96,8 @@ public class Anagrafica {
     public void setUsernameUtente(String usernameUtente) {
         this.usernameUtente = usernameUtente;
     }
+
+    public String getID(){
+        return this.codiceFiscale;
+    }
 }

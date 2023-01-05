@@ -58,7 +58,7 @@ public class PopulateDB {
                 if (j % 20 == 0) lastAnagrafica.setIndirizzoFatturazione(RndData.randomString(15));
 
                 for (int recapitoIndex = 0; recapitoIndex < nOfRecapitoPerUtente; recapitoIndex++) {
-                    Recapito lastRecapito = new Recapito(RndData.randomString(10), TipoRecapito.values()[RndData.getRandomInt(0, TipoRecapito.values().length - 1)], lastAnagrafica);
+                    Recapito lastRecapito = new Recapito(RndData.randomString(10), TipoRecapito.values()[RndData.getRandomInt(0, TipoRecapito.values().length - 1)], lastAnagrafica.getID());
                     listOfRecapito.add(lastRecapito);
                     if (recapitoIndex == 0) listOfRecapitoPreferito.add(lastRecapito);
                 }
