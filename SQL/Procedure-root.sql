@@ -3,6 +3,9 @@
 USE `bacheca_annunci`;
 
 DROP PROCEDURE IF EXISTS `registrazione_utente`;
+DROP PROCEDURE IF EXISTS `inserire_annuncio`;
+DROP PROCEDURE IF EXISTS `dettagli_annuncio`;
+DROP PROCEDURE IF EXISTS `scrivere_commento`;
 
 DELIMITER !
 
@@ -59,9 +62,47 @@ BEGIN
 		insert into `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`)
 			values (var_inserzionista, var_descrizione, var_prezzo, var_categoria);
 
+		set var_numero = last_insert_id();
 	commit;
+END!
 
-	set var_numero = last_insert_id();
+CREATE PROCEDURE `scrivere_commento` (
+	in var_utente VARCHAR(30), in var_annuncio INT UNSIGNED, in var_testo VARCHAR(250))
+BEGIN
+	declare exit handler for sqlexception
+    begin
+    	rollback;
+    	resignal;
+    end;
+
+	set transaction isolation level read uncommitted; 
+	start transaction;
+		insert into `commento` (`utente`, `annuncio`, `testo`)
+			values (var_utente, var_annuncio, var_testo);
+
+		update `annuncio`
+			set `modificato`=CURRENT_TIMESTAMP
+			where `numero`=var_annuncio;
+	commit;
+END!
+
+CREATE PROCEDURE `dettagli_annuncio` (
+	in var_annuncio_id INT UNSIGNED)
+BEGIN
+	declare exit handler for sqlexception
+	begin
+		rollback;
+		resignal;
+	end;
+
+	set transaction isolation level read committed;
+	start transaction;
+		select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`prezzo`,
+		`annuncio`.`categoria`, `annuncio`.`inserito`, `annuncio`.`modificato`, `annuncio`.`venduto`,
+		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
+		from `annuncio` left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
+		where `annuncio`.`numero`=var_annuncio_id;
+	commit;
 END!
 
 DELIMITER ;
@@ -71,3 +112,7 @@ DELIMITER ;
 GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`;
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`;
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`;
+GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`;
+GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `gestore`;
+GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`;
+GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `gestore`;

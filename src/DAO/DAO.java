@@ -3,6 +3,7 @@ package DAO;
 import Model.*;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +91,6 @@ public class DAO {
         }
         return result;
     }
-
 
     public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) {
         boolean valueReturn = false;
@@ -484,6 +484,22 @@ public class DAO {
         return batchResult.getAllTrue();
     }
 
+    public static boolean deleteAllCategoria(Role role) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String query = "DELETE FROM `categoria`";
+            Statement s = conn.createStatement();
+            s.executeUpdate(query);
+
+            result = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {
         int[] singlesResult = null;
         try {
@@ -515,6 +531,28 @@ public class DAO {
         }
 
         return new BatchResult(singlesResult);
+    }
+
+    public static boolean insertCommento(Role role, Commento commento) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
+            CallableStatement cs = conn.prepareCall(callQuery);
+            cs.setString(1, commento.getUtente());
+            cs.setInt(2, (int) commento.getAnnuncio());
+            cs.setString(3, commento.getTesto());
+
+            cs.executeUpdate();
+
+            result = true;
+
+            cs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public static boolean insertAnnuncio(Role role, Annuncio annuncio) {
@@ -584,6 +622,45 @@ public class DAO {
         }
 
         return new BatchResult(singlesResult);
+    }
+
+    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+            String callQuery = "{call `dettagli_annuncio`(?)}";
+            CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            cs.setInt(1, (int) annuncio.getID());
+            ResultSet rs = cs.executeQuery();
+
+            if (!rs.first()) throw new RuntimeException("No result");
+
+            annuncio.setNumero(rs.getInt(1));
+            annuncio.setInserzionista(rs.getString(2));
+            annuncio.setDescrizione(rs.getString(3));
+            annuncio.setPriceInCents((int) (rs.getFloat(4) * 100));
+            annuncio.setCategoria(rs.getString(5));
+            annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
+            annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
+            annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
+
+            do {
+                Commento commento = new Commento(
+                        rs.getString(9),
+                        annuncio.getID(),
+                        rs.getTimestamp(10).toLocalDateTime(),
+                        rs.getString(11)
+                );
+                commentoList.add(commento);
+            } while (rs.next());
+
+            result = true;
+
+            cs.close();
+        } catch (SQLException | RuntimeException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public static List<String> getAllUsernames() {

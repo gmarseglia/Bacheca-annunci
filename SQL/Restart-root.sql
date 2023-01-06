@@ -146,7 +146,7 @@ CREATE TABLE segue (
 CREATE TABLE commento (
 	utente			VARCHAR(30)			NOT NULL,
 	annuncio		BIGINT UNSIGNED		NOT NULL,
-	scritto			TIMESTAMP			NOT NULL,
+	scritto			TIMESTAMP			NOT NULL    DEFAULT CURRENT_TIMESTAMP,
 	testo			VARCHAR(250)		NOT NULL,
 	CONSTRAINT PK_commento PRIMARY KEY (utente, annuncio, scritto),
 	FOREIGN KEY (utente) REFERENCES utente(username)

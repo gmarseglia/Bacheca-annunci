@@ -53,6 +53,9 @@ public class ViewLogin {
             ActiveUser.setUsername(credenziali.getUsername());
         }
 
+        System.out.printf("Login eseguito con %s.\n",
+                loginResult ? "successo" : "insuccesso");
+
         dispatch(loginResult);
     }
 

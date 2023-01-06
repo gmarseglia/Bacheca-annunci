@@ -2,13 +2,12 @@ package View;
 
 import Controller.BaseController;
 import Controller.GestoreController;
-import Model.ActiveUser;
-import Model.Annuncio;
-import Model.Categoria;
-import Model.Role;
+import Model.*;
 import Utility.RndData;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ViewUtente {
 
@@ -37,21 +36,19 @@ public class ViewUtente {
         #TODO: while cycle to dispatch
          */
         OPERATION operation;
-        operation = OPERATION.INSERIRE_ANNUNCIO;
+        operation = OPERATION.SCRIVERE_COMMENTO;
         dispatch(operation);
     }
 
     protected static void dispatch(OPERATION operation) {
         switch (operation) {
-            case INSERIRE_ANNUNCIO:
-                inserireAnnuncio();
-                break;
-            case CREARE_CATEGORIA:
-            case CREARE_REPORT:
-                gestoreDispatch(operation);
-                break;
-            default:
+            case INSERIRE_ANNUNCIO -> inserireAnnuncio();
+            case SCRIVERE_COMMENTO -> scrivereCommento();
+            case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
+            case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
+            default -> {
                 if (false) begin(); //#TODO
+            }
         }
     }
 
@@ -67,6 +64,29 @@ public class ViewUtente {
             default -> {
                 if (false) begin(); //#TODO
             }
+        }
+    }
+
+    private static void dettagliAnnuncio() {
+        long annuncioID;
+
+        /*
+        #TODO: ask users to give info
+         */
+        annuncioID = 1;
+
+        Annuncio annuncio = new Annuncio(annuncioID);
+        List<Commento> commentoList = new ArrayList<>();
+        boolean dettaglioResult = BaseController.dettagliAnnuncio(annuncio, commentoList);
+
+        //#TODO: improve
+        if (dettaglioResult) {
+            System.out.println(annuncio);
+            for (Commento commento : commentoList) {
+                System.out.println(commento);
+            }
+        } else {
+            System.out.println("Dettagli annuncio: insuccesso.\n");
         }
     }
 
@@ -90,6 +110,23 @@ public class ViewUtente {
                 result ? "successo" : "insuccesso");
     }
 
+    private static void scrivereCommento() {
+        String testo;
+        long annuncioID;
+
+        /*
+        #TODO: ask users to give info
+         */
+        testo = "Testo del commento.";
+        annuncioID = 1;
+        Commento commento = new Commento(ActiveUser.getUsername(), annuncioID, null, testo);
+
+        boolean insertResult = BaseController.scrivereCommento(commento);
+
+        System.out.printf("Il commento è stato scritto con %s.\n",
+                insertResult ? "successo" : "insuccesso");
+    }
+
     private static void creareCategoria() {
         String nome, padre;
 
@@ -98,7 +135,7 @@ public class ViewUtente {
             nome = RndData.randomString(15);
             padre = RndData.randomString(15);
         } else {
-            nome = "cat3";
+            nome = "cat1";
             padre = null;
         }
 
@@ -115,6 +152,5 @@ public class ViewUtente {
     private static void creareReport() {
         //#TODO
     }
-
 
 }

@@ -12,6 +12,10 @@ public class Annuncio {
     private LocalDateTime modificato;
     private LocalDateTime venduto;
 
+    public Annuncio(long numero) {
+        this.numero = numero;
+    }
+
     public Annuncio(long numero, String inserzionista, String descrizione, long priceInCents, String categoria, LocalDateTime inserito, LocalDateTime modificato, LocalDateTime venduto) {
         this.numero = numero;
         this.inserzionista = inserzionista;
@@ -97,5 +101,19 @@ public class Annuncio {
 
     public void setVenduto(LocalDateTime venduto) {
         this.venduto = venduto;
+    }
+
+    @Override
+    public String toString() {
+        return "Annuncio{" +
+                "numero=" + numero +
+                ", inserzionista='" + inserzionista + '\'' +
+                ", descrizione='" + descrizione + '\'' +
+                ", priceInCents=" + priceInCents +
+                ", categoria='" + categoria + '\'' +
+                ", inserito=" + inserito +
+                ", modificato=" + modificato +
+                ", venduto=" + venduto +
+                '}';
     }
 }
