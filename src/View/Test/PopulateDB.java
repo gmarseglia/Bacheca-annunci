@@ -1,4 +1,4 @@
-package View;
+package View.Test;
 
 import Model.*;
 import Utility.RndData;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PopulateDB {
 
-    private static final int nOfUtenti = 1000;
+    private static final int nOfUtenti = 10;
     private static final int nOfChatPerUtente = 4;
     private static final int nOfMessagesPerChat = 4;
     private static final int nOfRecapitoPerUtente = 2;
@@ -168,7 +168,7 @@ public class PopulateDB {
     }
 
     private static void generateSonCategories(List<Categoria> listOfCategories, Categoria padre, int nOfLayers, int nOfCategories) {
-        Categoria newCategoria = new Categoria(RndData.randomString(10), padre.getID());
+        Categoria newCategoria = new Categoria(RndData.randomString(10), (padre == null) ? null : padre.getID());
         listOfCategories.add(newCategoria);
         if (nOfLayers > 1) {
             for (int categoriaIndex = 0; categoriaIndex < nOfCategories; categoriaIndex++) {

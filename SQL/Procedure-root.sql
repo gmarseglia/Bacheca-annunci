@@ -43,8 +43,31 @@ BEGIN
 	commit;
 END!
 
+CREATE PROCEDURE `inserire_annuncio` (
+	in var_inserzionista VARCHAR(30), in var_descrizione TEXT, in var_prezzo NUMERIC(7, 2),
+	in var_categoria VARCHAR(60), out var_numero INT UNSIGNED )
+BEGIN
+	declare exit handler for sqlexception
+    begin
+    	rollback;
+    	resignal;
+    end;
+
+	set transaction isolation level read uncommitted; 
+	start transaction;
+
+		insert into `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`)
+			values (var_inserzionista, var_descrizione, var_prezzo, var_categoria);
+
+	commit;
+
+	set var_numero = last_insert_id();
+END!
+
 DELIMITER ;
 
 -- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
 
 GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`;
+GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`;
+GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`;

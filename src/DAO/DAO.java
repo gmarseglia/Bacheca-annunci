@@ -517,6 +517,34 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
+    public static boolean insertAnnuncio(Role role, Annuncio annuncio) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?, ?)}";
+            CallableStatement cs = conn.prepareCall(callQuery);
+
+            cs.setString(1, annuncio.getInserzionista());
+            cs.setString(2, annuncio.getDescrizione());
+            cs.setFloat(3, (float) annuncio.getPriceInCents() / 100);
+            cs.setString(4, annuncio.getCategoria());
+            cs.registerOutParameter(5, Types.INTEGER);
+
+            cs.execute();
+
+            annuncio.setNumero(cs.getLong(5));
+
+            result = true;
+
+            cs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static BatchResult insertBatchAnnuncio(Role role, List<Annuncio> listOfAnnuncio) {
         int[] singlesResult = null;
         try {

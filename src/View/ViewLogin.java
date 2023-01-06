@@ -2,7 +2,6 @@ package View;
 
 
 import Controller.RegistrationController;
-import DAO.DAO;
 import DAO.BatchResult;
 import Model.*;
 import Utility.RndData;
@@ -11,7 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Login {
+public class ViewLogin {
 
     private enum MODE {
         LOGIN,
@@ -87,9 +86,9 @@ public class Login {
             recapitoList.add(new Recapito(RndData.randomString(15), TipoRecapito.CELLULARE, codiceFiscale));
             recapitoList.add(new Recapito(RndData.randomString(15), TipoRecapito.TELEFONO, codiceFiscale));
         } else {
-            username = "user2";
+            username = "user";
             password = "pass";
-            role = Role.BASE;
+            role = Role.GESTORE;
             codiceFiscale = "KRTMRA98L10H501E";
             nome = "mario";
             cognome = "kart";
@@ -135,8 +134,10 @@ public class Login {
     private static void dispatch(boolean result) {
         if (result) {
             switch (ActiveUser.getRole()) {
-                case BASE -> Base.begin();
-                case GESTORE -> Gestore.begin();
+                case BASE:
+                case GESTORE:
+                    ViewUtente.begin();
+                    break;
             }
         } else {
             if (false) main(null);
