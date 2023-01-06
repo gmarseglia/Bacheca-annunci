@@ -45,11 +45,26 @@ public class ViewUtente {
             case INSERIRE_ANNUNCIO -> inserireAnnuncio();
             case SCRIVERE_COMMENTO -> scrivereCommento();
             case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
+            case INVIARE_MESSAGGIO -> inviareMessaggio();
+            case VISUALIZZARE_CHAT -> visualizzareChat();
+            case MESSAGGI_CON_UTENTE -> messaggiConUtente();
             case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
             default -> {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void messaggiConUtente() {
+        /*
+        #TODO
+         */
+    }
+
+    private static void visualizzareChat() {
+        /*
+        #TODO
+         */
     }
 
     protected static void gestoreDispatch(OPERATION operation) {
@@ -65,6 +80,22 @@ public class ViewUtente {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void inviareMessaggio() {
+        String destinatario;
+        String testo;
+
+        /*
+        #TODO: ask users to give info
+         */
+        destinatario = "user2";
+        testo = "prova";
+
+        MessaggioPrivato messaggioPrivato = new MessaggioPrivato(
+                ActiveUser.getUsername(), destinatario, null, testo);
+        boolean messageResult = BaseController.scrivereMessaggioPrivato(messaggioPrivato);
+        System.out.printf("Messaggio inviato con %s.\n", messageResult ? "successo" : "insuccesso");
     }
 
     private static void dettagliAnnuncio() {

@@ -193,7 +193,7 @@ public class DAO {
 //            System.out.println("Statement created.\n");
 
             // #3: query
-            query = String.format("ALTER TABLE `annuncio` AUTO_INCREMENT = 1");
+            query = "ALTER TABLE `annuncio` AUTO_INCREMENT = 1";
 
             // #4: execute query
             stmt.executeUpdate(query);
@@ -280,6 +280,91 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
+    public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+            String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
+                    "UNION " +
+                    "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
+            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ps.setString(1, targetUtente);
+            ps.setString(2, targetUtente);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.first()) throw new RuntimeException("Empty result set.");
+
+            do {
+                utenteIDList.add(rs.getString(1));
+            } while (rs.next());
+
+            result = true;
+
+            ps.close();
+        } catch (SQLException | RuntimeException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+            String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
+                    " FROM `messaggio_privato` " +
+                    " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
+                    " ORDER BY `inviato` ASC;";
+            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ps.setString(1, utente1ID);
+            ps.setString(2, utente2ID);
+            ps.setString(3, utente2ID);
+            ps.setString(4, utente1ID);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.first()) throw new RuntimeException("Empty result set.");
+
+            do {
+                MessaggioPrivato messaggioPrivato = new MessaggioPrivato(
+                        rs.getString(1), rs.getString(2), rs.getTimestamp(3).toLocalDateTime(), rs.getString(4)
+                );
+                messaggioPrivatoList.add(messaggioPrivato);
+            } while (rs.next());
+
+            result = true;
+
+            ps.close();
+        } catch (SQLException | RuntimeException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static boolean insertMessaggio(Role role, MessaggioPrivato messaggioPrivato) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String updateQuery = "INSERT INTO `messaggio_privato` " +
+                    "(`mittente`, `destinatario`, `testo`) " +
+                    "VALUES (?, ?, ?);";
+            PreparedStatement ps = conn.prepareStatement(updateQuery);
+            ps.setString(1, messaggioPrivato.getMittente());
+            ps.setString(2, messaggioPrivato.getDestinatario());
+            ps.setString(3, messaggioPrivato.getTesto());
+            ps.executeUpdate();
+
+            result = true;
+
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static BatchResult insertBatchMessaggioPrivato(Role role, List<MessaggioPrivato> listOfMessaggioPrivato) {
         int[] singlesResult = null;
         try {
@@ -293,8 +378,8 @@ public class DAO {
             PreparedStatement psmnt = conn.prepareStatement(query);
 
             for (MessaggioPrivato messaggioPrivato : listOfMessaggioPrivato) {
-                psmnt.setString(1, messaggioPrivato.getMittente().getUsername());
-                psmnt.setString(2, messaggioPrivato.getDestinatario().getUsername());
+                psmnt.setString(1, messaggioPrivato.getMittente());
+                psmnt.setString(2, messaggioPrivato.getDestinatario());
                 psmnt.setTimestamp(3, Timestamp.valueOf(messaggioPrivato.getInviato()));
                 psmnt.setString(4, messaggioPrivato.getTesto());
                 psmnt.addBatch();

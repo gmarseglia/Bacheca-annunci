@@ -81,8 +81,8 @@ public class PopulateDB {
             for (int userIndex = 0; userIndex < nOfUtenti; userIndex++) {
                 for (int chatIndex = 0; chatIndex < nOfChatPerUtente / 2; chatIndex++) {
                     for (int messagesIndex = 0; messagesIndex < nOfMessagesPerChat; messagesIndex++) {
-                        MessaggioPrivato lastMessaggioPrivato1 = new MessaggioPrivato(listOfUtente.get(userIndex), listOfUtente.get((userIndex + 1 + chatIndex) % nOfUtenti), RndData.randomDateTime(), RndData.randomStringWithBlanks(100));
-                        MessaggioPrivato lastMessaggioPrivato2 = new MessaggioPrivato(listOfUtente.get((userIndex + 1 + chatIndex) % nOfUtenti), listOfUtente.get(userIndex), lastMessaggioPrivato1.getInviato().plusMinutes(5), RndData.randomStringWithBlanks(100));
+                        MessaggioPrivato lastMessaggioPrivato1 = new MessaggioPrivato(listOfUtente.get(userIndex).getID(), listOfUtente.get((userIndex + 1 + chatIndex) % nOfUtenti).getID(), RndData.randomDateTime(), RndData.randomStringWithBlanks(100));
+                        MessaggioPrivato lastMessaggioPrivato2 = new MessaggioPrivato(listOfUtente.get((userIndex + 1 + chatIndex) % nOfUtenti).getID(), listOfUtente.get(userIndex).getID(), lastMessaggioPrivato1.getInviato().plusMinutes(5), RndData.randomStringWithBlanks(100));
                         listOfMessaggioPrivato.add(lastMessaggioPrivato1);
                         listOfMessaggioPrivato.add(lastMessaggioPrivato2);
                     }

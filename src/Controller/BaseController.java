@@ -1,9 +1,7 @@
 package Controller;
 
 import DAO.DAO;
-import Model.ActiveUser;
-import Model.Annuncio;
-import Model.Commento;
+import Model.*;
 
 import java.util.List;
 
@@ -19,5 +17,17 @@ public class BaseController {
 
     public static boolean dettagliAnnuncio(Annuncio annuncio, List<Commento> commentoList) {
         return DAO.getDettagliAnnuncio(ActiveUser.getRole(), annuncio, commentoList);
+    }
+
+    public static boolean scrivereMessaggioPrivato(MessaggioPrivato messaggioPrivato) {
+        return DAO.insertMessaggio(ActiveUser.getRole(), messaggioPrivato);
+    }
+
+    public static boolean visualizzareChat(String utenteID, List<String> utenteIDList) {
+        return DAO.selectUtentiConMessaggi(ActiveUser.getRole(), utenteID, utenteIDList);
+    }
+
+    public static boolean visualizzareMessaggi(String utenteID1, String utenteID2, List<MessaggioPrivato> messaggioPrivatoList) {
+        return DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), utenteID1, utenteID2, messaggioPrivatoList);
     }
 }

@@ -3,31 +3,31 @@ package Model;
 import java.time.LocalDateTime;
 
 public class MessaggioPrivato {
-    private Utente mittente;
-    private Utente destinatario;
+    private String mittente;
+    private String destinatario;
     private LocalDateTime inviato;
     private String testo;
 
-    public MessaggioPrivato(Utente mittente, Utente destinatario, LocalDateTime inviato, String testo) {
+    public MessaggioPrivato(String mittente, String destinatario, LocalDateTime inviato, String testo) {
         this.mittente = mittente;
         this.destinatario = destinatario;
         this.inviato = inviato;
         this.testo = testo;
     }
 
-    public Utente getMittente() {
+    public String getMittente() {
         return mittente;
     }
 
-    public void setMittente(Utente mittente) {
+    public void setMittente(String mittente) {
         this.mittente = mittente;
     }
 
-    public Utente getDestinatario() {
+    public String getDestinatario() {
         return destinatario;
     }
 
-    public void setDestinatario(Utente destinatario) {
+    public void setDestinatario(String destinatario) {
         this.destinatario = destinatario;
     }
 
@@ -45,5 +45,15 @@ public class MessaggioPrivato {
 
     public void setTesto(String testo) {
         this.testo = testo;
+    }
+
+    @Override
+    public String toString() {
+        return "MessaggioPrivato{" +
+                "mittente='" + mittente + '\'' +
+                ", destinatario='" + destinatario + '\'' +
+                ", inviato=" + inviato +
+                ", testo='" + testo + '\'' +
+                '}';
     }
 }
