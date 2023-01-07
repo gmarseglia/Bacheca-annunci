@@ -63,6 +63,10 @@ BEGIN
 		insert into `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`)
 			values (var_inserzionista, var_descrizione, var_prezzo, var_categoria);
 
+		update `utente`
+			set `annunci_inseriti`=`annunci_inseriti`+1
+			where `username`=var_inserzionista;
+
 		set var_numero = last_insert_id();
 	commit;
 END!
@@ -118,6 +122,7 @@ END!
 CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED)
 BEGIN
 	declare counter INT;
+
 	declare exit handler for sqlexception
 	begin
 		rollback;
@@ -136,6 +141,12 @@ BEGIN
 	update `annuncio`
 		set `venduto`=CURRENT_TIMESTAMP
 		where `numero`=var_annuncio_id;
+
+	update `utente`
+		set `annunci_venduti`=`annunci_venduti`+1
+		where `username`=(select `inserzionista`
+							from `annuncio`
+							where `numero`=var_annuncio_id);
 
 	commit;
 END!
