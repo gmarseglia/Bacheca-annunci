@@ -30,4 +30,8 @@ public class BaseController {
     public static boolean visualizzareMessaggi(String utenteID1, String utenteID2, List<MessaggioPrivato> messaggioPrivatoList) {
         return DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), utenteID1, utenteID2, messaggioPrivatoList);
     }
+
+    public static boolean vendereAnnuncio(Long annuncioID){
+        return DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID);
+    }
 }

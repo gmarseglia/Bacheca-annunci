@@ -6,6 +6,7 @@ DROP PROCEDURE IF EXISTS `registrazione_utente`;
 DROP PROCEDURE IF EXISTS `inserire_annuncio`;
 DROP PROCEDURE IF EXISTS `dettagli_annuncio`;
 DROP PROCEDURE IF EXISTS `scrivere_commento`;
+DROP PROCEDURE IF EXISTS `vendere_annuncio`;
 
 DELIMITER !
 
@@ -69,6 +70,7 @@ END!
 CREATE PROCEDURE `scrivere_commento` (
 	in var_utente VARCHAR(30), in var_annuncio INT UNSIGNED, in var_testo VARCHAR(250))
 BEGIN
+	declare counter INT;
 	declare exit handler for sqlexception
     begin
     	rollback;
@@ -77,6 +79,14 @@ BEGIN
 
 	set transaction isolation level read uncommitted; 
 	start transaction;
+	
+		select count(`numero`) into counter 
+			from `annuncio` 
+			where `numero`=var_annuncio and `venduto` is not null;
+
+		if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
+		end if;
+
 		insert into `commento` (`utente`, `annuncio`, `testo`)
 			values (var_utente, var_annuncio, var_testo);
 
@@ -105,6 +115,31 @@ BEGIN
 	commit;
 END!
 
+CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED)
+BEGIN
+	declare counter INT;
+	declare exit handler for sqlexception
+	begin
+		rollback;
+		resignal;
+	end;
+
+	start transaction;
+
+	select count(`numero`) into counter 
+		from `annuncio` 
+		where `numero`=var_annuncio_id and `venduto` is not null;
+
+	if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
+	end if;
+
+	update `annuncio`
+		set `venduto`=CURRENT_TIMESTAMP
+		where `numero`=var_annuncio_id;
+
+	commit;
+END!
+
 DELIMITER ;
 
 -- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
@@ -116,3 +151,5 @@ GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`;
 GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `gestore`;
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`;
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `gestore`;
+GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `base`;
+GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`;

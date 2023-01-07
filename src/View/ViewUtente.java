@@ -48,23 +48,12 @@ public class ViewUtente {
             case INVIARE_MESSAGGIO -> inviareMessaggio();
             case VISUALIZZARE_CHAT -> visualizzareChat();
             case MESSAGGI_CON_UTENTE -> messaggiConUtente();
+            case VENDERE_ANNUNCIO -> vendereAnnuncio();
             case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
             default -> {
                 if (false) begin(); //#TODO
             }
         }
-    }
-
-    private static void messaggiConUtente() {
-        /*
-        #TODO
-         */
-    }
-
-    private static void visualizzareChat() {
-        /*
-        #TODO
-         */
     }
 
     protected static void gestoreDispatch(OPERATION operation) {
@@ -80,6 +69,24 @@ public class ViewUtente {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void vendereAnnuncio() {
+        /*
+        #TODO
+         */
+    }
+
+    private static void messaggiConUtente() {
+        /*
+        #TODO
+         */
+    }
+
+    private static void visualizzareChat() {
+        /*
+        #TODO
+         */
     }
 
     private static void inviareMessaggio() {

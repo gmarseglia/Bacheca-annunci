@@ -6,6 +6,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DAO {
 
@@ -635,7 +636,11 @@ public class DAO {
 
             cs.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e.getSQLState().equals("45001")) {
+                System.out.println("Articolo già venduto.\n");
+            } else {
+                e.printStackTrace();
+            }
         }
         return result;
     }
@@ -744,6 +749,32 @@ public class DAO {
             cs.close();
         } catch (SQLException | RuntimeException e) {
             e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static boolean updateAnnuncioVendere(Role role, long annuncioID) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String call = "{call `vendere_annuncio`(?)};";
+            CallableStatement cs = conn.prepareCall(call);
+            cs.setLong(1, annuncioID);
+
+            cs.executeUpdate();
+
+            result = true;
+
+            cs.close();
+
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("45001")) {
+                System.out.println("Articolo già venduto.\n");
+                result = true;
+            } else {
+                e.printStackTrace();
+            }
         }
         return result;
     }

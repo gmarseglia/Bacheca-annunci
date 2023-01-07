@@ -78,7 +78,7 @@ public class ControllerTest {
                     String.format("Testo del commento %d.", commIndex));
             boolean commentoResult = BaseController.scrivereCommento(commento);
             printResult(String.format("Scrivere commento %d", commIndex), commentoResult);
-            Thread.sleep(1000);
+            Thread.sleep(1100);
         }
 
         Annuncio annuncioDettaglio = new Annuncio(annuncio.getID());
@@ -100,11 +100,11 @@ public class ControllerTest {
         MessaggioPrivato messaggioPrivato2 = new MessaggioPrivato(
                 utente.getUsername(), utente3.getUsername(), null, "Messaggio privato 2");
         boolean messageResult = BaseController.scrivereMessaggioPrivato(messaggioPrivato);
-        Thread.sleep(1);
+        Thread.sleep(1100);
         messageResult &= BaseController.scrivereMessaggioPrivato(messaggioPrivato1);
-        Thread.sleep(1);
+        Thread.sleep(1100);
         messageResult &= BaseController.scrivereMessaggioPrivato(messaggioPrivato2);
-        Thread.sleep(1);
+        Thread.sleep(1100);
         messageResult &= BaseController.scrivereMessaggioPrivato(messaggioPrivato1);
         printResult("Scrivere Messaggio Privato", messageResult);
 
@@ -115,6 +115,16 @@ public class ControllerTest {
         List<MessaggioPrivato> messaggioPrivatoList = new ArrayList<>();
         boolean messageSelectResult = BaseController.visualizzareMessaggi(utente.getID(), utente3.getID(), messaggioPrivatoList);
         printResultList("Visualizzare messaggi fra utenti", messageSelectResult, messaggioPrivatoList);
+
+        boolean vendereResult = BaseController.vendereAnnuncio(annuncio.getID());
+        Annuncio annuncioVenduto = new Annuncio(annuncio.getID());
+        BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
+        printResult("Vendere annuncio", vendereResult, annuncioVenduto);
+
+        boolean vendere2Result = BaseController.vendereAnnuncio(annuncio.getID());
+        annuncioVenduto = new Annuncio(annuncio.getID());
+        BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
+        printResult("Vendere annuncio", vendere2Result, annuncioVenduto);
     }
 
     private static void printResult(String operation, boolean result) {
