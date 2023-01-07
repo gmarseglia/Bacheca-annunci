@@ -182,6 +182,47 @@ public class DAO {
         return valueReturn;
     }
 
+    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String call = "{call `dettagli_utente`(?)}";
+            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            cs.setString(1, utente.getID());
+
+            ResultSet rs = cs.executeQuery();
+
+            if (!rs.first()) throw new RuntimeException("Utente non trovato.");
+
+            utente.setAnnunci_inseriti(rs.getInt(1));
+            utente.setAnnunci_venduti(rs.getInt(2));
+
+            anagrafica.setCodiceFiscale(rs.getString(3));
+            //#TODO
+
+            if (cs.getMoreResults()) {
+                rs = cs.getResultSet();
+
+                //#TODO
+                if (rs.first()) {
+                    do {
+                        Recapito recapito = new Recapito(rs.getString(1), null, null);
+                        recapitoList.add(recapito);
+                    } while (rs.next());
+                }
+            }
+
+            result = true;
+
+            cs.close();
+
+        } catch (SQLException | RuntimeException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static boolean resetAutoincrement() {
         boolean valueReturn = false;
 

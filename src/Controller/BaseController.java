@@ -34,4 +34,8 @@ public class BaseController {
     public static boolean vendereAnnuncio(Long annuncioID){
         return DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID);
     }
+
+    public static boolean dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList){
+        return DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList);
+    }
 }

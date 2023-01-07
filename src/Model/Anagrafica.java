@@ -25,6 +25,8 @@ public class Anagrafica {
         this.usernameUtente = usernameUtente;
     }
 
+    public Anagrafica(){}
+
     public String getCodiceFiscale() {
         return codiceFiscale;
     }

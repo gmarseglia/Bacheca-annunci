@@ -40,6 +40,7 @@ public class ControllerTest {
         List<Recapito> recapitoList = new ArrayList<>();
         recapitoList.add(new Recapito("email@email.com", TipoRecapito.EMAIL, codiceFiscale));
         recapitoList.add(new Recapito("339123456", TipoRecapito.CELLULARE, codiceFiscale));
+        recapitoList.add(new Recapito("339123457", TipoRecapito.CELLULARE, codiceFiscale));
         List<Recapito> recapitoList2 = new ArrayList<>();
         recapitoList2.add(new Recapito("prova@email.com", TipoRecapito.EMAIL, codiceFiscale2));
         List<Recapito> recapitoList3 = new ArrayList<>();
@@ -64,6 +65,15 @@ public class ControllerTest {
 
         ActiveUser.setRole(Role.GESTORE);
         ActiveUser.setUsername(username);
+
+        boolean dettagliUtenteResult;
+        Utente utenteDettagli = new Utente(utente.getID());
+        Anagrafica anagraficaDettagli = new Anagrafica();
+        List<Recapito> recapitoDettaglioList = new ArrayList<>();
+        dettagliUtenteResult = BaseController.dettagliUtente(utenteDettagli, anagraficaDettagli, recapitoDettaglioList);
+        printResult("Dettagli utente", dettagliUtenteResult);
+
+        if(true) return;
 
         Categoria categoria = new Categoria("categoria_1");
         boolean categoriaResult = GestoreController.creareCategoria(categoria);

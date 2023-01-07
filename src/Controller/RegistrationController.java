@@ -10,6 +10,7 @@ public class RegistrationController {
     public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, List<Recapito> recapitoList) {
         boolean result;
         result = DAO.registrazioneUtente(utente, credenziali, anagrafica, recapitoList.get(0));
+        result &= DAO.insertBatchRecapito(recapitoList.subList(1, recapitoList.size())).getAllTrue();
         return result;
     }
 
