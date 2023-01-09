@@ -870,6 +870,45 @@ public class DAO {
         return result;
     }
 
+    private static boolean cercareAnnuncioWhere(Role role, String whereClause, List<Annuncio> annuncioList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String query = String.format("SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, " +
+                    "`categoria`, `inserito`, `modificato`, `venduto` " +
+                    "FROM `annuncio` " +
+                    "WHERE %s;", whereClause);
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.closeOnCompletion();
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.first()) {
+                do {
+                    Annuncio newAnnuncio = new Annuncio(
+                            rs.getLong(1),
+                            rs.getString(2),
+                            rs.getString(3),
+                            rs.getLong(4) * 100,
+                            rs.getString(4),
+                            rs.getTimestamp(5).toLocalDateTime(),
+                            rs.getTimestamp(6).toLocalDateTime(),
+                            (rs.getTimestamp(7) == null) ? null : rs.getTimestamp(5).toLocalDateTime()
+                    );
+                    annuncioList.add(newAnnuncio);
+                } while (rs.next());
+            }
+
+            result = true;
+
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     /*
     SEGUE
      */
