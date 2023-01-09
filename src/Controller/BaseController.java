@@ -42,4 +42,8 @@ public class BaseController {
     public static boolean seguireAnnuncio(Segue segue) throws AnnuncioVendutoException {
         return DAO.insertSegue(ActiveUser.getRole(), segue);
     }
+
+    public static boolean stopSeguireAnnuncio(Segue segue) {
+        return DAO.deleteSegue(ActiveUser.getRole(), segue);
+    }
 }

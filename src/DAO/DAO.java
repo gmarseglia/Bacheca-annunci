@@ -651,6 +651,28 @@ public class DAO {
         return result;
     }
 
+    public static boolean deleteSegue(Role role, Segue segue) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
+            PreparedStatement ps = conn.prepareStatement(update);
+            ps.setString(1, segue.getUtente());
+            ps.setLong(2, segue.getAnnuncio());
+            ps.closeOnCompletion();
+
+            ps.execute();
+
+            result = true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {
         int[] singlesResult = null;
         try {

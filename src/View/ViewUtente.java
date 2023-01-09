@@ -19,6 +19,7 @@ public class ViewUtente {
         CERCARE_PER_DESCRIZIONE,        //A0203
         SEGUIRE_ANNUNCIO,               //A0300
         STOP_SEGUIRE_ANNUNCIO,          //A0301
+        STOP_SEGUIRE_VENDUTI,           //A0302
         CONTROLLARE_MODIFICHE_SEGUITI,  //A0400
         VENDERE_ANNUNCIO,               //A0500
         DETTAGLI_INSERZIONISTA,         //A0600
