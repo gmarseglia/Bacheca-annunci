@@ -40,22 +40,6 @@ public class ViewUtente {
         dispatch(operation);
     }
 
-    protected static void dispatch(OPERATION operation) {
-        switch (operation) {
-            case INSERIRE_ANNUNCIO -> inserireAnnuncio();
-            case SCRIVERE_COMMENTO -> scrivereCommento();
-            case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
-            case INVIARE_MESSAGGIO -> inviareMessaggio();
-            case VISUALIZZARE_CHAT -> visualizzareChat();
-            case MESSAGGI_CON_UTENTE -> messaggiConUtente();
-            case VENDERE_ANNUNCIO -> vendereAnnuncio();
-            case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
-            default -> {
-                if (false) begin(); //#TODO
-            }
-        }
-    }
-
     protected static void gestoreDispatch(OPERATION operation) {
         if (ActiveUser.getRole() != Role.GESTORE) {
             System.out.println("Impossibile svolgere le operazioni con gli attuali privilegi.\n");
@@ -69,6 +53,29 @@ public class ViewUtente {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    protected static void dispatch(OPERATION operation) {
+        switch (operation) {
+            case INSERIRE_ANNUNCIO -> inserireAnnuncio();
+            case SCRIVERE_COMMENTO -> scrivereCommento();
+            case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
+            case INVIARE_MESSAGGIO -> inviareMessaggio();
+            case VISUALIZZARE_CHAT -> visualizzareChat();
+            case MESSAGGI_CON_UTENTE -> messaggiConUtente();
+            case VENDERE_ANNUNCIO -> vendereAnnuncio();
+            case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
+            case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
+            default -> {
+                if (false) begin(); //#TODO
+            }
+        }
+    }
+
+    private static void dettagliInserzionista() {
+        /*
+        #TODO
+         */
     }
 
     private static void vendereAnnuncio() {
