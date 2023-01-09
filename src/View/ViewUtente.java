@@ -67,10 +67,17 @@ public class ViewUtente {
             case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
             case CREARE_CATEGORIA -> gestoreDispatch(operation);
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
+            case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
             default -> {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void stopSeguireAnnuncio() {
+        /*
+        #TODO
+         */
     }
 
     private static void seguireAnnuncio() {
