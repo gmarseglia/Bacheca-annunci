@@ -706,6 +706,40 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
+    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID,
+                                                         List<Annuncio> annunciSeguitiModificatiList,
+                                                         boolean updateLastCheck, boolean deleteSold) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
+            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            cs.setString(1, utenteID);
+            cs.setBoolean(2, updateLastCheck);
+            cs.setBoolean(3, deleteSold);
+
+            ResultSet rs = cs.executeQuery();
+            result = true;
+
+            if (rs.first()) {
+                do {
+                    Annuncio newAnnuncio = new Annuncio(rs.getLong(1), rs.getString(2), rs.getString(3),
+                            (long) (rs.getFloat(4) * 100), rs.getString(5),
+                            rs.getTimestamp(6).toLocalDateTime(), rs.getTimestamp(7).toLocalDateTime(),
+                            (rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
+                    annunciSeguitiModificatiList.add(newAnnuncio);
+                } while (rs.next());
+            }
+
+            cs.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
         boolean result = false;
         try {

@@ -31,7 +31,7 @@ CREATE TABLE utente (
 	username 			VARCHAR(30) 	NOT NULL,
 	annunci_inseriti 	INT UNSIGNED 	NOT NULL 	DEFAULT 0,
 	annunci_venduti 	INT UNSIGNED 	NOT NULL 	DEFAULT 0,
-	contr_seguti 		TIMESTAMP 					DEFAULT CURRENT_TIMESTAMP,
+	contr_seguiti 		TIMESTAMP 					DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (username)
 ) ENGINE = InnoDB;
 

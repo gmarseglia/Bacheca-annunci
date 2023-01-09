@@ -46,4 +46,9 @@ public class BaseController {
     public static boolean stopSeguireAnnuncio(Segue segue) {
         return DAO.deleteSegue(ActiveUser.getRole(), segue);
     }
+
+    public static boolean controllareAnnunciSeguiti(String utenteID, List<Annuncio> annunciSegutiModificatiList) {
+        return DAO.selectAnnunciSeguitiModificati(
+                ActiveUser.getRole(), utenteID, annunciSegutiModificatiList, true, true);
+    }
 }

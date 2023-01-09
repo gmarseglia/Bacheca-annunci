@@ -81,7 +81,29 @@ public class ViewControllerTest {
         boolean annuncioResult = BaseController.inserireAnnuncio(annuncio);
         printResult("Inserimento annuncio", annuncioResult);
 
-        for (int commIndex = 0; commIndex < 2; commIndex++) {
+        List<Annuncio> annunciSeguitiModificati = new ArrayList<>();
+        boolean controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList("Controllo seguiti vuoto", controlloSeguiti1Result, annunciSeguitiModificati);
+
+        Segue segue = new Segue(utente.getID(), annuncio.getID());
+        boolean segueResult;
+        try {
+            segueResult = BaseController.seguireAnnuncio(segue);
+            printResult("Seguire annuncio da utente", segueResult);
+        } catch (AnnuncioVendutoException e) {
+            printResult("Seguire annuncio da utente", false, "Annuncio già venduto");
+        }
+
+        annunciSeguitiModificati = new ArrayList<>();
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList("Controllo seguiti annuncio pulito", controlloSeguiti1Result, annunciSeguitiModificati);
+        Thread.sleep(1100);
+
+        annunciSeguitiModificati = new ArrayList<>();
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList(" Secondo controllo seguiti annuncio pulito", controlloSeguiti1Result, annunciSeguitiModificati);
+
+        for (int commIndex = 0; commIndex < 1; commIndex++) {
             Commento commento = new Commento(username, annuncio.getID(), null,
                     String.format("Testo del commento %d.", commIndex));
             boolean commentoResult;
@@ -94,16 +116,26 @@ public class ViewControllerTest {
             Thread.sleep(1100);
         }
 
+        annunciSeguitiModificati = new ArrayList<>();
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList(" Controllo seguiti annuncio dopo commenti", controlloSeguiti1Result, annunciSeguitiModificati);
+        Thread.sleep(1100);
+
+        annunciSeguitiModificati = new ArrayList<>();
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList(" Secondo controllo seguiti annuncio dopo commenti", controlloSeguiti1Result, annunciSeguitiModificati);
+
         Annuncio annuncioDettaglio = new Annuncio(annuncio.getID());
         List<Commento> commentoListDettaglio = new ArrayList<>();
         boolean dettaglioResult = BaseController.dettagliAnnuncio(annuncioDettaglio, commentoListDettaglio);
         if (dettaglioResult) {
+            System.out.println("--> Dettagli annuncio: OK");
             System.out.println(annuncioDettaglio);
             for (Commento commento : commentoListDettaglio) {
                 System.out.println(commento);
             }
         } else {
-            System.out.println("Dettagli annuncio: NOT OK.\n");
+            System.out.println("--> Dettagli annuncio: NOT OK");
         }
 
         MessaggioPrivato messaggioPrivato = new MessaggioPrivato(
@@ -129,15 +161,6 @@ public class ViewControllerTest {
         boolean messageSelectResult = BaseController.visualizzareMessaggi(utente.getID(), utente3.getID(), messaggioPrivatoList);
         printResultList("Visualizzare messaggi fra utenti", messageSelectResult, messaggioPrivatoList);
 
-        Segue segue = new Segue(utente.getID(), annuncio.getID());
-        boolean segueResult;
-        try {
-            segueResult = BaseController.seguireAnnuncio(segue);
-            printResult("Seguire annuncio da utente", segueResult);
-        } catch (AnnuncioVendutoException e) {
-            printResult("Seguire annuncio da utente", false, "Annuncio già venduto");
-        }
-
         Segue segue2 = new Segue(utente2.getID(), annuncio.getID());
         boolean segueResult2;
         try {
@@ -160,6 +183,15 @@ public class ViewControllerTest {
             printResult("Vendere annuncio #1", false, "Annuncio già venduto.");
         }
 
+        annunciSeguitiModificati = new ArrayList<>();
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList(" Controllo seguiti annuncio dopo vendita", controlloSeguiti1Result, annunciSeguitiModificati);
+        Thread.sleep(1100);
+
+        annunciSeguitiModificati = new ArrayList<>();
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        printResultList(" Secondo controllo seguiti annuncio dopo vendita", controlloSeguiti1Result, annunciSeguitiModificati);
+
         boolean vendere2Result;
         try {
             vendere2Result = BaseController.vendereAnnuncio(annuncio.getID());
@@ -169,13 +201,14 @@ public class ViewControllerTest {
         } catch (AnnuncioVendutoException e) {
             printResult("Vendere annuncio #2", false, "Annuncio già venduto.");
         }
-
-
     }
 
     private static void printResult(String operation, boolean result, Object o, String explain) {
-        List<Object> iterable = new ArrayList<>();
-        iterable.add(o);
+        List<Object> iterable = null;
+        if (o != null) {
+            iterable = new ArrayList<>();
+            iterable.add(o);
+        }
         printResultList(operation, result, iterable, explain);
     }
 
@@ -200,10 +233,13 @@ public class ViewControllerTest {
                 (explain.equals("")) ? "NOT OK" :
                         String.format("NOT OK due to '%s'", explain));
         if (iterable != null) {
-            for (Object o : iterable)
-                if (o != null) System.out.println(o);
+            if (!iterable.iterator().hasNext()) {
+                System.out.printf("%s is empty.\n", iterable.getClass().getName());
+            } else {
+                for (Object o : iterable)
+                    if (o != null) System.out.println(o);
+            }
         }
     }
-
 
 }
