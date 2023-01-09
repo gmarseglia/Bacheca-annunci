@@ -20,13 +20,15 @@ public class DAO {
     private static final String REGISTRATORE_USER = "registratore";
     private static final String REGISTRATORE_PASS = "registratore";
 
-
     private static Connection conn;
     private static Statement stmt = null;
     private static String query;
 
     private static ResultSet rs = null;
 
+    /*
+    CONNESSIONE
+     */
     private static void openRoleConnection(Role role) throws SQLException {
         if (conn == null || LAST_ROLE != role) {
             try {
@@ -57,6 +59,17 @@ public class DAO {
         }
     }
 
+    public static void closeConnection() {
+        try {
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+    LOGIN E REGISTRAZIONE
+     */
     public static boolean loginUtente(Role role, Credenziali credenziali) {
         boolean result = false;
         try {
@@ -146,6 +159,9 @@ public class DAO {
         return valueReturn;
     }
 
+    /*
+    UTENTE
+     */
     public static boolean insertUtenteByUsername(String username) {
         boolean valueReturn = false;
 
@@ -221,40 +237,6 @@ public class DAO {
         return result;
     }
 
-    public static boolean resetAutoincrement() {
-        boolean valueReturn = false;
-
-        try {
-            // #1: connect
-            openRoleConnection(Role.ROOT);
-
-            // #2: create statement
-            stmt = conn.createStatement();
-//            System.out.println("Statement created.\n");
-
-            // #3: query
-            query = "ALTER TABLE `annuncio` AUTO_INCREMENT = 1";
-
-            // #4: execute query
-            stmt.executeUpdate(query);
-
-            valueReturn = true;
-
-        } catch (Exception e) {
-            System.out.println("Exception caught!\n");
-            e.printStackTrace();
-        } finally {
-            try {
-                stmt.close();
-//                conn.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return valueReturn;
-    }
-
     public static BatchResult insertBatchUtenteOnlyUsername(Role role, List<Utente> utenti) {
         int[] singlesResult = null;
         try {
@@ -286,6 +268,135 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
+    public static List<String> getAllUsernames() {
+
+        List<String> returnList = new ArrayList<String>();
+
+        try {
+            // #1: connect
+            openRoleConnection(Role.ROOT);
+
+            // #2: create statement
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+//            System.out.println("Statement created.\n");
+
+            // #3: query
+            query = "SELECT username FROM `utente`";
+
+            // #4: execute query
+            rs = stmt.executeQuery(query);
+
+//            if (!rs.first()) {
+//                throw new Exception("No result found!");
+//            }
+
+            if (rs.first()) {
+                do {
+                    returnList.add(rs.getString("username"));
+                } while (rs.next());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Exception caught!\n");
+            e.printStackTrace();
+        } finally {
+            try {
+                stmt.close();
+//                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return returnList;
+    }
+
+    public static boolean deleteAllUtente() {
+
+        boolean valueReturn = false;
+
+        try {
+            // #1: connect
+            openRoleConnection(Role.ROOT);
+
+            // #2: create statement
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+            // #3: query
+            query = "DELETE FROM utente";
+
+            // #4: execute query
+            stmt.executeUpdate(query);
+
+            valueReturn = true;
+
+        } catch (Exception e) {
+            System.out.println("Exception caught!\n");
+            e.printStackTrace();
+        } finally {
+            try {
+                stmt.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return valueReturn;
+    }
+
+    /*
+    ANAGRAFICA
+     */
+    public static BatchResult insertBatchAnagrafica(Role role, List<Anagrafica> listOfAnagrafica) {
+        int[] singlesResult = null;
+        try {
+            openRoleConnection(role);
+
+            conn.setAutoCommit(false);
+
+            String query = "INSERT IGNORE INTO `anagrafica` " +
+                    "(`codice_fiscale`, `nome`, `cognome`, " +
+                    "`sesso`, `data_nascita`, `comune_nascita`," +
+                    "`indirizzo_residenza`, `indirizzo_fatturazione`, `utente`)" +
+                    "VALUES (?, ?, ?," +
+                    "?, ?, ?," +
+                    "?, ?, ?)";
+
+            PreparedStatement psmnt = conn.prepareStatement(query);
+
+            for (Anagrafica anagrafica : listOfAnagrafica) {
+                psmnt.setString(1, anagrafica.getCodiceFiscale());
+                psmnt.setString(2, anagrafica.getNome());
+                psmnt.setString(3, anagrafica.getCognome());
+                psmnt.setString(4, (anagrafica.getSesso() == Sesso.DONNA) ? "Donna" : "Uomo");
+                psmnt.setDate(5, Date.valueOf(anagrafica.getDataNascita()));
+                psmnt.setString(6, anagrafica.getComuneNascita());
+                psmnt.setString(7, anagrafica.getIndirizzoResidenza());
+                psmnt.setString(8, anagrafica.getIndirizzoFatturazione());
+                psmnt.setString(9, anagrafica.getUsernameUtente());
+                psmnt.addBatch();
+            }
+
+            singlesResult = psmnt.executeBatch();
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new BatchResult(singlesResult);
+    }
+
+
+    /*
+    CREDENZIALI
+     */
     public static BatchResult insertBatchCredenziali(Role role, List<Credenziali> credentials) {
         int[] singlesResult = null;
         try {
@@ -301,6 +412,149 @@ public class DAO {
                 psmnt.setString(1, credential.getUsername());
                 psmnt.setString(2, credential.getPassword());
                 psmnt.setString(3, (credential.getRole() == Role.BASE) ? "base" : "gestore");
+                psmnt.addBatch();
+            }
+
+            singlesResult = psmnt.executeBatch();
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new BatchResult(singlesResult);
+    }
+
+    /*
+    RECAPITO
+     */
+    public static BatchResult insertBatchRecapito(List<Recapito> listOfRecapito) {
+        int[] singlesResult = null;
+        PreparedStatement psmnt;
+        try {
+            openRoleConnection(ActiveUser.getRole());
+
+            conn.setAutoCommit(false);
+
+            String query = "INSERT IGNORE INTO `recapito` " +
+                    "(`valore`, `anagrafica`, `tipo`)" +
+                    "VALUES (?, ?, ?)";
+            psmnt = conn.prepareStatement(query);
+
+            for (Recapito recapito : listOfRecapito) {
+                psmnt.setString(1, recapito.getValore());
+                psmnt.setString(2, recapito.getAnagraficaID());
+                String tipo = switch (recapito.getTipo()) {
+                    case CELLULARE -> "cellulare";
+                    case TELEFONO -> "telefono";
+                    case EMAIL -> "email";
+                    default -> throw new RuntimeException("No type found in Recapito");
+                };
+                psmnt.setString(3, tipo);
+                psmnt.addBatch();
+            }
+
+            singlesResult = psmnt.executeBatch();
+            conn.commit();
+
+            psmnt.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new BatchResult(singlesResult);
+    }
+
+    public static BatchResult insertBatchRecapitoPreferito(Role role, List<Recapito> listOfRecapito) {
+        int[] singlesResult = null;
+        try {
+            openRoleConnection(role);
+
+            conn.setAutoCommit(false);
+
+            String query = "INSERT IGNORE INTO `recapito_preferito` " +
+                    "(`anagrafica`, `recapito`)" +
+                    "VALUES (?, ?)";
+            PreparedStatement psmnt = conn.prepareStatement(query);
+
+            for (Recapito recapito : listOfRecapito) {
+                psmnt.setString(1, recapito.getAnagraficaID());
+                psmnt.setString(2, recapito.getValore());
+                psmnt.addBatch();
+            }
+
+            singlesResult = psmnt.executeBatch();
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new BatchResult(singlesResult);
+    }
+
+    /*
+    MESSAGGI PRIVATI
+     */
+    public static boolean insertMessaggio(Role role, MessaggioPrivato messaggioPrivato) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String updateQuery = "INSERT INTO `messaggio_privato` " +
+                    "(`mittente`, `destinatario`, `testo`) " +
+                    "VALUES (?, ?, ?);";
+            PreparedStatement ps = conn.prepareStatement(updateQuery);
+            ps.setString(1, messaggioPrivato.getMittente());
+            ps.setString(2, messaggioPrivato.getDestinatario());
+            ps.setString(3, messaggioPrivato.getTesto());
+            ps.executeUpdate();
+
+            result = true;
+
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static BatchResult insertBatchMessaggioPrivato(Role role, List<MessaggioPrivato> listOfMessaggioPrivato) {
+        int[] singlesResult = null;
+        try {
+            openRoleConnection(role);
+
+            conn.setAutoCommit(false);
+
+            String query = "INSERT IGNORE INTO `messaggio_privato` " +
+                    "(`mittente`, `destinatario`, `inviato`, `testo`)" +
+                    "VALUES (?, ?, ?, ?)";
+            PreparedStatement psmnt = conn.prepareStatement(query);
+
+            for (MessaggioPrivato messaggioPrivato : listOfMessaggioPrivato) {
+                psmnt.setString(1, messaggioPrivato.getMittente());
+                psmnt.setString(2, messaggioPrivato.getDestinatario());
+                psmnt.setTimestamp(3, Timestamp.valueOf(messaggioPrivato.getInviato()));
+                psmnt.setString(4, messaggioPrivato.getTesto());
                 psmnt.addBatch();
             }
 
@@ -382,187 +636,14 @@ public class DAO {
         return result;
     }
 
-    public static boolean insertMessaggio(Role role, MessaggioPrivato messaggioPrivato) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-
-            String updateQuery = "INSERT INTO `messaggio_privato` " +
-                    "(`mittente`, `destinatario`, `testo`) " +
-                    "VALUES (?, ?, ?);";
-            PreparedStatement ps = conn.prepareStatement(updateQuery);
-            ps.setString(1, messaggioPrivato.getMittente());
-            ps.setString(2, messaggioPrivato.getDestinatario());
-            ps.setString(3, messaggioPrivato.getTesto());
-            ps.executeUpdate();
-
-            result = true;
-
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public static BatchResult insertBatchMessaggioPrivato(Role role, List<MessaggioPrivato> listOfMessaggioPrivato) {
-        int[] singlesResult = null;
-        try {
-            openRoleConnection(role);
-
-            conn.setAutoCommit(false);
-
-            String query = "INSERT IGNORE INTO `messaggio_privato` " +
-                    "(`mittente`, `destinatario`, `inviato`, `testo`)" +
-                    "VALUES (?, ?, ?, ?)";
-            PreparedStatement psmnt = conn.prepareStatement(query);
-
-            for (MessaggioPrivato messaggioPrivato : listOfMessaggioPrivato) {
-                psmnt.setString(1, messaggioPrivato.getMittente());
-                psmnt.setString(2, messaggioPrivato.getDestinatario());
-                psmnt.setTimestamp(3, Timestamp.valueOf(messaggioPrivato.getInviato()));
-                psmnt.setString(4, messaggioPrivato.getTesto());
-                psmnt.addBatch();
-            }
-
-            singlesResult = psmnt.executeBatch();
-            conn.commit();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return new BatchResult(singlesResult);
-    }
-
-    public static BatchResult insertBatchRecapito(List<Recapito> listOfRecapito) {
-        int[] singlesResult = null;
-        PreparedStatement psmnt;
-        try {
-            openRoleConnection(ActiveUser.getRole());
-
-            conn.setAutoCommit(false);
-
-            String query = "INSERT IGNORE INTO `recapito` " +
-                    "(`valore`, `anagrafica`, `tipo`)" +
-                    "VALUES (?, ?, ?)";
-            psmnt = conn.prepareStatement(query);
-
-            for (Recapito recapito : listOfRecapito) {
-                psmnt.setString(1, recapito.getValore());
-                psmnt.setString(2, recapito.getAnagraficaID());
-                String tipo = switch (recapito.getTipo()) {
-                    case CELLULARE -> "cellulare";
-                    case TELEFONO -> "telefono";
-                    case EMAIL -> "email";
-                    default -> throw new RuntimeException("No type found in Recapito");
-                };
-                psmnt.setString(3, tipo);
-                psmnt.addBatch();
-            }
-
-            singlesResult = psmnt.executeBatch();
-            conn.commit();
-
-            psmnt.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return new BatchResult(singlesResult);
-    }
-
-    public static BatchResult insertBatchRecapitoPreferito(Role role, List<Recapito> listOfRecapito) {
-        int[] singlesResult = null;
-        try {
-            openRoleConnection(role);
-
-            conn.setAutoCommit(false);
-
-            String query = "INSERT IGNORE INTO `recapito_preferito` " +
-                    "(`anagrafica`, `recapito`)" +
-                    "VALUES (?, ?)";
-            PreparedStatement psmnt = conn.prepareStatement(query);
-
-            for (Recapito recapito : listOfRecapito) {
-                psmnt.setString(1, recapito.getAnagraficaID());
-                psmnt.setString(2, recapito.getValore());
-                psmnt.addBatch();
-            }
-
-            singlesResult = psmnt.executeBatch();
-            conn.commit();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return new BatchResult(singlesResult);
-    }
-
-    public static BatchResult insertBatchAnagrafica(Role role, List<Anagrafica> listOfAnagrafica) {
-        int[] singlesResult = null;
-        try {
-            openRoleConnection(role);
-
-            conn.setAutoCommit(false);
-
-            String query = "INSERT IGNORE INTO `anagrafica` " +
-                    "(`codice_fiscale`, `nome`, `cognome`, " +
-                    "`sesso`, `data_nascita`, `comune_nascita`," +
-                    "`indirizzo_residenza`, `indirizzo_fatturazione`, `utente`)" +
-                    "VALUES (?, ?, ?," +
-                    "?, ?, ?," +
-                    "?, ?, ?)";
-
-            PreparedStatement psmnt = conn.prepareStatement(query);
-
-            for (Anagrafica anagrafica : listOfAnagrafica) {
-                psmnt.setString(1, anagrafica.getCodiceFiscale());
-                psmnt.setString(2, anagrafica.getNome());
-                psmnt.setString(3, anagrafica.getCognome());
-                psmnt.setString(4, (anagrafica.getSesso() == Sesso.DONNA) ? "Donna" : "Uomo");
-                psmnt.setDate(5, Date.valueOf(anagrafica.getDataNascita()));
-                psmnt.setString(6, anagrafica.getComuneNascita());
-                psmnt.setString(7, anagrafica.getIndirizzoResidenza());
-                psmnt.setString(8, anagrafica.getIndirizzoFatturazione());
-                psmnt.setString(9, anagrafica.getUsernameUtente());
-                psmnt.addBatch();
-            }
-
-            singlesResult = psmnt.executeBatch();
-            conn.commit();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return new BatchResult(singlesResult);
+    /*
+    CATEGORIA
+     */
+    public static boolean insertCategoria(Role role, Categoria categoria) {
+        List<Categoria> categoriaList = new ArrayList<>();
+        categoriaList.add(categoria);
+        BatchResult batchResult = insertBatchCategoria(role, categoriaList);
+        return batchResult.getAllTrue();
     }
 
     public static BatchResult insertBatchCategoria(Role role, List<Categoria> listOfCategoria) {
@@ -602,13 +683,6 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean insertCategoria(Role role, Categoria categoria) {
-        List<Categoria> categoriaList = new ArrayList<>();
-        categoriaList.add(categoria);
-        BatchResult batchResult = insertBatchCategoria(role, categoriaList);
-        return batchResult.getAllTrue();
-    }
-
     public static boolean deleteAllCategoria(Role role) {
         boolean result = false;
         try {
@@ -625,145 +699,42 @@ public class DAO {
         return result;
     }
 
-    public static boolean insertSegue(Role role, Segue segue) throws AnnuncioVendutoException {
-        boolean result = false;
+    /*
+    ANNUNCIO
+     */
+
+    public static boolean resetAutoincrement() {
+        boolean valueReturn = false;
+
         try {
-            openRoleConnection(role);
+            // #1: connect
+            openRoleConnection(Role.ROOT);
 
-            String call = "{call `seguire_annuncio`(?, ?)};";
-            CallableStatement cs = conn.prepareCall(call);
-            cs.setString(1, segue.getUtente());
-            cs.setLong(2, segue.getAnnuncio());
-            cs.closeOnCompletion();
+            // #2: create statement
+            stmt = conn.createStatement();
+//            System.out.println("Statement created.\n");
 
-            cs.execute();
+            // #3: query
+            query = "ALTER TABLE `annuncio` AUTO_INCREMENT = 1";
 
-            result = true;
+            // #4: execute query
+            stmt.executeUpdate(query);
 
-        } catch (SQLException e) {
-            if (e.getSQLState() == "45001") {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
+            valueReturn = true;
 
-        return result;
-    }
-
-    public static boolean deleteSegue(Role role, Segue segue) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-
-            String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
-            PreparedStatement ps = conn.prepareStatement(update);
-            ps.setString(1, segue.getUtente());
-            ps.setLong(2, segue.getAnnuncio());
-            ps.closeOnCompletion();
-
-            ps.execute();
-
-            result = true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {
-        int[] singlesResult = null;
-        try {
-            openRoleConnection(role);
-
-            conn.setAutoCommit(false);
-
-            String query = "INSERT IGNORE INTO `segue` (`utente`, `annuncio`) VALUES (?, ?)";
-
-            PreparedStatement psmnt = conn.prepareStatement(query);
-
-            for (Segue segue : listOfSegue) {
-                psmnt.setString(1, segue.getUtente());
-                psmnt.setLong(2, segue.getAnnuncio());
-                psmnt.addBatch();
-            }
-
-            singlesResult = psmnt.executeBatch();
-            conn.commit();
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            System.out.println("Exception caught!\n");
             e.printStackTrace();
         } finally {
             try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
+                stmt.close();
+//                conn.close();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        return new BatchResult(singlesResult);
-    }
-
-    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID,
-                                                         List<Annuncio> annunciSeguitiModificatiList,
-                                                         boolean updateLastCheck, boolean deleteSold) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-
-            String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
-            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setString(1, utenteID);
-            cs.setBoolean(2, updateLastCheck);
-            cs.setBoolean(3, deleteSold);
-
-            ResultSet rs = cs.executeQuery();
-            result = true;
-
-            if (rs.first()) {
-                do {
-                    Annuncio newAnnuncio = new Annuncio(rs.getLong(1), rs.getString(2), rs.getString(3),
-                            (long) (rs.getFloat(4) * 100), rs.getString(5),
-                            rs.getTimestamp(6).toLocalDateTime(), rs.getTimestamp(7).toLocalDateTime(),
-                            (rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
-                    annunciSeguitiModificatiList.add(newAnnuncio);
-                } while (rs.next());
-            }
-
-            cs.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-
-            String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
-            cs.setString(1, commento.getUtente());
-            cs.setInt(2, (int) commento.getAnnuncio());
-            cs.setString(3, commento.getTesto());
-
-            cs.executeUpdate();
-
-            result = true;
-
-            cs.close();
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("45001")) {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return valueReturn;
     }
 
     public static boolean insertAnnuncio(Role role, Annuncio annuncio) {
@@ -899,87 +870,150 @@ public class DAO {
         return result;
     }
 
-    public static List<String> getAllUsernames() {
-
-        List<String> returnList = new ArrayList<String>();
-
+    /*
+    SEGUE
+     */
+    public static boolean insertSegue(Role role, Segue segue) throws AnnuncioVendutoException {
+        boolean result = false;
         try {
-            // #1: connect
-            openRoleConnection(Role.ROOT);
+            openRoleConnection(role);
 
-            // #2: create statement
-            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-//            System.out.println("Statement created.\n");
+            String call = "{call `seguire_annuncio`(?, ?)};";
+            CallableStatement cs = conn.prepareCall(call);
+            cs.setString(1, segue.getUtente());
+            cs.setLong(2, segue.getAnnuncio());
+            cs.closeOnCompletion();
 
-            // #3: query
-            query = "SELECT username FROM `utente`";
+            cs.execute();
 
-            // #4: execute query
-            rs = stmt.executeQuery(query);
+            result = true;
 
-//            if (!rs.first()) {
-//                throw new Exception("No result found!");
-//            }
+        } catch (SQLException e) {
+            if (e.getSQLState() == "45001") {
+                throw new AnnuncioVendutoException();
+            } else {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
+    public static boolean deleteSegue(Role role, Segue segue) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
+            PreparedStatement ps = conn.prepareStatement(update);
+            ps.setString(1, segue.getUtente());
+            ps.setLong(2, segue.getAnnuncio());
+            ps.closeOnCompletion();
+
+            ps.execute();
+
+            result = true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {
+        int[] singlesResult = null;
+        try {
+            openRoleConnection(role);
+
+            conn.setAutoCommit(false);
+
+            String query = "INSERT IGNORE INTO `segue` (`utente`, `annuncio`) VALUES (?, ?)";
+
+            PreparedStatement psmnt = conn.prepareStatement(query);
+
+            for (Segue segue : listOfSegue) {
+                psmnt.setString(1, segue.getUtente());
+                psmnt.setLong(2, segue.getAnnuncio());
+                psmnt.addBatch();
+            }
+
+            singlesResult = psmnt.executeBatch();
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new BatchResult(singlesResult);
+    }
+
+    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID,
+                                                         List<Annuncio> annunciSeguitiModificatiList,
+                                                         boolean updateLastCheck, boolean deleteSold) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
+            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            cs.setString(1, utenteID);
+            cs.setBoolean(2, updateLastCheck);
+            cs.setBoolean(3, deleteSold);
+
+            ResultSet rs = cs.executeQuery();
+            result = true;
 
             if (rs.first()) {
                 do {
-                    returnList.add(rs.getString("username"));
+                    Annuncio newAnnuncio = new Annuncio(rs.getLong(1), rs.getString(2), rs.getString(3),
+                            (long) (rs.getFloat(4) * 100), rs.getString(5),
+                            rs.getTimestamp(6).toLocalDateTime(), rs.getTimestamp(7).toLocalDateTime(),
+                            (rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
+                    annunciSeguitiModificatiList.add(newAnnuncio);
                 } while (rs.next());
             }
 
-        } catch (Exception e) {
-            System.out.println("Exception caught!\n");
+            cs.close();
+
+        } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                stmt.close();
-//                conn.close();
-            } catch (Exception e) {
+        }
+        return result;
+    }
+
+    /*
+    COMMENTO
+     */
+    public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
+            CallableStatement cs = conn.prepareCall(callQuery);
+            cs.setString(1, commento.getUtente());
+            cs.setInt(2, (int) commento.getAnnuncio());
+            cs.setString(3, commento.getTesto());
+
+            cs.executeUpdate();
+
+            result = true;
+
+            cs.close();
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("45001")) {
+                throw new AnnuncioVendutoException();
+            } else {
                 e.printStackTrace();
             }
         }
-
-        return returnList;
-    }
-
-    public static boolean deleteAllUtente() {
-
-        boolean valueReturn = false;
-
-        try {
-            // #1: connect
-            openRoleConnection(Role.ROOT);
-
-            // #2: create statement
-            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-            // #3: query
-            query = "DELETE FROM utente";
-
-            // #4: execute query
-            stmt.executeUpdate(query);
-
-            valueReturn = true;
-
-        } catch (Exception e) {
-            System.out.println("Exception caught!\n");
-            e.printStackTrace();
-        } finally {
-            try {
-                stmt.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return valueReturn;
-    }
-
-    public static void closeConnection() {
-        try {
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return result;
     }
 }
