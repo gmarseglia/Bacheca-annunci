@@ -48,7 +48,6 @@ public class ViewUtente {
 
         switch (operation) {
             case CREARE_CATEGORIA -> creareCategoria();
-            case CREARE_REPORT -> creareReport();
             default -> {
                 if (false) begin(); //#TODO
             }
@@ -65,11 +64,18 @@ public class ViewUtente {
             case MESSAGGI_CON_UTENTE -> messaggiConUtente();
             case VENDERE_ANNUNCIO -> vendereAnnuncio();
             case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
-            case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
+            case CREARE_CATEGORIA -> gestoreDispatch(operation);
+            case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             default -> {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void seguireAnnuncio() {
+        /*
+        #TODO
+         */
     }
 
     private static void dettagliInserzionista() {
@@ -197,10 +203,6 @@ public class ViewUtente {
                 categoria.getNome(),
                 categoria.getPadre() != null ? " figlia di " + categoria.getPadre() : "",
                 createResult ? "successo" : "insuccesso");
-    }
-
-    private static void creareReport() {
-        //#TODO
     }
 
 }

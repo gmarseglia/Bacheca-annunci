@@ -625,6 +625,32 @@ public class DAO {
         return result;
     }
 
+    public static boolean insertSegue(Role role, Segue segue) throws AnnuncioVendutoException {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String call = "{call `seguire_annuncio`(?, ?)};";
+            CallableStatement cs = conn.prepareCall(call);
+            cs.setString(1, segue.getUtente());
+            cs.setLong(2, segue.getAnnuncio());
+            cs.closeOnCompletion();
+
+            cs.execute();
+
+            result = true;
+
+        } catch (SQLException e) {
+            if (e.getSQLState() == "45001") {
+                throw new AnnuncioVendutoException();
+            } else {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
     public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {
         int[] singlesResult = null;
         try {

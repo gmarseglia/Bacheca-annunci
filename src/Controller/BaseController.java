@@ -35,7 +35,11 @@ public class BaseController {
         return DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID);
     }
 
-    public static boolean dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList){
+    public static boolean dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
         return DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList);
+    }
+
+    public static boolean seguireAnnuncio(Segue segue) throws AnnuncioVendutoException {
+        return DAO.insertSegue(ActiveUser.getRole(), segue);
     }
 }

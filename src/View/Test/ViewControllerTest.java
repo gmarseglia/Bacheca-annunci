@@ -129,6 +129,15 @@ public class ViewControllerTest {
         boolean messageSelectResult = BaseController.visualizzareMessaggi(utente.getID(), utente3.getID(), messaggioPrivatoList);
         printResultList("Visualizzare messaggi fra utenti", messageSelectResult, messaggioPrivatoList);
 
+        Segue segue = new Segue(utente.getID(), annuncio.getID());
+        boolean segueResult;
+        try {
+            segueResult = BaseController.seguireAnnuncio(segue);
+            printResult("Seguire annuncio", segueResult);
+        } catch (AnnuncioVendutoException e) {
+            printResult("Seguire annuncio", false, "Annuncio già venduto");
+        }
+
         boolean vendereResult;
         try {
             vendereResult = BaseController.vendereAnnuncio(annuncio.getID());
@@ -175,7 +184,9 @@ public class ViewControllerTest {
     }
 
     private static void printResultList(String operation, boolean result, Iterable iterable, String explain) {
-        System.out.printf("--> %s: %s.\n", operation, result ? "OK" : String.format("NOT OK due to '%s'", explain));
+        System.out.printf("--> %s: %s.\n", operation, result ? "OK" :
+                (explain.equals("")) ? "NOT OK" :
+                        String.format("NOT OK due to '%s'", explain));
         if (iterable != null) {
             for (Object o : iterable)
                 if (o != null) System.out.println(o);
