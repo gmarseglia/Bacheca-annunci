@@ -11,7 +11,7 @@ public class BaseController {
         return DAO.insertAnnuncio(ActiveUser.getRole(), annuncio);
     }
 
-    public static boolean scrivereCommento(Commento commento) {
+    public static boolean scrivereCommento(Commento commento) throws AnnuncioVendutoException {
         return DAO.insertCommento(ActiveUser.getRole(), commento);
     }
 
@@ -31,7 +31,7 @@ public class BaseController {
         return DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), utenteID1, utenteID2, messaggioPrivatoList);
     }
 
-    public static boolean vendereAnnuncio(Long annuncioID){
+    public static boolean vendereAnnuncio(Long annuncioID) throws AnnuncioVendutoException {
         return DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID);
     }
 

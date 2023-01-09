@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ControllerTest {
+public class ViewControllerTest {
 
     public static void main(String[] args) throws InterruptedException {
         ActiveUser.setRole(Role.ROOT);
@@ -73,8 +73,6 @@ public class ControllerTest {
         dettagliUtenteResult = BaseController.dettagliUtente(utenteDettagli, anagraficaDettagli, recapitoDettaglioList);
         printResult("Dettagli utente", dettagliUtenteResult);
 
-        if(true) return;
-
         Categoria categoria = new Categoria("categoria_1");
         boolean categoriaResult = GestoreController.creareCategoria(categoria);
         printResult("Creazione categoria", categoriaResult);
@@ -86,8 +84,13 @@ public class ControllerTest {
         for (int commIndex = 0; commIndex < 2; commIndex++) {
             Commento commento = new Commento(username, annuncio.getID(), null,
                     String.format("Testo del commento %d.", commIndex));
-            boolean commentoResult = BaseController.scrivereCommento(commento);
-            printResult(String.format("Scrivere commento %d", commIndex), commentoResult);
+            boolean commentoResult;
+            try {
+                commentoResult = BaseController.scrivereCommento(commento);
+                printResult(String.format("Scrivere commento %d", commIndex), commentoResult);
+            } catch (AnnuncioVendutoException e) {
+                printResult("Scrivere commento %d", false, "Annuncio già venduto");
+            }
             Thread.sleep(1100);
         }
 
@@ -126,30 +129,55 @@ public class ControllerTest {
         boolean messageSelectResult = BaseController.visualizzareMessaggi(utente.getID(), utente3.getID(), messaggioPrivatoList);
         printResultList("Visualizzare messaggi fra utenti", messageSelectResult, messaggioPrivatoList);
 
-        boolean vendereResult = BaseController.vendereAnnuncio(annuncio.getID());
-        Annuncio annuncioVenduto = new Annuncio(annuncio.getID());
-        BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
-        printResult("Vendere annuncio", vendereResult, annuncioVenduto);
+        boolean vendereResult;
+        try {
+            vendereResult = BaseController.vendereAnnuncio(annuncio.getID());
+            Annuncio annuncioVenduto = new Annuncio(annuncio.getID());
+            BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
+            printResult("Vendere annuncio #1", vendereResult, annuncioVenduto);
+        } catch (AnnuncioVendutoException e) {
+            printResult("Vendere annuncio #1", false, "Annuncio già venduto.");
+        }
 
-        boolean vendere2Result = BaseController.vendereAnnuncio(annuncio.getID());
-        annuncioVenduto = new Annuncio(annuncio.getID());
-        BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
-        printResult("Vendere annuncio", vendere2Result, annuncioVenduto);
+        boolean vendere2Result;
+        try {
+            vendere2Result = BaseController.vendereAnnuncio(annuncio.getID());
+            Annuncio annuncioGiaVenduto = new Annuncio(annuncio.getID());
+            BaseController.dettagliAnnuncio(annuncioGiaVenduto, new ArrayList<>());
+            printResult("Vendere annuncio", vendere2Result, annuncioGiaVenduto);
+        } catch (AnnuncioVendutoException e) {
+            printResult("Vendere annuncio #2", false, "Annuncio già venduto.");
+        }
+    }
+
+    private static void printResult(String operation, boolean result, Object o, String explain) {
+        List<Object> iterable = new ArrayList<>();
+        iterable.add(o);
+        printResultList(operation, result, iterable, explain);
+    }
+
+    private static void printResult(String operation, boolean result, String explain) {
+        printResult(operation, result, null, explain);
     }
 
     private static void printResult(String operation, boolean result) {
-        System.out.printf("%s: %s.\n", operation, result ? "OK" : "NOT OK");
+        printResult(operation, result, "");
     }
 
     private static void printResult(String operation, boolean result, Object object) {
-        System.out.printf("%s: %s.\n", operation, result ? "OK" : "NOT OK");
-        System.out.println(object);
+        printResult(operation, result, object, "");
     }
 
     private static void printResultList(String operation, boolean result, Iterable iterable) {
-        System.out.printf("%s: %s.\n", operation, result ? "OK" : "NOT OK");
-        for (Object o : iterable)
-            System.out.println(o);
+        printResultList(operation, result, iterable, "");
+    }
+
+    private static void printResultList(String operation, boolean result, Iterable iterable, String explain) {
+        System.out.printf("--> %s: %s.\n", operation, result ? "OK" : String.format("NOT OK due to '%s'", explain));
+        if (iterable != null) {
+            for (Object o : iterable)
+                if (o != null) System.out.println(o);
+        }
     }
 
 

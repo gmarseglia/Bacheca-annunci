@@ -3,10 +3,8 @@ package DAO;
 import Model.*;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class DAO {
 
@@ -660,7 +658,7 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean insertCommento(Role role, Commento commento) {
+    public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
         boolean result = false;
         try {
             openRoleConnection(role);
@@ -678,7 +676,7 @@ public class DAO {
             cs.close();
         } catch (SQLException e) {
             if (e.getSQLState().equals("45001")) {
-                System.out.println("Articolo già venduto.\n");
+                throw new AnnuncioVendutoException();
             } else {
                 e.printStackTrace();
             }
@@ -794,7 +792,7 @@ public class DAO {
         return result;
     }
 
-    public static boolean updateAnnuncioVendere(Role role, long annuncioID) {
+    public static boolean updateAnnuncioVendere(Role role, long annuncioID) throws AnnuncioVendutoException {
         boolean result = false;
         try {
             openRoleConnection(role);
@@ -811,8 +809,7 @@ public class DAO {
 
         } catch (SQLException e) {
             if (e.getSQLState().equals("45001")) {
-                System.out.println("Articolo già venduto.\n");
-                result = true;
+                throw new AnnuncioVendutoException();
             } else {
                 e.printStackTrace();
             }

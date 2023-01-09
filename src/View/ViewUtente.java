@@ -159,10 +159,15 @@ public class ViewUtente {
         annuncioID = 1;
         Commento commento = new Commento(ActiveUser.getUsername(), annuncioID, null, testo);
 
-        boolean insertResult = BaseController.scrivereCommento(commento);
+        boolean insertResult = false;
+        try {
+            insertResult = BaseController.scrivereCommento(commento);
+            System.out.printf("Il commento è stato scritto con %s.\n",
+                    insertResult ? "successo" : "insuccesso");
+        } catch (AnnuncioVendutoException e) {
+            System.out.println("L'annuncio è già stato venduto, impossibile aggiungere nuovi commenti.\n");
+        }
 
-        System.out.printf("Il commento è stato scritto con %s.\n",
-                insertResult ? "successo" : "insuccesso");
     }
 
     private static void creareCategoria() {
