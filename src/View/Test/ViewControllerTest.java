@@ -148,6 +148,8 @@ public class ViewControllerTest {
         } catch (AnnuncioVendutoException e) {
             printResult("Vendere annuncio #2", false, "Annuncio già venduto.");
         }
+
+
     }
 
     private static void printResult(String operation, boolean result, Object o, String explain) {

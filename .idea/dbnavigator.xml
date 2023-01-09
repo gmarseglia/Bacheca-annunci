@@ -29,7 +29,7 @@
     <retain-sticky-names value="false" />
   </component>
   <component name="DBNavigator.Project.FileConnectionMappingManager">
-    <mapping file-url="file://$PROJECT_DIR$/SQL/Restart-root.sql" connection-id="8b3f0ed7-6efc-4973-8b96-e62c4fc0c2a3" session-id="MAIN" current-schema="mysql" />
+    <mapping file-url="file://$PROJECT_DIR$/SQL/Users-Tables-root.sql" connection-id="8b3f0ed7-6efc-4973-8b96-e62c4fc0c2a3" session-id="MAIN" current-schema="mysql" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
