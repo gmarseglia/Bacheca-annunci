@@ -5,6 +5,7 @@ import Controller.GestoreController;
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
 import Utility.RndData;
+import Utility.ScannerUtility;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,20 +29,70 @@ public class ViewUtente {
         VISUALIZZARE_CHAT,              //M0101
         SCRIVERE_COMMENTO,              //C0000
         CREARE_CATEGORIA,               //G0000
-        CREARE_REPORT                   //R0001
+        CREARE_REPORT,                  //R0001
+        TERMINARE_APPLICAZIONE;
 
+
+        public static OPERATION dispatchMap(String input) {
+            OPERATION result = switch (input) {
+                case "1" -> INSERIRE_ANNUNCIO;
+                case "2" -> VENDERE_ANNUNCIO;
+                case "3" -> CERCARE_PER_UTENTE;
+                case "4" -> CERCARE_PER_CATEGORIA;
+                case "5" -> CERCARE_PER_DESCRIZIONE;
+                case "6" -> DETTAGLI_ANNUNCIO;
+                case "7" -> SEGUIRE_ANNUNCIO;
+                case "8" -> STOP_SEGUIRE_ANNUNCIO;
+                case "9" -> CONTROLLARE_MODIFICHE_SEGUITI;
+                case "a", "A" -> DETTAGLI_INSERZIONISTA;
+                case "b", "B" -> SCRIVERE_COMMENTO;
+                case "c", "C" -> VISUALIZZARE_CHAT;
+                case "d", "D" -> MESSAGGI_CON_UTENTE;
+                case "e", "E" -> INVIARE_MESSAGGIO;
+                case "f", "F" -> CREARE_CATEGORIA;
+                case "g", "G" -> CREARE_REPORT;
+                case "u", "U" -> TERMINARE_APPLICAZIONE;
+                default -> null;
+            };
+
+            return result;
+        }
     }
 
+    private static final String MAIN_DISPATCH = """
+            Operazioni possibili:
+            (1) Inserire un annuncio.
+            (2) Indicare un annuncio inserito come venduto.
+            (3) Cercare gli annunci di un utente.
+            (4) Cercare gli annunci disponibili per categoria.
+            (5) Cercare gli annunci disponibili per descrizione.
+            (6) Visualizzare i dettagli di un annuncio.
+            (7) Aggiungere un annuncio disponibile ai "seguiti".
+            (8) Rimuovere un annuncio dai "seguiti".
+            (9) Controllare quali annunci "seguiti" hanno subito modifiche.
+            (A) Visualizzare i dettagli di un utente.
+            (B) Scrivere un commento sotto un annuncio disponibile.
+            (C) Visualizzare utenti con cui sono stati scambiati messaggi privati.
+            (D) Visualizzare tutti i messaggi privati scambiati con un utente.
+            (E) Inviare un messaggio privato ad un utente.
+            (F) Creare una categoria.
+            (G) Generare report sulla percentuale di vendita degli utenti.
+            (U) Uscire dall'applicazione.
+            """;
+
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void begin() {
-        /*
-        #TODO: while cycle to dispatch
-         */
-        System.out.println("\nViewUtente.begin()");
-        System.exit(0);
 
         OPERATION operation;
-        operation = OPERATION.SCRIVERE_COMMENTO;
-        dispatch(operation);
+        while (true) {
+            System.out.println();
+            do {
+                operation = OPERATION.dispatchMap(ScannerUtility.askFirstChar(MAIN_DISPATCH));
+            } while (operation == null);
+
+            dispatch(operation);
+        }
+
     }
 
     protected static void gestoreDispatch(OPERATION operation) {
@@ -53,31 +104,29 @@ public class ViewUtente {
         switch (operation) {
             case CREARE_CATEGORIA -> creareCategoria();
             case CREARE_REPORT -> creareReport();
-            default -> {
-                if (false) begin(); //#TODO
-            }
         }
     }
 
     protected static void dispatch(OPERATION operation) {
         switch (operation) {
             case INSERIRE_ANNUNCIO -> inserireAnnuncio();
-            case SCRIVERE_COMMENTO -> scrivereCommento();
-            case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
-            case INVIARE_MESSAGGIO -> inviareMessaggio();
-            case VISUALIZZARE_CHAT -> visualizzareChat();
-            case MESSAGGI_CON_UTENTE -> messaggiConUtente();
             case VENDERE_ANNUNCIO -> vendereAnnuncio();
-            case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
-            case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
-            case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
-            case CONTROLLARE_MODIFICHE_SEGUITI -> controllareModificheSeguiti();
             case CERCARE_PER_UTENTE -> cercaPerUtente();
             case CERCARE_PER_CATEGORIA -> cercaPerCategoria();
             case CERCARE_PER_DESCRIZIONE -> cercaPerDescrizione();
+            case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
+            case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
+            case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
+            case CONTROLLARE_MODIFICHE_SEGUITI -> controllareModificheSeguiti();
+            case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
+            case SCRIVERE_COMMENTO -> scrivereCommento();
+            case VISUALIZZARE_CHAT -> visualizzareChat();
+            case MESSAGGI_CON_UTENTE -> messaggiConUtente();
+            case INVIARE_MESSAGGIO -> inviareMessaggio();
             case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
-            default -> {
-                if (false) begin(); //#TODO
+            case TERMINARE_APPLICAZIONE -> {
+                System.out.println("Uscita dall'applicazione.");
+                System.exit(0);
             }
         }
     }

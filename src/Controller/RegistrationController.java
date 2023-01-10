@@ -41,7 +41,7 @@ public class RegistrationController {
     public static DBResult login(Credenziali credenziali) {
         DBResult result = new DBResult(false);
         try {
-            DAO.selectCredenziali(ActiveUser.getRole(), credenziali);
+            result.setResult(DAO.selectCredenziali(ActiveUser.getRole(), credenziali));
         } catch (SQLException e) {
             if (e.getSQLState().equals("S1000")) {
                 result.setMessage("Credenziali di accesso non valide, " + e.getMessage());
@@ -50,6 +50,8 @@ public class RegistrationController {
             }
         } catch (RuntimeException e) {
             result.setMessage("Credenziali di accesso non valide.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return result;
     }
