@@ -73,19 +73,34 @@ public class ViewControllerTest {
         dettagliUtenteResult = BaseController.dettagliUtente(utenteDettagli, anagraficaDettagli, recapitoDettaglioList);
         printResult("Dettagli utente", dettagliUtenteResult);
 
-        Categoria categoria = new Categoria("categoria_1");
+        Categoria categoria = new Categoria("cat_1");
         boolean categoriaResult = GestoreController.creareCategoria(categoria);
-        printResult("Creazione categoria", categoriaResult);
+        printResult("Creazione cat_1", categoriaResult);
 
-        Annuncio annuncio = new Annuncio(username, "Descrizione annuncio.", 10 * 100, categoria.getID(), null);
-        boolean annuncioResult = BaseController.inserireAnnuncio(annuncio);
-        printResult("Inserimento annuncio", annuncioResult);
+        Categoria categoria1 = new Categoria("cat_1-1", categoria.getID());
+        printResult("Creazione cat_1-1", GestoreController.creareCategoria(categoria1));
+
+        Categoria cat2 = new Categoria("cat_2");
+        printResult("Creazione cat_2", GestoreController.creareCategoria(cat2));
+
+        Annuncio annuncio_1 = new Annuncio(username, "Descrizione annuncio.", 10 * 100, categoria.getID(), null);
+        boolean annuncioResult = BaseController.inserireAnnuncio(annuncio_1);
+        printResult("Inserimento annuncio_1", annuncioResult);
+
+        Annuncio annuncio_1_1 = new Annuncio(username, "Descrizione annuncio.", 10 * 100, cat2.getID(), null);
+        printResult("Inserimento annuncio_1", BaseController.inserireAnnuncio(annuncio_1_1));
+
+        Annuncio annuncio_2 = new Annuncio(utente2.getUsername(), "Questo è un annuncio.", 10 * 100, categoria.getID(), null);
+        printResult("Inserimento annuncio_2", BaseController.inserireAnnuncio(annuncio_2));
+
+        Annuncio annuncio_3 = new Annuncio(utente.getUsername(), "Questo è un dragoooooo.", 10 * 100, categoria1.getID(), null);
+        printResult("Inserimento annuncio_3", BaseController.inserireAnnuncio(annuncio_3));
 
         List<Annuncio> annunciSeguitiModificati = new ArrayList<>();
         boolean controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
         printResultList("Controllo seguiti vuoto", controlloSeguiti1Result, annunciSeguitiModificati);
 
-        Segue segue = new Segue(utente.getID(), annuncio.getID());
+        Segue segue = new Segue(utente.getID(), annuncio_1.getID());
         boolean segueResult;
         try {
             segueResult = BaseController.seguireAnnuncio(segue);
@@ -104,7 +119,7 @@ public class ViewControllerTest {
         printResultList(" Secondo controllo seguiti annuncio pulito", controlloSeguiti1Result, annunciSeguitiModificati);
 
         for (int commIndex = 0; commIndex < 1; commIndex++) {
-            Commento commento = new Commento(username, annuncio.getID(), null,
+            Commento commento = new Commento(username, annuncio_1.getID(), null,
                     String.format("Testo del commento %d.", commIndex));
             boolean commentoResult;
             try {
@@ -125,7 +140,7 @@ public class ViewControllerTest {
         controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
         printResultList(" Secondo controllo seguiti annuncio dopo commenti", controlloSeguiti1Result, annunciSeguitiModificati);
 
-        Annuncio annuncioDettaglio = new Annuncio(annuncio.getID());
+        Annuncio annuncioDettaglio = new Annuncio(annuncio_1.getID());
         List<Commento> commentoListDettaglio = new ArrayList<>();
         boolean dettaglioResult = BaseController.dettagliAnnuncio(annuncioDettaglio, commentoListDettaglio);
         if (dettaglioResult) {
@@ -161,7 +176,7 @@ public class ViewControllerTest {
         boolean messageSelectResult = BaseController.visualizzareMessaggi(utente.getID(), utente3.getID(), messaggioPrivatoList);
         printResultList("Visualizzare messaggi fra utenti", messageSelectResult, messaggioPrivatoList);
 
-        Segue segue2 = new Segue(utente2.getID(), annuncio.getID());
+        Segue segue2 = new Segue(utente2.getID(), annuncio_1.getID());
         boolean segueResult2;
         try {
             segueResult2 = BaseController.seguireAnnuncio(segue2);
@@ -175,8 +190,8 @@ public class ViewControllerTest {
 
         boolean vendereResult;
         try {
-            vendereResult = BaseController.vendereAnnuncio(annuncio.getID());
-            Annuncio annuncioVenduto = new Annuncio(annuncio.getID());
+            vendereResult = BaseController.vendereAnnuncio(annuncio_1.getID());
+            Annuncio annuncioVenduto = new Annuncio(annuncio_1.getID());
             BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
             printResult("Vendere annuncio #1", vendereResult, annuncioVenduto);
         } catch (AnnuncioVendutoException e) {
@@ -194,13 +209,29 @@ public class ViewControllerTest {
 
         boolean vendere2Result;
         try {
-            vendere2Result = BaseController.vendereAnnuncio(annuncio.getID());
-            Annuncio annuncioGiaVenduto = new Annuncio(annuncio.getID());
+            vendere2Result = BaseController.vendereAnnuncio(annuncio_1.getID());
+            Annuncio annuncioGiaVenduto = new Annuncio(annuncio_1.getID());
             BaseController.dettagliAnnuncio(annuncioGiaVenduto, new ArrayList<>());
             printResult("Vendere annuncio", vendere2Result, annuncioGiaVenduto);
         } catch (AnnuncioVendutoException e) {
             printResult("Vendere annuncio #2", false, "Annuncio già venduto.");
         }
+
+
+        List<Annuncio> selectAnnuncioList = new ArrayList<>();
+        printResultList("Cerca per inserzionista",
+                BaseController.cercareAnnunciPerInserzionista(utente.getUsername(), selectAnnuncioList),
+                selectAnnuncioList);
+
+        selectAnnuncioList.clear();
+        printResultList("Cerca per categoria",
+                BaseController.cercareAnnunciPerCategoria(categoria.getNome(), selectAnnuncioList),
+                selectAnnuncioList);
+
+        selectAnnuncioList.clear();
+        printResultList("Cerca per descrizione",
+                BaseController.cercareAnnunciPerDescrizione("annuncio", selectAnnuncioList),
+                selectAnnuncioList);
     }
 
     private static void printResult(String operation, boolean result, Object o, String explain) {

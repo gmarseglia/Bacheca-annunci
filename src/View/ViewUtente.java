@@ -68,10 +68,31 @@ public class ViewUtente {
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
             case CONTROLLARE_MODIFICHE_SEGUITI -> controllareModificheSeguiti();
+            case CERCARE_PER_UTENTE -> cercaPerUtente();
+            case CERCARE_PER_CATEGORIA -> cercaPerCategoria();
+            case CERCARE_PER_DESCRIZIONE -> cercaPerDescrizione();
             default -> {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void cercaPerDescrizione() {
+        /*
+        #TODO
+         */
+    }
+
+    private static void cercaPerCategoria() {
+        /*
+        #TODO
+         */
+    }
+
+    private static void cercaPerUtente() {
+        /*
+        #TODO
+         */
     }
 
     private static void controllareModificheSeguiti() {

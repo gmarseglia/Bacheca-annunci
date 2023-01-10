@@ -870,39 +870,82 @@ public class DAO {
         return result;
     }
 
-    private static boolean cercareAnnuncioWhere(Role role, String whereClause, List<Annuncio> annuncioList) {
+    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) {
         boolean result = false;
         try {
             openRoleConnection(role);
 
-            String query = String.format("SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, " +
+            String query = "SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, " +
                     "`categoria`, `inserito`, `modificato`, `venduto` " +
                     "FROM `annuncio` " +
-                    "WHERE %s;", whereClause);
-            PreparedStatement ps = conn.prepareStatement(query);
+                    "WHERE `inserzionista`=?";
+            query = query.concat((onlyAvailable) ? " AND `venduto` IS NULL;" : ";");
+
+            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ps.setString(1, inserzionistaID);
             ps.closeOnCompletion();
 
             ResultSet rs = ps.executeQuery();
+            result = true;
 
             if (rs.first()) {
                 do {
-                    Annuncio newAnnuncio = new Annuncio(
-                            rs.getLong(1),
-                            rs.getString(2),
-                            rs.getString(3),
-                            rs.getLong(4) * 100,
-                            rs.getString(4),
-                            rs.getTimestamp(5).toLocalDateTime(),
-                            rs.getTimestamp(6).toLocalDateTime(),
-                            (rs.getTimestamp(7) == null) ? null : rs.getTimestamp(5).toLocalDateTime()
-                    );
-                    annuncioList.add(newAnnuncio);
+                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
                 } while (rs.next());
             }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, boolean onlyAvailable, List<Annuncio> annuncioList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String query = "SELECT * FROM `annuncio` WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)";
+            query = query.concat((onlyAvailable) ? " AND `venduto` IS NULL;" : ";");
+            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ps.setString(1, descrizione);
+            ps.closeOnCompletion();
+
+            ResultSet rs = ps.executeQuery();
             result = true;
 
-            ps.close();
+            if (rs.first()) {
+                do {
+                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                } while (rs.next());
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static boolean selectAvailableAnnuncioByCategoria(Role role, String categoriaID, boolean onlyAvailable, List<Annuncio> annuncioList) {
+        boolean result = false;
+        try {
+            openRoleConnection(role);
+
+            String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
+            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            cs.setString(1, categoriaID);
+            cs.setBoolean(2, onlyAvailable);
+            cs.closeOnCompletion();
+
+            ResultSet rs = cs.executeQuery();
+            result = true;
+
+            if (rs.first()) {
+                do {
+                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                } while (rs.next());
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

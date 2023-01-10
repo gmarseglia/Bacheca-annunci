@@ -1,15 +1,15 @@
 use `bacheca_annunci`;
 
-DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`;
+DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`;
 
 DELIMITER !
 
-CREATE PROCEDURE `controllare_annunci_seguiti` (
-    IN var_utente_id VARCHAR (30),
-    IN var_aggiornare_contr BOOLEAN, IN var_eliminare_venduti BOOLEAN
+CREATE PROCEDURE `select_annunci_categorie_figlie` (
+    IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean
 )
 BEGIN
-    DECLARE start_timestamp TIMESTAMP;
+    DECLARE counter INT DEFAULT 1;
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -19,26 +19,32 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-        SET start_timestamp = CURRENT_TIMESTAMP;
+        CREATE TEMPORARY TABLE `temp_categoria`
+        SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
+
+        WHILE counter > 0 DO
+            CREATE TEMPORARY TABLE `temp_categoria_2` SELECT * FROM `temp_categoria`;
+            SELECT count(*) INTO counter
+            FROM `categoria`
+            WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_2`);
+
+            IF (counter > 0) THEN
+                CREATE TEMPORARY TABLE `temp_categoria_3` SELECT * FROM `temp_categoria`;
+                INSERT INTO `temp_categoria`
+                SELECT *
+                FROM `categoria`
+                WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria_2`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_3`);
+                DROP TEMPORARY TABLE `temp_categoria_3`;
+            END IF;
+
+            DROP TEMPORARY TABLE `temp_categoria_2`;
+        END WHILE;
 
         SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`prezzo`,
             `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
-        FROM `utente` as `u`
-            INNER JOIN `segue` as `s` ON `u`.`username`=`s`.`utente`
-            INNER JOIN `annuncio` as `a` ON `s`.`annuncio`=`a`.`numero`
-        WHERE `u`.`username`=var_utente_id AND `a`.`modificato`>`u`.`contr_seguiti`;
-
-        IF(var_eliminare_venduti=true) THEN
-            DELETE `s`
-            FROM `segue` AS `s` INNER JOIN `annuncio` AS `a` ON `s`.`annuncio`=`a`.`numero`
-            WHERE `s`.`utente`=var_utente_id AND `a`.`venduto` IS NOT NULL;
-        END IF;
-
-        IF(var_aggiornare_contr=true) THEN
-            UPDATE `utente`
-            SET `contr_seguiti`=start_timestamp
-            WHERE `username`=var_utente_id;
-        END IF;
+        FROM `annuncio` as `a`
+        WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`)
+            AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
 
     COMMIT;
 END !

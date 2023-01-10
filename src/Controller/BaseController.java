@@ -48,7 +48,18 @@ public class BaseController {
     }
 
     public static boolean controllareAnnunciSeguiti(String utenteID, List<Annuncio> annunciSegutiModificatiList) {
-        return DAO.selectAnnunciSeguitiModificati(
-                ActiveUser.getRole(), utenteID, annunciSegutiModificatiList, true, true);
+        return DAO.selectAnnunciSeguitiModificati(ActiveUser.getRole(), utenteID, annunciSegutiModificatiList, true, true);
+    }
+
+    public static boolean cercareAnnunciPerInserzionista(String inserzionistaID, List<Annuncio> annuncioList) {
+        return DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, true, annuncioList);
+    }
+
+    public static boolean cercareAnnunciPerCategoria(String categoriaID, List<Annuncio> annuncioList) {
+        return DAO.selectAvailableAnnuncioByCategoria(ActiveUser.getRole(), categoriaID, true, annuncioList);
+    }
+
+    public static boolean cercareAnnunciPerDescrizione(String descrizione, List<Annuncio> annuncioList) {
+        return DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, true, annuncioList);
     }
 }

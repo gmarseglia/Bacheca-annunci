@@ -168,8 +168,8 @@ CREATE INDEX By_categoria
 CREATE INDEX By_inserzionista
 	ON annuncio(inserzionista);
 
--- CREATE FULLTEXT INDEX By_descrizione
--- 	ON annuncio(descrizione);
+CREATE FULLTEXT INDEX By_descrizione
+	ON annuncio(descrizione);
 
 CREATE UNIQUE INDEX By_utente
 	ON anagrafica(utente);
