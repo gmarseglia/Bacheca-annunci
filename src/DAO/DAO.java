@@ -27,9 +27,7 @@ public class DAO {
 
     private static ResultSet rs = null;
 
-    /*
-    CONNESSIONE
-     */
+    // CONNESSIONE
     private static void openRoleConnection(Role role) throws SQLException {
         if (conn == null || LAST_ROLE != role) {
             try {
@@ -68,9 +66,7 @@ public class DAO {
         }
     }
 
-    /*
-    LOGIN E REGISTRAZIONE
-     */
+    // LOGIN E REGISTRAZIONE
     public static Boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
         openRoleConnection(role);
 
@@ -143,9 +139,7 @@ public class DAO {
         return true;
     }
 
-    /*
-    UTENTE
-     */
+    // UTENTE
     public static boolean insertUtenteByUsername(String username) {
         boolean valueReturn = false;
 
@@ -328,9 +322,7 @@ public class DAO {
         return valueReturn;
     }
 
-    /*
-    ANAGRAFICA
-     */
+    // ANAGRAFICA
     public static BatchResult insertBatchAnagrafica(Role role, List<Anagrafica> listOfAnagrafica) {
         int[] singlesResult = null;
         try {
@@ -378,9 +370,7 @@ public class DAO {
     }
 
 
-    /*
-    CREDENZIALI
-     */
+    // CREDENZIALI
     public static BatchResult insertBatchCredenziali(Role role, List<Credenziali> credentials) {
         int[] singlesResult = null;
         try {
@@ -493,9 +483,7 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    /*
-    MESSAGGI PRIVATI
-     */
+    // MESSAGGI PRIVATI
     public static boolean insertMessaggio(Role role, MessaggioPrivato messaggioPrivato) {
         boolean result = false;
         try {
@@ -617,9 +605,7 @@ public class DAO {
         return result;
     }
 
-    /*
-    CATEGORIA
-     */
+    // CATEGORIA
     public static boolean insertCategoria(Role role, Categoria categoria) {
         List<Categoria> categoriaList = new ArrayList<>();
         categoriaList.add(categoria);
@@ -680,10 +666,7 @@ public class DAO {
         return result;
     }
 
-    /*
-    ANNUNCIO
-     */
-
+    // ANNUNCIO
     public static boolean resetAutoincrement() {
         boolean valueReturn = false;
 
@@ -728,7 +711,7 @@ public class DAO {
 
             cs.setString(1, annuncio.getInserzionista());
             cs.setString(2, annuncio.getDescrizione());
-            cs.setFloat(3, (float) annuncio.getPriceInCents() / 100);
+            cs.setFloat(3, annuncio.getPrice());
             cs.setString(4, annuncio.getCategoria());
             cs.registerOutParameter(5, Types.INTEGER);
 
@@ -765,7 +748,7 @@ public class DAO {
             for (Annuncio annuncio : listOfAnnuncio) {
                 psmnt.setString(1, annuncio.getInserzionista());
                 psmnt.setString(2, annuncio.getDescrizione());
-                psmnt.setFloat(3, annuncio.getPriceInCents() / 100);
+                psmnt.setFloat(3, annuncio.getPrice());
                 psmnt.setString(4, annuncio.getCategoria());
                 psmnt.setTimestamp(5, Timestamp.valueOf(annuncio.getInserito()));
                 psmnt.addBatch();
@@ -801,7 +784,7 @@ public class DAO {
             annuncio.setNumero(rs.getInt(1));
             annuncio.setInserzionista(rs.getString(2));
             annuncio.setDescrizione(rs.getString(3));
-            annuncio.setPriceInCents((int) (rs.getFloat(4) * 100));
+            annuncio.setPrice((rs.getFloat(4)));
             annuncio.setCategoria(rs.getString(5));
             annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
             annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
@@ -933,9 +916,7 @@ public class DAO {
         return result;
     }
 
-    /*
-    SEGUE
-     */
+    // SEGUE
     public static boolean insertSegue(Role role, Segue segue) throws AnnuncioVendutoException {
         boolean result = false;
         try {
@@ -1051,9 +1032,7 @@ public class DAO {
         return result;
     }
 
-    /*
-    COMMENTO
-     */
+    // COMMENTO
     public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
         boolean result = false;
         try {
@@ -1080,9 +1059,7 @@ public class DAO {
         return result;
     }
 
-    /*
-    REPORT
-     */
+    // REPORT
     public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) {
         boolean result = false;
         try {

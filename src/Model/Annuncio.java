@@ -6,7 +6,7 @@ public class Annuncio {
     private long numero;
     private String inserzionista;
     private String descrizione;
-    private long priceInCents;
+    private float price;
     private String categoria;
     private LocalDateTime inserito;
     private LocalDateTime modificato;
@@ -16,21 +16,21 @@ public class Annuncio {
         this.numero = numero;
     }
 
-    public Annuncio(long numero, String inserzionista, String descrizione, long priceInCents, String categoria, LocalDateTime inserito, LocalDateTime modificato, LocalDateTime venduto) {
+    public Annuncio(long numero, String inserzionista, String descrizione, float price, String categoria, LocalDateTime inserito, LocalDateTime modificato, LocalDateTime venduto) {
         this.numero = numero;
         this.inserzionista = inserzionista;
         this.descrizione = descrizione;
-        this.priceInCents = priceInCents;
+        this.price = price;
         this.categoria = categoria;
         this.inserito = inserito;
         this.modificato = modificato;
         this.venduto = venduto;
     }
 
-    public Annuncio(String inserzionista, String descrizione, long priceInCents, String categoria, LocalDateTime inserito) {
+    public Annuncio(String inserzionista, String descrizione, float price, String categoria, LocalDateTime inserito) {
         this.inserzionista = inserzionista;
         this.descrizione = descrizione;
-        this.priceInCents = priceInCents;
+        this.price = price;
         this.categoria = categoria;
         this.inserito = inserito;
     }
@@ -63,12 +63,12 @@ public class Annuncio {
         this.descrizione = descrizione;
     }
 
-    public long getPriceInCents() {
-        return priceInCents;
+    public float getPrice() {
+        return price;
     }
 
-    public void setPriceInCents(long priceInCents) {
-        this.priceInCents = priceInCents;
+    public void setPrice(float price) {
+        this.price = price;
     }
 
     public String getCategoria() {
@@ -109,7 +109,7 @@ public class Annuncio {
                 "numero=" + numero +
                 ", inserzionista='" + inserzionista + '\'' +
                 ", descrizione='" + descrizione + '\'' +
-                ", priceInCents=" + priceInCents +
+                ", price=" + price +
                 ", categoria='" + categoria + '\'' +
                 ", inserito=" + inserito +
                 ", modificato=" + modificato +

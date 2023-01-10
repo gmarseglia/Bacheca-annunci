@@ -9,7 +9,7 @@ public class BuilderAnnuncio {
                 rs.getLong(1),
                 rs.getString(2),
                 rs.getString(3),
-                rs.getLong(4) * 100,
+                rs.getFloat(4),
                 rs.getString(5),
                 rs.getTimestamp(6).toLocalDateTime(),
                 rs.getTimestamp(7).toLocalDateTime(),
