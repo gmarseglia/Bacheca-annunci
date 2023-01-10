@@ -232,6 +232,9 @@ public class ViewControllerTest {
         printResultList("Cerca per descrizione",
                 BaseController.cercareAnnunciPerDescrizione("annuncio", selectAnnuncioList),
                 selectAnnuncioList);
+
+        List<ReportEntry> reportEntryList = new ArrayList<>();
+        printResultList("Report", BaseController.generareReport(reportEntryList), reportEntryList);
     }
 
     private static void printResult(String operation, boolean result, Object o, String explain) {

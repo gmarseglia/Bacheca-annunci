@@ -48,6 +48,7 @@ public class ViewUtente {
 
         switch (operation) {
             case CREARE_CATEGORIA -> creareCategoria();
+            case CREARE_REPORT -> creareReport();
             default -> {
                 if (false) begin(); //#TODO
             }
@@ -64,17 +65,23 @@ public class ViewUtente {
             case MESSAGGI_CON_UTENTE -> messaggiConUtente();
             case VENDERE_ANNUNCIO -> vendereAnnuncio();
             case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
-            case CREARE_CATEGORIA -> gestoreDispatch(operation);
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
             case CONTROLLARE_MODIFICHE_SEGUITI -> controllareModificheSeguiti();
             case CERCARE_PER_UTENTE -> cercaPerUtente();
             case CERCARE_PER_CATEGORIA -> cercaPerCategoria();
             case CERCARE_PER_DESCRIZIONE -> cercaPerDescrizione();
+            case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
             default -> {
                 if (false) begin(); //#TODO
             }
         }
+    }
+
+    private static void creareReport() {
+        /*
+        #TODO
+         */
     }
 
     private static void cercaPerDescrizione() {
