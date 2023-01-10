@@ -234,7 +234,7 @@ public class ViewControllerTest {
                 selectAnnuncioList);
 
         List<ReportEntry> reportEntryList = new ArrayList<>();
-        printResultList("Report", BaseController.generareReport(reportEntryList), reportEntryList);
+        printResultList("Report", GestoreController.generareReport(reportEntryList), reportEntryList);
     }
 
     private static void printResult(String operation, boolean result, Object o, String explain) {

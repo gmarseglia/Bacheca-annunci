@@ -62,8 +62,4 @@ public class BaseController {
     public static boolean cercareAnnunciPerDescrizione(String descrizione, List<Annuncio> annuncioList) {
         return DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, true, annuncioList);
     }
-
-    public static boolean generareReport(List<ReportEntry> reportEntryList) {
-        return DAO.selectReport(ActiveUser.getRole(), reportEntryList);
-    }
 }
