@@ -4,13 +4,15 @@ import DAO.DAO;
 import DAO.BatchResult;
 import Model.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class RegistrationController {
-    public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, List<Recapito> recapitoList) {
-        boolean result;
-        result = DAO.registrazioneUtente(utente, credenziali, anagrafica, recapitoList.get(0));
-        result &= DAO.insertBatchRecapito(recapitoList.subList(1, recapitoList.size())).getAllTrue();
+    public static BatchResult registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, List<Recapito> recapitoList) {
+        BatchResult result;
+        boolean registrationResult = DAO.registrazioneUtente(utente, credenziali, anagrafica, recapitoList.get(0));
+        result = DAO.insertBatchRecapito(recapitoList.subList(1, recapitoList.size()));
+        result.setExtraResult(registrationResult);
         return result;
     }
 
@@ -20,7 +22,7 @@ public class RegistrationController {
         return batchResult;
     }
 
-    public static boolean login(Credenziali credenziali) {
-        return DAO.loginUtente(ActiveUser.getRole(), credenziali);
+    public static boolean login(Credenziali credenziali) throws SQLException {
+        return DAO.selectCredenziali(ActiveUser.getRole(), credenziali);
     }
 }

@@ -25,6 +25,18 @@ public class Anagrafica {
         this.usernameUtente = usernameUtente;
     }
 
+    public Anagrafica(String codiceFiscale, String nome, String cognome, Sesso sesso, LocalDate dataNascita, String comuneNascita, String indirizzoResidenza, String indirizzoFatturazione, String usernameUtente) {
+        this.codiceFiscale = codiceFiscale;
+        this.nome = nome;
+        this.cognome = cognome;
+        this.sesso = sesso;
+        this.dataNascita = dataNascita;
+        this.comuneNascita = comuneNascita;
+        this.indirizzoResidenza = indirizzoResidenza;
+        this.indirizzoFatturazione = indirizzoFatturazione;
+        this.usernameUtente = usernameUtente;
+    }
+
     public Anagrafica(){}
 
     public String getCodiceFiscale() {

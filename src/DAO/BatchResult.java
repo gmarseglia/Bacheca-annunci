@@ -3,6 +3,7 @@ package DAO;
 public class BatchResult {
     private int[] singlesResult;
     private int batchResult;
+    private boolean extraResult;
 
     public BatchResult(int[] singlesResult) {
         this.singlesResult = singlesResult;
@@ -34,5 +35,13 @@ public class BatchResult {
         for (int batchIndex = 0; finalResult && batchIndex < batchSize - 1; batchIndex++)
             finalResult = finalResult && this.singlesResult[batchIndex] == 1;
         return finalResult;
+    }
+
+    public boolean getExtraResult() {
+        return extraResult;
+    }
+
+    public void setExtraResult(boolean extraResult) {
+        this.extraResult = extraResult;
     }
 }

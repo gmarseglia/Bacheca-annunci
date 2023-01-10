@@ -57,10 +57,10 @@ public class ViewControllerTest {
         Anagrafica anagrafica2 = new Anagrafica(codiceFiscale2, nome, cognome, sesso, dataNascita, comuneNascita, indirizzoResidenza, username2);
         Anagrafica anagrafica3 = new Anagrafica(codiceFiscale3, nome, cognome, sesso, dataNascita, comuneNascita, indirizzoResidenza, username3);
 
-        boolean registrationResult;
-        registrationResult = RegistrationController.registrazioneUtente(utente, credenziali, anagrafica, recapitoList);
-        registrationResult &= RegistrationController.registrazioneUtente(utente2, credenziali2, anagrafica2, recapitoList2);
-        registrationResult &= RegistrationController.registrazioneUtente(utente3, credenziali3, anagrafica3, recapitoList3);
+        boolean registrationResult = true;
+        registrationResult &= RegistrationController.registrazioneUtente(utente, credenziali, anagrafica, recapitoList).getExtraResult();
+        registrationResult &= RegistrationController.registrazioneUtente(utente2, credenziali2, anagrafica2, recapitoList2).getExtraResult();
+        registrationResult &= RegistrationController.registrazioneUtente(utente3, credenziali3, anagrafica3, recapitoList3).getExtraResult();
         printResult("Registrazione multipla", registrationResult);
 
         ActiveUser.setRole(Role.GESTORE);

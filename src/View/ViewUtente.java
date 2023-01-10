@@ -35,6 +35,9 @@ public class ViewUtente {
         /*
         #TODO: while cycle to dispatch
          */
+        System.out.println("\nViewUtente.begin()");
+        System.exit(0);
+
         OPERATION operation;
         operation = OPERATION.SCRIVERE_COMMENTO;
         dispatch(operation);

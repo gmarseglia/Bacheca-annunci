@@ -70,7 +70,7 @@ public class DAO {
     /*
     LOGIN E REGISTRAZIONE
      */
-    public static boolean loginUtente(Role role, Credenziali credenziali) {
+    public static boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
         boolean result = false;
         try {
             openRoleConnection(role);
@@ -78,11 +78,12 @@ public class DAO {
             String query = "SELECT `ruolo` FROM `credenziali` " +
                     "WHERE `username`=? AND `password`=?;";
 
-            ResultSet rs;
             PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ps.setString(1, credenziali.getUsername());
             ps.setString(2, credenziali.getPassword());
-            rs = ps.executeQuery();
+            ps.closeOnCompletion();
+
+            ResultSet rs = ps.executeQuery();
 
             if (!rs.first()) return false;
 
@@ -100,6 +101,7 @@ public class DAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            throw e;
         }
         return result;
     }
@@ -138,6 +140,7 @@ public class DAO {
             cs.setString(9, anagrafica.getComuneNascita());
             cs.setString(10, anagrafica.getIndirizzoResidenza());
             cs.setString(11, anagrafica.getIndirizzoFatturazione());
+
             cs.setString(12, recapitoPreferito.getValore());
             String tipoRecapito = switch (recapitoPreferito.getTipo()) {
                 case EMAIL -> "email";
