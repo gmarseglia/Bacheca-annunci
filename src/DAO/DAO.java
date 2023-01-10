@@ -1,6 +1,7 @@
 package DAO;
 
 import Model.*;
+import Model.Exception.AnnuncioVendutoException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -70,96 +71,76 @@ public class DAO {
     /*
     LOGIN E REGISTRAZIONE
      */
-    public static boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static Boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT `ruolo` FROM `credenziali` " +
-                    "WHERE `username`=? AND `password`=?;";
+        String query = "SELECT `ruolo` FROM `credenziali` " +
+                "WHERE `username`=? AND `password`=?;";
 
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, credenziali.getUsername());
-            ps.setString(2, credenziali.getPassword());
-            ps.closeOnCompletion();
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, credenziali.getUsername());
+        ps.setString(2, credenziali.getPassword());
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
-            if (!rs.first()) return false;
+        rs.first();
 
-            Role selectedRole = switch (rs.getString(1)) {
-                case "base" -> Role.BASE;
-                case "gestore" -> Role.GESTORE;
-                default -> throw new RuntimeException("Invalid role");
-            };
-            credenziali.setRole(selectedRole);
+        Role selectedRole = switch (rs.getString(1)) {
+            case "base" -> Role.BASE;
+            case "gestore" -> Role.GESTORE;
+            default -> throw new RuntimeException("Invalid role");
+        };
+        credenziali.setRole(selectedRole);
 
-            result = true;
+        rs.close();
 
-            rs.close();
-            ps.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        }
-        return result;
+        return true;
     }
 
-    public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) {
-        boolean valueReturn = false;
+    public static boolean callRegistrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) throws SQLException {
+        // #1: connect
+        openRoleConnection(ActiveUser.getRole());
 
-        try {
-            // #1: connect
-            openRoleConnection(ActiveUser.getRole());
+        // #2: create statement
+        String callQuery = "{call `registrazione_utente` (" +
+                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        CallableStatement cs = conn.prepareCall(callQuery);
 
-            // #2: create statement
-            String callQuery = "{call `registrazione_utente` (" +
-                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
-            stmt = conn.createStatement();
+        // Prepare call
+        cs.setString(1, utente.getUsername());
+        cs.setString(2, credenziali.getPassword());
+        String userRole = switch (credenziali.getRole()) {
+            case BASE -> "base";
+            case GESTORE -> "gestore";
+            default -> throw new RuntimeException("Invalid role");
+        };
+        cs.setString(3, userRole);
+        cs.setString(4, anagrafica.getCodiceFiscale());
+        cs.setString(5, anagrafica.getNome());
+        cs.setString(6, anagrafica.getCognome());
+        String userSesso = switch (anagrafica.getSesso()) {
+            case UOMO -> "uomo";
+            case DONNA -> "donna";
+        };
+        cs.setString(7, userSesso);
+        cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
+        cs.setString(9, anagrafica.getComuneNascita());
+        cs.setString(10, anagrafica.getIndirizzoResidenza());
+        cs.setString(11, anagrafica.getIndirizzoFatturazione());
 
-            // Prepare call
-            cs.setString(1, utente.getUsername());
-            cs.setString(2, credenziali.getPassword());
-            String userRole = switch (credenziali.getRole()) {
-                case BASE -> "base";
-                case GESTORE -> "gestore";
-                default -> throw new RuntimeException("Invalid role");
-            };
-            cs.setString(3, userRole);
-            cs.setString(4, anagrafica.getCodiceFiscale());
-            cs.setString(5, anagrafica.getNome());
-            cs.setString(6, anagrafica.getCognome());
-            String userSesso = switch (anagrafica.getSesso()) {
-                case UOMO -> "uomo";
-                case DONNA -> "donna";
-            };
-            cs.setString(7, userSesso);
-            cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
-            cs.setString(9, anagrafica.getComuneNascita());
-            cs.setString(10, anagrafica.getIndirizzoResidenza());
-            cs.setString(11, anagrafica.getIndirizzoFatturazione());
+        cs.setString(12, recapitoPreferito.getValore());
+        String tipoRecapito = switch (recapitoPreferito.getTipo()) {
+            case EMAIL -> "email";
+            case TELEFONO -> "telefono";
+            case CELLULARE -> "cellulare";
+        };
+        cs.setString(13, tipoRecapito);
+        cs.closeOnCompletion();
 
-            cs.setString(12, recapitoPreferito.getValore());
-            String tipoRecapito = switch (recapitoPreferito.getTipo()) {
-                case EMAIL -> "email";
-                case TELEFONO -> "telefono";
-                case CELLULARE -> "cellulare";
-            };
-            cs.setString(13, tipoRecapito);
+        cs.execute();
 
-            cs.execute();
-
-            cs.close();
-
-            valueReturn = true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return valueReturn;
+        return true;
     }
 
     /*
@@ -434,12 +415,10 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    /*
-    RECAPITO
-     */
-    public static BatchResult insertBatchRecapito(List<Recapito> listOfRecapito) {
-        int[] singlesResult = null;
-        PreparedStatement psmnt;
+
+    // RECAPITO
+    public static int[] insertBatchRecapito(List<Recapito> listOfRecapito) throws SQLException {
+        int[] batchResult;
         try {
             openRoleConnection(ActiveUser.getRole());
 
@@ -448,28 +427,27 @@ public class DAO {
             String query = "INSERT IGNORE INTO `recapito` " +
                     "(`valore`, `anagrafica`, `tipo`)" +
                     "VALUES (?, ?, ?)";
-            psmnt = conn.prepareStatement(query);
+            PreparedStatement ps = conn.prepareStatement(query);
 
             for (Recapito recapito : listOfRecapito) {
-                psmnt.setString(1, recapito.getValore());
-                psmnt.setString(2, recapito.getAnagraficaID());
+                ps.setString(1, recapito.getValore());
+                ps.setString(2, recapito.getAnagraficaID());
                 String tipo = switch (recapito.getTipo()) {
                     case CELLULARE -> "cellulare";
                     case TELEFONO -> "telefono";
                     case EMAIL -> "email";
                     default -> throw new RuntimeException("No type found in Recapito");
                 };
-                psmnt.setString(3, tipo);
-                psmnt.addBatch();
+                ps.setString(3, tipo);
+                ps.addBatch();
             }
+            ps.closeOnCompletion();
 
-            singlesResult = psmnt.executeBatch();
+            batchResult = (ps.executeBatch());
             conn.commit();
 
-            psmnt.close();
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         } finally {
             try {
                 conn.setAutoCommit(true);
@@ -478,7 +456,7 @@ public class DAO {
             }
         }
 
-        return new BatchResult(singlesResult);
+        return batchResult;
     }
 
     public static BatchResult insertBatchRecapitoPreferito(Role role, List<Recapito> listOfRecapito) {

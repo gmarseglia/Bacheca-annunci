@@ -3,17 +3,15 @@ package View;
 
 import Controller.RegistrationController;
 import DAO.BatchResult;
+import DAO.DBResult;
 import Model.*;
-import Utility.RndData;
+import Model.Exception.InputInterruptedRuntimeException;
 import Utility.ScannerUtility;
 
-import javax.swing.text.DateFormatter;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class ViewLogin {
 
@@ -47,12 +45,10 @@ public class ViewLogin {
 
         } catch (InputInterruptedRuntimeException e) {
             ExceptionHandler.handleInputInterrupted(e);
-        } catch (SQLException e) {
-            ExceptionHandler.handleSQLException(e);
         }
     }
 
-    private static void login() throws SQLException {
+    private static void login() {
         String username, password;
 
         username = ScannerUtility.askString("Username", 30);
@@ -61,17 +57,21 @@ public class ViewLogin {
 
         System.out.printf("Login di '%s'... ", credenziali.getUsername());
 
-        boolean loginResult = RegistrationController.login(credenziali);
+        DBResult loginResult = RegistrationController.login(credenziali);
 
-        if (loginResult) {
+        if (loginResult.getResult()) {
             ActiveUser.setRole(credenziali.getRole());
             ActiveUser.setUsername(credenziali.getUsername());
         }
 
-        System.out.printf("eseguito con %s.\n",
-                loginResult ? "successo" : "insuccesso");
+        if (loginResult.getResult())
+            System.out.printf("eseguito con successo.\n");
+        else {
+            System.out.printf("eseguito con insuccesso (%s).\n", loginResult.getMessage());
+        }
 
-        dispatch(loginResult);
+
+        dispatch(loginResult.getResult());
     }
 
     private static void register() {
@@ -211,9 +211,10 @@ public class ViewLogin {
         } while (!confirmRecapitoPreferito);
 
         // ALTRI RECAPITI
-        Boolean confirmAltriRecapiti = null;
+        Boolean confirmAltriRecapiti;
         int recapitiCounter = 1;
         do {
+            confirmAltriRecapiti = null;
             System.out.println();
             do {
                 switch (ScannerUtility.askFirstChar("Fornire altri recapiti? (S)i o (N)o")) {
@@ -263,13 +264,21 @@ public class ViewLogin {
 
         } while (confirmAltriRecapiti);
 
+
+        System.out.printf("\nRegistrazione di %s... ", username);
+
         BatchResult registrationResult;
         registrationResult = RegistrationController.registrazioneUtente(utente, credenziali, anagrafica, recapitoList);
 
-        System.out.printf("Registrazione di %s conclusa con: %s\n", username, (registrationResult.getExtraResult()) ? "successo" : "insuccesso");
+        if (registrationResult.getExtraResult()) {
+            System.out.println("conclusa con successo.");
+        } else {
+            System.out.printf("conclusa con insuccesso (%s).\n", registrationResult.getExtraMessage());
+        }
+
         for (int recapitoIndex = 1; recapitoIndex < recapitoList.size(); recapitoIndex++) {
-            System.out.printf("Recapito #%d registrato con: %s\n", recapitoIndex,
-                    registrationResult.getSinglesResult()[recapitoIndex - 1] == 1 ? "successo" : "insuccesso");
+            System.out.printf("Recapito #%d registrato con %s.\n", recapitoIndex,
+                    (registrationResult.getBatchResult()[recapitoIndex - 1] == 1) ? "successo" : "insuccesso");
         }
 
         if (registrationResult.getExtraResult()) {

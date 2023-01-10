@@ -2,6 +2,7 @@ package Controller;
 
 import DAO.DAO;
 import Model.*;
+import Model.Exception.AnnuncioVendutoException;
 
 import java.util.List;
 

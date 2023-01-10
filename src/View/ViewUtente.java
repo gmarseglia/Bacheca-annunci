@@ -3,6 +3,7 @@ package View;
 import Controller.BaseController;
 import Controller.GestoreController;
 import Model.*;
+import Model.Exception.AnnuncioVendutoException;
 import Utility.RndData;
 
 import java.time.LocalDateTime;

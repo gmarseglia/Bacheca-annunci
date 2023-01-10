@@ -1,6 +1,6 @@
 package Utility;
 
-import Model.InputInterruptedRuntimeException;
+import Model.Exception.InputInterruptedRuntimeException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

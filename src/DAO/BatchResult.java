@@ -1,47 +1,61 @@
 package DAO;
 
 public class BatchResult {
-    private int[] singlesResult;
-    private int batchResult;
-    private boolean extraResult;
+    private int[] batchResult;
+    private String batchMessage;
+    private Boolean extraResult;
+    private String extraMessage;
 
-    public BatchResult(int[] singlesResult) {
-        this.singlesResult = singlesResult;
-        this.batchResult = 0;
-        if (singlesResult != null) {
-            for (int singleResult : this.singlesResult) this.batchResult += singleResult;
-        }
-    }
-
-    public int[] getSinglesResult() {
-        return singlesResult;
-    }
-
-    public void setSinglesResult(int[] singlesResult) {
-        this.singlesResult = singlesResult;
-    }
-
-    public int getBatchResult() {
-        return batchResult;
-    }
-
-    public void setBatchResult(int batchResult) {
+    public BatchResult(int[] batchResult) {
         this.batchResult = batchResult;
     }
 
-    public boolean getAllTrue() {
-        boolean finalResult = true;
-        int batchSize = this.singlesResult.length;
-        for (int batchIndex = 0; finalResult && batchIndex < batchSize - 1; batchIndex++)
-            finalResult = finalResult && this.singlesResult[batchIndex] == 1;
-        return finalResult;
+    public BatchResult(boolean extraResult) {
+        this.extraResult = extraResult;
     }
 
-    public boolean getExtraResult() {
+    public int[] getBatchResult() {
+        return batchResult;
+    }
+
+    public void setBatchResult(int[] batchResult) {
+        this.batchResult = batchResult;
+    }
+
+    public Boolean getExtraResult() {
         return extraResult;
     }
 
     public void setExtraResult(boolean extraResult) {
         this.extraResult = extraResult;
+    }
+
+    public String getBatchMessage() {
+        return batchMessage;
+    }
+
+    public void setBatchMessage(String batchMessage) {
+        this.batchMessage = batchMessage;
+    }
+
+    public boolean getAllTrue() {
+        boolean result = true;
+        if (this.getExtraResult() != null) {
+            result &= this.getExtraResult();
+        }
+        if (this.batchResult != null) {
+            for (int index = 0; index < this.getBatchResult().length && result; index++) {
+                result &= this.getBatchResult()[index] == 1;
+            }
+        }
+        return result;
+    }
+
+    public String getExtraMessage() {
+        return extraMessage;
+    }
+
+    public void setExtraMessage(String extraMessage) {
+        this.extraMessage = extraMessage;
     }
 }

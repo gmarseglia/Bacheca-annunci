@@ -5,6 +5,7 @@ import Controller.GestoreController;
 import Controller.RegistrationController;
 import DAO.DAO;
 import Model.*;
+import Model.Exception.AnnuncioVendutoException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -62,6 +63,9 @@ public class ViewControllerTest {
         registrationResult &= RegistrationController.registrazioneUtente(utente2, credenziali2, anagrafica2, recapitoList2).getExtraResult();
         registrationResult &= RegistrationController.registrazioneUtente(utente3, credenziali3, anagrafica3, recapitoList3).getExtraResult();
         printResult("Registrazione multipla", registrationResult);
+
+        printResult("Registrazione che infrange KEY",
+                RegistrationController.registrazioneUtente(utente, credenziali, anagrafica, recapitoList).getExtraResult());
 
         ActiveUser.setRole(Role.GESTORE);
         ActiveUser.setUsername(username);
