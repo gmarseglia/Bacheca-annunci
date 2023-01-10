@@ -2,6 +2,7 @@ package View;
 
 import Controller.BaseController;
 import Controller.GestoreController;
+import DAO.DBResult;
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
 import Utility.RndData;
@@ -10,6 +11,7 @@ import Utility.ScannerUtility;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class ViewUtente {
 
@@ -80,6 +82,12 @@ public class ViewUtente {
             (U) Uscire dall'applicazione.
             """;
 
+    public static void main(String[] args) {
+        ActiveUser.setUsername("user");
+        ActiveUser.setRole(Role.GESTORE);
+        begin();
+    }
+
     @SuppressWarnings("InfiniteLoopStatement")
     public static void begin() {
 
@@ -93,18 +101,6 @@ public class ViewUtente {
             dispatch(operation);
         }
 
-    }
-
-    protected static void gestoreDispatch(OPERATION operation) {
-        if (ActiveUser.getRole() != Role.GESTORE) {
-            System.out.println("Impossibile svolgere le operazioni con gli attuali privilegi.\n");
-            return;
-        }
-
-        switch (operation) {
-            case CREARE_CATEGORIA -> creareCategoria();
-            case CREARE_REPORT -> creareReport();
-        }
     }
 
     protected static void dispatch(OPERATION operation) {
@@ -128,6 +124,18 @@ public class ViewUtente {
                 System.out.println("Uscita dall'applicazione.");
                 System.exit(0);
             }
+        }
+    }
+
+    protected static void gestoreDispatch(OPERATION operation) {
+        if (ActiveUser.getRole() != Role.GESTORE) {
+            System.out.println("Impossibile svolgere le operazioni con gli attuali privilegi.\n");
+            return;
+        }
+
+        switch (operation) {
+            case CREARE_CATEGORIA -> creareCategoria();
+            case CREARE_REPORT -> creareReport();
         }
     }
 
@@ -207,8 +215,7 @@ public class ViewUtente {
         destinatario = "user2";
         testo = "prova";
 
-        MessaggioPrivato messaggioPrivato = new MessaggioPrivato(
-                ActiveUser.getUsername(), destinatario, null, testo);
+        MessaggioPrivato messaggioPrivato = new MessaggioPrivato(ActiveUser.getUsername(), destinatario, null, testo);
         boolean messageResult = BaseController.scrivereMessaggioPrivato(messaggioPrivato);
         System.out.printf("Messaggio inviato con %s.\n", messageResult ? "successo" : "insuccesso");
     }
@@ -238,22 +245,47 @@ public class ViewUtente {
 
     protected static void inserireAnnuncio() {
         String descrizione;
-        long prezzoInCent;
+        float prezzo;
         String categoria;
 
-        /*
-        #TODO: Ask users to give info
-         */
-        descrizione = "Descrizione dell'annuncio.\n";
-        prezzoInCent = 1050;
-        categoria = "cat1";
+        Boolean confirmOp;
+        do {
+            descrizione = ScannerUtility.askText("Descrizione dell'annuncio", 5000);
+            prezzo = ScannerUtility.askFloat("Prezzo");
+            categoria = ScannerUtility.askString("Categoria", 60);
 
-        Annuncio targetAnnuncio = new Annuncio(ActiveUser.getUsername(), descrizione, prezzoInCent, categoria, LocalDateTime.now());
+            System.out.printf("""
+                                                
+                    Descrizione: %s
+                    Prezzo: %.2f
+                    Categoria: %s
+                    """, descrizione, prezzo, categoria);
 
-        boolean result = BaseController.inserireAnnuncio(targetAnnuncio);
-        System.out.printf("L'annuncio %s è stato inserito con %s,\n",
-                result ? targetAnnuncio.getID() : "",
-                result ? "successo" : "insuccesso");
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+
+        } while (!confirmOp);
+
+        Annuncio targetAnnuncio = new Annuncio(ActiveUser.getUsername(), descrizione, prezzo, categoria, null);
+
+        System.out.print("Inserimento annuncio... ");
+        DBResult inserimentoResult = BaseController.inserireAnnuncio(targetAnnuncio);
+
+        if (inserimentoResult.getResult()) {
+            System.out.printf("terminato con successo con numero %d.\n", targetAnnuncio.getID());
+        } else {
+            System.out.printf("terminato con insuccesso (%s).\n", inserimentoResult.getMessage());
+        }
+
+        ScannerUtility.askAnyChar();
     }
 
     private static void scrivereCommento() {
@@ -270,8 +302,7 @@ public class ViewUtente {
         boolean insertResult = false;
         try {
             insertResult = BaseController.scrivereCommento(commento);
-            System.out.printf("Il commento è stato scritto con %s.\n",
-                    insertResult ? "successo" : "insuccesso");
+            System.out.printf("Il commento è stato scritto con %s.\n", insertResult ? "successo" : "insuccesso");
         } catch (AnnuncioVendutoException e) {
             System.out.println("L'annuncio è già stato venduto, impossibile aggiungere nuovi commenti.\n");
         }
@@ -294,10 +325,7 @@ public class ViewUtente {
 
         boolean createResult = GestoreController.creareCategoria(categoria);
 
-        System.out.printf("La categoria %s%s è stata creata con %s.\n",
-                categoria.getNome(),
-                categoria.getPadre() != null ? " figlia di " + categoria.getPadre() : "",
-                createResult ? "successo" : "insuccesso");
+        System.out.printf("La categoria %s%s è stata creata con %s.\n", categoria.getNome(), categoria.getPadre() != null ? " figlia di " + categoria.getPadre() : "", createResult ? "successo" : "insuccesso");
     }
 
 }

@@ -47,7 +47,6 @@ public class ScannerUtility {
         }
     }
 
-
     public static String askString(String ask, int limit) {
         String resultString;
         do {
@@ -76,7 +75,7 @@ public class ScannerUtility {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         do {
-            System.out.printf("%s in format dd-MM-yyyy (e.g. 14-03-2000) -> ", ask);
+            System.out.printf("%s nel formato dd-MM-yyyy (es. 14-03-2000) -> ", ask);
             input = getString();
             try {
                 resultDate = LocalDate.parse(input, formatter);
@@ -86,5 +85,24 @@ public class ScannerUtility {
         } while (resultDate == null);
 
         return resultDate;
+    }
+
+    public static Float askFloat(String ask) {
+        Float result;
+        do {
+            System.out.printf("%s (es. 10.20) ->", ask);
+            try {
+                result = Float.parseFloat(getString());
+            } catch (RuntimeException e) {
+                result = null;
+            }
+        } while (result == null);
+
+        return result;
+    }
+
+    public static void askAnyChar() {
+        System.out.println("Inviare qualsiasi carattere per proseguire.");
+        getFirstChar();
     }
 }

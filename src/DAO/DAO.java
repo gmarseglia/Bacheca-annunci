@@ -701,32 +701,24 @@ public class DAO {
         return valueReturn;
     }
 
-    public static boolean insertAnnuncio(Role role, Annuncio annuncio) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean insertAnnuncio(Role role, Annuncio annuncio) throws SQLException {
+        openRoleConnection(role);
 
-            String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
+        String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?, ?)}";
+        CallableStatement cs = conn.prepareCall(callQuery);
 
-            cs.setString(1, annuncio.getInserzionista());
-            cs.setString(2, annuncio.getDescrizione());
-            cs.setFloat(3, annuncio.getPrice());
-            cs.setString(4, annuncio.getCategoria());
-            cs.registerOutParameter(5, Types.INTEGER);
+        cs.setString(1, annuncio.getInserzionista());
+        cs.setString(2, annuncio.getDescrizione());
+        cs.setFloat(3, annuncio.getPrice());
+        cs.setString(4, annuncio.getCategoria());
+        cs.registerOutParameter(5, Types.INTEGER);
+        cs.closeOnCompletion();
 
-            cs.execute();
+        cs.execute();
 
-            annuncio.setNumero(cs.getLong(5));
+        annuncio.setNumero(cs.getLong(5));
 
-            result = true;
-
-            cs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return result;
+        return true;
     }
 
     public static BatchResult insertBatchAnnuncio(Role role, List<Annuncio> listOfAnnuncio) {

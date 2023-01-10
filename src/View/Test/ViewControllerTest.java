@@ -88,17 +88,17 @@ public class ViewControllerTest {
         printResult("Creazione cat_2", GestoreController.creareCategoria(cat2));
 
         Annuncio annuncio_1 = new Annuncio(username, "Descrizione annuncio.", 10 * 100, categoria.getID(), null);
-        boolean annuncioResult = BaseController.inserireAnnuncio(annuncio_1);
+        boolean annuncioResult = BaseController.inserireAnnuncio(annuncio_1).getResult();
         printResult("Inserimento annuncio_1", annuncioResult);
 
         Annuncio annuncio_1_1 = new Annuncio(username, "Descrizione annuncio.", 10 * 100, cat2.getID(), null);
-        printResult("Inserimento annuncio_1", BaseController.inserireAnnuncio(annuncio_1_1));
+        printResult("Inserimento annuncio_1", BaseController.inserireAnnuncio(annuncio_1_1).getResult());
 
         Annuncio annuncio_2 = new Annuncio(utente2.getUsername(), "Questo è un annuncio.", 10 * 100, categoria.getID(), null);
-        printResult("Inserimento annuncio_2", BaseController.inserireAnnuncio(annuncio_2));
+        printResult("Inserimento annuncio_2", BaseController.inserireAnnuncio(annuncio_2).getResult());
 
         Annuncio annuncio_3 = new Annuncio(utente.getUsername(), "Questo è un dragoooooo.", 10 * 100, categoria1.getID(), null);
-        printResult("Inserimento annuncio_3", BaseController.inserireAnnuncio(annuncio_3));
+        printResult("Inserimento annuncio_3", BaseController.inserireAnnuncio(annuncio_3).getResult());
 
         List<Annuncio> annunciSeguitiModificati = new ArrayList<>();
         boolean controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);

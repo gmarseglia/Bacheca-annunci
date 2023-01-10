@@ -1,15 +1,27 @@
 package Controller;
 
 import DAO.DAO;
+import DAO.DBResult;
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
 
+import java.sql.SQLException;
 import java.util.List;
 
 
 public class BaseController {
-    public static boolean inserireAnnuncio(Annuncio annuncio) {
-        return DAO.insertAnnuncio(ActiveUser.getRole(), annuncio);
+    public static DBResult inserireAnnuncio(Annuncio annuncio) {
+        DBResult result = new DBResult(false);
+        try {
+            result.setResult(DAO.insertAnnuncio(ActiveUser.getRole(), annuncio));
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("23000")) {
+                result.setMessage(String.format("Categoria non esistente, [%s].", e.getMessage()));
+            } else {
+                result.setMessage(e.getSQLState() + ", " + e.getMessage());
+            }
+        }
+        return result;
     }
 
     public static boolean scrivereCommento(Commento commento) throws AnnuncioVendutoException {

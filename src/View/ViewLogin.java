@@ -114,7 +114,7 @@ public class ViewLogin {
 
             confirmCredenziali = null;
             do {
-                switch (ScannerUtility.askFirstChar("Confermi? (S)i, (N)o?")) {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o?")) {
                     case "s", "S" -> {
                         confirmCredenziali = true;
                         utente = new Utente(username);
