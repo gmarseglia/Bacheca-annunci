@@ -156,9 +156,51 @@ public class ViewUtente {
     }
 
     private static void cercaPerUtente() {
-        /*
-        #TODO
-         */
+        String inserzionistaID;
+        Boolean onlyAvailable;
+        Boolean confirmOp;
+
+        do {
+            confirmOp = null;
+            inserzionistaID = ScannerUtility.askString("Username", 30);
+            onlyAvailable = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
+                    case "s", "S" -> onlyAvailable = true;
+                    case "n", "N" -> onlyAvailable = false;
+                }
+            } while (onlyAvailable == null);
+            System.out.printf("""
+                    
+                    Trovare tutti gli annunci di %s
+                    Filtrare per solo disponibili: %s.
+                    """, inserzionistaID, onlyAvailable ? "Vero" : "Falso");
+
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+        } while (!confirmOp);
+
+        System.out.printf("\nRicerca degli annunci di \"%s\"... ", inserzionistaID);
+        List<Annuncio> foundAnnunciList = new ArrayList<>();
+        DBResult dbResult = BaseController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable , foundAnnunciList);
+
+        if (dbResult.getResult()) {
+            System.out.print("terminata con successo.\n");
+            for (Annuncio annuncio : foundAnnunciList) {
+                System.out.println(annuncio);
+            }
+        } else {
+            System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
+        }
+
+        ScannerUtility.askAny();
     }
 
     private static void controllareModificheSeguiti() {

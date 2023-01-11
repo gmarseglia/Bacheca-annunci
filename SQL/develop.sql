@@ -1,14 +1,14 @@
 use `bacheca_annunci`;
 
-DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`;
+DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`;
 
 DELIMITER !
 
-CREATE PROCEDURE `select_annunci_categorie_figlie` (
-    IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean
+CREATE PROCEDURE `select_annunci_by_inserzionista` (
+    IN var_inserzionista_id VARCHAR(30), IN var_solo_disponibili boolean
 )
 BEGIN
-    DECLARE counter INT DEFAULT 1;
+    DECLARE counter INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -19,32 +19,17 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-        CREATE TEMPORARY TABLE `temp_categoria`
-        SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
+        SELECT COUNT(*) INTO counter
+        FROM `utente`
+        WHERE `username`=var_inserzionista_id;
 
-        WHILE counter > 0 DO
-            CREATE TEMPORARY TABLE `temp_categoria_2` SELECT * FROM `temp_categoria`;
-            SELECT count(*) INTO counter
-            FROM `categoria`
-            WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_2`);
+        IF (counter <> 1) THEN
+            SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
+        END IF;
 
-            IF (counter > 0) THEN
-                CREATE TEMPORARY TABLE `temp_categoria_3` SELECT * FROM `temp_categoria`;
-                INSERT INTO `temp_categoria`
-                SELECT *
-                FROM `categoria`
-                WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria_2`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_3`);
-                DROP TEMPORARY TABLE `temp_categoria_3`;
-            END IF;
-
-            DROP TEMPORARY TABLE `temp_categoria_2`;
-        END WHILE;
-
-        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`prezzo`,
-            `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
-        FROM `annuncio` as `a`
-        WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`)
-            AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
+        SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`, `venduto`
+        FROM `annuncio`
+        WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) AND `venduto` IS NOT NULL);
 
     COMMIT;
 END !

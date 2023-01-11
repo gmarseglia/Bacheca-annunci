@@ -220,7 +220,7 @@ public class ViewControllerTest {
 
         List<Annuncio> selectAnnuncioList = new ArrayList<>();
         printResultList("Cerca per inserzionista",
-                BaseController.cercareAnnunciPerInserzionista(utente.getUsername(), selectAnnuncioList),
+                BaseController.cercareAnnunciPerInserzionista(utente.getUsername(), false, selectAnnuncioList).getResult(),
                 selectAnnuncioList);
 
         selectAnnuncioList.clear();

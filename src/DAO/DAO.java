@@ -815,34 +815,24 @@ public class DAO {
         return true;
     }
 
-    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, " +
-                    "`categoria`, `inserito`, `modificato`, `venduto` " +
-                    "FROM `annuncio` " +
-                    "WHERE `inserzionista`=?";
-            query = query.concat((onlyAvailable) ? " AND `venduto` IS NULL;" : ";");
+        String call = "{call `select_annunci_by_inserzionista` (?, ?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, inserzionistaID);
+        cs.setBoolean(2, onlyAvailable);
+        cs.closeOnCompletion();
 
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, inserzionistaID);
-            ps.closeOnCompletion();
+        ResultSet rs = cs.executeQuery();
 
-            ResultSet rs = ps.executeQuery();
-            result = true;
-
-            if (rs.first()) {
-                do {
-                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
     public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, boolean onlyAvailable, List<Annuncio> annuncioList) {

@@ -80,8 +80,18 @@ public class BaseController {
         return DAO.selectAnnunciSeguitiModificati(ActiveUser.getRole(), utenteID, annunciSegutiModificatiList, true, true);
     }
 
-    public static boolean cercareAnnunciPerInserzionista(String inserzionistaID, List<Annuncio> annuncioList) {
-        return DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, true, annuncioList);
+    public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, Boolean onlyAvailable, List<Annuncio> annuncioList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, (onlyAvailable == null) ? false : onlyAvailable, annuncioList));
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("45002")) {
+                dbResult.setMessage(String.format("Utente non esistente [%s]", e.getMessage()));
+            } else {
+                dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            }
+        }
+        return dbResult;
     }
 
     public static boolean cercareAnnunciPerCategoria(String categoriaID, List<Annuncio> annuncioList) {

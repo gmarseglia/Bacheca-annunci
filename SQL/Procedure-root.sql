@@ -12,6 +12,7 @@ DROP PROCEDURE IF EXISTS `seguire_annuncio`;
 DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`;
 DROP PROCEDURE IF EXISTS `get_all_child_categories`;
 DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`;
+DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`;
 
 DELIMITER !
 
@@ -350,6 +351,36 @@ BEGIN
     COMMIT;
 END !
 
+CREATE PROCEDURE `select_annunci_by_inserzionista` (
+    IN var_inserzionista_id VARCHAR(30), IN var_solo_disponibili boolean
+)
+BEGIN
+    DECLARE counter INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    START TRANSACTION;
+
+        SELECT COUNT(*) INTO counter
+        FROM `utente`
+        WHERE `username`=var_inserzionista_id;
+
+        IF (counter <> 1) THEN
+            SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
+        END IF;
+
+        SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`, `venduto`
+        FROM `annuncio`
+        WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
+
+    COMMIT;
+END !
+
 DELIMITER ;
 
 -- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
@@ -372,3 +403,5 @@ GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `gestore`;
 GRANT EXECUTE ON PROCEDURE `get_all_child_categories` TO `gestore`;
 GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `base`;
 GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `gestore`;
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `base`;
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`;
