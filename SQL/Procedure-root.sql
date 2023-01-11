@@ -310,7 +310,7 @@ CREATE PROCEDURE `select_annunci_categorie_figlie` (
     IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean
 )
 BEGIN
-    DECLARE counter INT DEFAULT 1;
+    DECLARE counter INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -320,6 +320,14 @@ BEGIN
 
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
+
+    	SELECT COUNT(*) INTO counter
+    	FROM `categoria`
+    	WHERE `nome`=var_categoria_id;
+
+    	IF (counter <> 1) THEN
+    		SIGNAL SQLSTATE "45003" SET message_text="categoria non esistente";
+		END IF;	
 
         CREATE TEMPORARY TABLE `temp_categoria`
         SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;

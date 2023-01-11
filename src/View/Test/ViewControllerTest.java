@@ -225,7 +225,7 @@ public class ViewControllerTest {
 
         selectAnnuncioList.clear();
         printResultList("Cerca per categoria",
-                BaseController.cercareAnnunciPerCategoria(categoria.getNome(), selectAnnuncioList),
+                BaseController.cercareAnnunciPerCategoria(categoria.getNome(), false, selectAnnuncioList).getResult(),
                 selectAnnuncioList);
 
         selectAnnuncioList.clear();

@@ -94,8 +94,20 @@ public class BaseController {
         return dbResult;
     }
 
-    public static boolean cercareAnnunciPerCategoria(String categoriaID, List<Annuncio> annuncioList) {
-        return DAO.selectAvailableAnnuncioByCategoria(ActiveUser.getRole(), categoriaID, true, annuncioList);
+    public static DBResult cercareAnnunciPerCategoria(String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) {
+        DBResult dbResult = new DBResult(false);
+
+        try {
+            dbResult.setResult(DAO.selectAnnuncioByCategoria(ActiveUser.getRole(), categoriaID, onlyAvailable, annuncioList));
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("45003")) {
+                dbResult.setMessage(String.format("Categoria non esistente [%s]", e.getMessage()));
+            } else {
+                dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            }
+        }
+
+        return dbResult;
     }
 
     public static boolean cercareAnnunciPerDescrizione(String descrizione, List<Annuncio> annuncioList) {
