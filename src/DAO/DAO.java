@@ -2,6 +2,7 @@ package DAO;
 
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
+import Model.Exception.CustomSQLException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -875,7 +876,7 @@ public class DAO {
     }
 
     // SEGUE
-    public static boolean insertSegue(Role role, Segue segue) throws  SQLException {
+    public static boolean insertSegue(Role role, Segue segue) throws SQLException {
         openRoleConnection(role);
 
         String call = "{call `seguire_annuncio`(?, ?)};";
@@ -889,26 +890,23 @@ public class DAO {
         return true;
     }
 
-    public static boolean deleteSegue(Role role, Segue segue) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean deleteSegue(Role role, String utenteID, Long annuncioID) throws SQLException {
+        openRoleConnection(role);
 
-            String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
-            PreparedStatement ps = conn.prepareStatement(update);
-            ps.setString(1, segue.getUtente());
-            ps.setLong(2, segue.getAnnuncio());
-            ps.closeOnCompletion();
+        String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
+        PreparedStatement ps = conn.prepareStatement(update);
+        ps.setString(1, utenteID);
+        ps.setLong(2, annuncioID);
+        ps.closeOnCompletion();
 
-            ps.execute();
-
-            result = true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if(ps.executeUpdate() == 0){
+            CustomSQLException e = new CustomSQLException();
+            e.setState("45005");
+            e.setMessage("Annuncio non presente fra i seguiti");
+            throw e;
         }
 
-        return result;
+        return true;
     }
 
     public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {

@@ -292,12 +292,22 @@ public class ViewUtente {
          */
     }
 
+    // (8)
     private static void stopSeguireAnnuncio() {
-        /*
-        #TODO
-         */
+        Long numero;
+
+        numero = askNumeroAnnuncio("Numero dell'annuncio da rimuovere dai \"seguiti\"");
+
+        System.out.printf("Rimozione dell'annuncio %s dai \"seguiti\"... ", numero);
+
+        DBResult dbResult = BaseController.stopSeguireAnnuncio(numero);
+
+        printResult(dbResult);
+
+        ScannerUtility.askAny();
     }
 
+    // (7)
     private static void seguireAnnuncio() {
         Long numero;
 

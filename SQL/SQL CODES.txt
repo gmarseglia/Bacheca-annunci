@@ -1,0 +1,6 @@
+SQL CODES
+45001	->	Annuncio già venduto
+45002	->	Utente non è inserzionista
+45003	->	Categoria non esistente
+45004	->	Annuncio non esistente
+45005	-> 	Annuncio non fra seguiti

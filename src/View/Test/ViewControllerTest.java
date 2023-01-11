@@ -185,11 +185,12 @@ public class ViewControllerTest {
         ActiveUser.setUsername(utente2.getID());
         segueResult2 = BaseController.seguireAnnuncio(annuncio_1.getID()).getResult();
         printResult("Seguire annuncio da utente2", segueResult2);
-        ActiveUser.setUsername(oldUsername);
 
 
-        boolean deleteSegue2Result = BaseController.stopSeguireAnnuncio(segue2);
+        boolean deleteSegue2Result = BaseController.stopSeguireAnnuncio(annuncio_1.getID()).getResult();
         printResult("Stop seguire annuncio utente 2", deleteSegue2Result);
+
+        ActiveUser.setUsername(oldUsername);
 
         boolean vendereResult;
 

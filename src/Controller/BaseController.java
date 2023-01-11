@@ -4,6 +4,7 @@ import DAO.DAO;
 import DAO.DBResult;
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
+import Model.Exception.CustomSQLException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -84,16 +85,26 @@ public class BaseController {
             dbResult.setResult(DAO.insertSegue(ActiveUser.getRole(), new Segue(ActiveUser.getUsername(), annuncioID)));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
-                case "45001" -> String.format("L'annuncio non è più disponibile [%s].", e.getMessage());
-                case "45004" -> String.format("L'annuncio non è esistente [%s].", e.getMessage());
+                case "23000" -> String.format("L'annuncio è già presente fra i \"seguiti\" [%s]", e.getMessage());
+                case "45001" -> String.format("L'annuncio non è più disponibile [%s]", e.getMessage());
+                case "45004" -> String.format("L'annuncio non è esistente [%s]", e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
         return dbResult;
     }
 
-    public static boolean stopSeguireAnnuncio(Segue segue) {
-        return DAO.deleteSegue(ActiveUser.getRole(), segue);
+    public static DBResult stopSeguireAnnuncio(Long annuncioID) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.deleteSegue(ActiveUser.getRole(), ActiveUser.getUsername(), annuncioID));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45005" -> String.format("L'annuncio non è presente fra i seguiti [%s]", e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
     }
 
     public static boolean controllareAnnunciSeguiti(String utenteID, List<Annuncio> annunciSegutiModificatiList) {
@@ -103,7 +114,7 @@ public class BaseController {
     public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, Boolean onlyAvailable, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, (onlyAvailable == null) ? false : onlyAvailable, annuncioList));
+            dbResult.setResult(DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, onlyAvailable != null && onlyAvailable, annuncioList));
         } catch (SQLException e) {
             if (e.getSQLState().equals("45002")) {
                 dbResult.setMessage(String.format("Utente non esistente [%s]", e.getMessage()));
