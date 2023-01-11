@@ -74,8 +74,17 @@ public class BaseController {
         return result;
     }
 
-    public static boolean dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
-        return DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList);
+    public static DBResult dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList));
+        } catch (SQLException e) {
+            switch (e.getSQLState()) {
+                case "45006" -> dbResult.setMessage(String.format("Username non registrato (%s)", e.getMessage()));
+                default -> dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            }
+        }
+        return dbResult;
     }
 
     public static DBResult seguireAnnuncio(Long annuncioID) {

@@ -114,4 +114,19 @@ public class Anagrafica {
     public String getID(){
         return this.codiceFiscale;
     }
+
+    @Override
+    public String toString() {
+        return "Anagrafica{" +
+                "codiceFiscale='" + codiceFiscale + '\'' +
+                ", nome='" + nome + '\'' +
+                ", cognome='" + cognome + '\'' +
+                ", sesso=" + sesso +
+                ", dataNascita=" + dataNascita +
+                ", comuneNascita='" + comuneNascita + '\'' +
+                ", indirizzoResidenza='" + indirizzoResidenza + '\'' +
+                ", indirizzoFatturazione='" + indirizzoFatturazione + '\'' +
+                ", usernameUtente='" + usernameUtente + '\'' +
+                '}';
+    }
 }

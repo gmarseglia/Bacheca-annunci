@@ -11,6 +11,10 @@ public class Recapito {
         this.anagrafica = anagrafica;
     }
 
+    public Recapito() {
+    }
+
+
     public String getValore() {
         return valore;
     }
@@ -35,7 +39,7 @@ public class Recapito {
         this.anagrafica = anagrafica;
     }
 
-    public String getAnagraficaID(){
+    public String getAnagraficaID() {
         return this.anagrafica;
     }
 }

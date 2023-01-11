@@ -75,7 +75,7 @@ public class ViewControllerTest {
         Utente utenteDettagli = new Utente(utente.getID());
         Anagrafica anagraficaDettagli = new Anagrafica();
         List<Recapito> recapitoDettaglioList = new ArrayList<>();
-        dettagliUtenteResult = BaseController.dettagliUtente(utenteDettagli, anagraficaDettagli, recapitoDettaglioList);
+        dettagliUtenteResult = BaseController.dettagliUtente(utenteDettagli, anagraficaDettagli, recapitoDettaglioList).getResult();
         printResult("Dettagli utente", dettagliUtenteResult);
 
         Categoria categoria = new Categoria("cat_1");

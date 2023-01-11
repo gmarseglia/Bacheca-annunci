@@ -23,7 +23,7 @@ public class ViewUtente {
         STOP_SEGUIRE_ANNUNCIO,          //A0301
         CONTROLLARE_SEGUITI,  //A0400
         VENDERE_ANNUNCIO,               //A0500
-        DETTAGLI_INSERZIONISTA,         //A0600
+        DETTAGLI_UTENTE,         //A0600
         INVIARE_MESSAGGIO,              //M0000
         MESSAGGI_CON_UTENTE,            //M0100
         VISUALIZZARE_CHAT,              //M0101
@@ -44,7 +44,7 @@ public class ViewUtente {
                 case "7" -> SEGUIRE_ANNUNCIO;
                 case "8" -> STOP_SEGUIRE_ANNUNCIO;
                 case "9" -> CONTROLLARE_SEGUITI;
-                case "a", "A" -> DETTAGLI_INSERZIONISTA;
+                case "a", "A" -> DETTAGLI_UTENTE;
                 case "b", "B" -> SCRIVERE_COMMENTO;
                 case "c", "C" -> VISUALIZZARE_CHAT;
                 case "d", "D" -> MESSAGGI_CON_UTENTE;
@@ -110,7 +110,7 @@ public class ViewUtente {
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
             case CONTROLLARE_SEGUITI -> controllareSeguiti();
-            case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
+            case DETTAGLI_UTENTE -> dettagliUtente();
             case SCRIVERE_COMMENTO -> scrivereCommento();
             case VISUALIZZARE_CHAT -> visualizzareChat();
             case MESSAGGI_CON_UTENTE -> messaggiConUtente();
@@ -347,10 +347,51 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    private static void dettagliInserzionista() {
+    private static void dettagliUtente() {
         /*
         #TODO
          */
+        Boolean confirmOp;
+        String targetUsername;
+
+        targetUsername = ScannerUtility.askString("Username dell'utente", 30);
+
+        System.out.printf("""
+                                
+                Visualizzare i dettagli dell'utente "%s"?
+                """, targetUsername);
+        confirmOp = null;
+        do {
+            switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+                case "a", "A" -> {
+                    return;
+                }
+            }
+        } while (confirmOp == null);
+
+        System.out.printf("Ricerca dei dettagli di \"%s\"... ", targetUsername);
+        Utente targetUtente = new Utente(targetUsername);
+        Anagrafica anagrafica = new Anagrafica();
+        List<Recapito> recapitoList = new ArrayList<>();
+        DBResult dbResult = BaseController.dettagliUtente(targetUtente, anagrafica, recapitoList);
+
+        printResult(dbResult, () -> {
+            //TODO: issue #23
+            System.out.println(targetUtente);
+            //TODO: issue #24
+            System.out.println(anagrafica);
+            System.out.println("Recapito preferito:");
+            //TODO: issue #25
+            System.out.println(recapitoList.get(0));
+            for (Recapito recapito : recapitoList.subList(1, recapitoList.size())) {
+                //TODO: issue #25
+                System.out.println(recapito);
+            }
+        });
+
+        ScannerUtility.askAny();
     }
 
     private static void vendereAnnuncio() {

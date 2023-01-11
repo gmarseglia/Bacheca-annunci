@@ -175,45 +175,70 @@ public class DAO {
         return valueReturn;
     }
 
-    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `dettagli_utente`(?)}";
-            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setString(1, utente.getID());
+        String call = "{call `dettagli_utente`(?)}";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, utente.getID());
 
-            ResultSet rs = cs.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
-            if (!rs.first()) throw new RuntimeException("Utente non trovato.");
-
-            utente.setAnnunci_inseriti(rs.getInt(1));
-            utente.setAnnunci_venduti(rs.getInt(2));
-
-            anagrafica.setCodiceFiscale(rs.getString(3));
-            //#TODO
-
-            if (cs.getMoreResults()) {
-                rs = cs.getResultSet();
-
-                //#TODO
-                if (rs.first()) {
-                    do {
-                        Recapito recapito = new Recapito(rs.getString(1), null, null);
-                        recapitoList.add(recapito);
-                    } while (rs.next());
-                }
-            }
-
-            result = true;
-
-            cs.close();
-
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
+        if (!rs.first()) {
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45006");
+            e.setMessage("Utente non esistente");
+            throw e;
         }
-        return result;
+
+        utente.setAnnunci_inseriti(rs.getInt(1));
+        utente.setAnnunci_venduti(rs.getInt(2));
+
+        anagrafica.setCodiceFiscale(rs.getString(3));
+        anagrafica.setNome(rs.getString(4));
+        anagrafica.setCognome(rs.getString(5));
+        anagrafica.setSesso(switch (rs.getString(6)) {
+            case "uomo" -> Sesso.UOMO;
+            case "donna" -> Sesso.DONNA;
+            default -> null;
+        });
+        anagrafica.setDataNascita(rs.getTimestamp(7).toLocalDateTime().toLocalDate());
+        anagrafica.setIndirizzoResidenza(rs.getString(8));
+        anagrafica.setIndirizzoFatturazione(rs.getString(9));
+
+        Recapito recapitoPreferito = new Recapito();
+        recapitoPreferito.setValore(rs.getString(10));
+        recapitoPreferito.setTipo(switch (rs.getString(11)) {
+            case "telefono" -> TipoRecapito.TELEFONO;
+            case "cellulare" -> TipoRecapito.CELLULARE;
+            case "email" -> TipoRecapito.EMAIL;
+            default -> null;
+        });
+        recapitoPreferito.setAnagrafica(anagrafica.getID());
+        recapitoList.add(recapitoPreferito);
+
+        if (cs.getMoreResults()) {
+            rs = cs.getResultSet();
+
+            if (rs.first()) {
+                do {
+                    Recapito recapito = new Recapito();
+                    recapito.setValore(rs.getString(1));
+                    recapito.setTipo(switch (rs.getString(2)) {
+                        case "telefono" -> TipoRecapito.TELEFONO;
+                        case "cellulare" -> TipoRecapito.CELLULARE;
+                        case "email" -> TipoRecapito.EMAIL;
+                        default -> null;
+                    });
+                    recapito.setAnagrafica(anagrafica.getID());
+                    recapitoList.add(recapito);
+                } while (rs.next());
+            }
+        }
+
+        cs.close();
+
+        return true;
     }
 
     public static BatchResult insertBatchUtenteOnlyUsername(Role role, List<Utente> utenti) {
@@ -903,7 +928,7 @@ public class DAO {
 
         if (ps.executeUpdate() == 0) {
             CustomSQLException e = new CustomSQLException();
-            e.setState("45005");
+            e.setSQLState("45005");
             e.setMessage("Annuncio non presente fra i seguiti");
             throw e;
         }

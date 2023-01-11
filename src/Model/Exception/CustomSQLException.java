@@ -11,7 +11,7 @@ public class CustomSQLException extends SQLException {
         return state;
     }
 
-    public void setState(String state) {
+    public void setSQLState(String state) {
         this.state = state;
     }
 

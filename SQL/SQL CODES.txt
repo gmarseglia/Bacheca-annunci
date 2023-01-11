@@ -4,3 +4,5 @@ SQL CODES
 45003	->	Categoria non esistente
 45004	->	Annuncio non esistente
 45005	-> 	Annuncio non fra seguiti
+45006	->	Utente non esistente
+45007	->	Enum error
