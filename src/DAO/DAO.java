@@ -762,25 +762,26 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-            String callQuery = "{call `dettagli_annuncio`(?)}";
-            CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setInt(1, (int) annuncio.getID());
-            ResultSet rs = cs.executeQuery();
+    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
+        openRoleConnection(role);
 
-            if (!rs.first()) throw new RuntimeException("No result");
+        String callQuery = "{call `dettagli_annuncio`(?)}";
+        CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-            annuncio.setNumero(rs.getInt(1));
-            annuncio.setInserzionista(rs.getString(2));
-            annuncio.setDescrizione(rs.getString(3));
-            annuncio.setPrice((rs.getFloat(4)));
-            annuncio.setCategoria(rs.getString(5));
-            annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
-            annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
-            annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
+        cs.setLong(1, annuncio.getID());
+        cs.closeOnCompletion();
+        ResultSet rs = cs.executeQuery();
+
+        if (rs.first()) {
+            annuncio = BuilderAnnuncio.newFromResultSet(rs);
+//            annuncio.setNumero(rs.getInt(1));
+//            annuncio.setInserzionista(rs.getString(2));
+//            annuncio.setDescrizione(rs.getString(3));
+//            annuncio.setPrice((rs.getFloat(4)));
+//            annuncio.setCategoria(rs.getString(5));
+//            annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
+//            annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
+//            annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
 
             do {
                 Commento commento = new Commento(
@@ -791,14 +792,9 @@ public class DAO {
                 );
                 commentoList.add(commento);
             } while (rs.next());
-
-            result = true;
-
-            cs.close();
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
         }
-        return result;
+
+        return true;
     }
 
     public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {

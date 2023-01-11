@@ -32,8 +32,18 @@ public class BaseController {
         return DAO.insertCommento(ActiveUser.getRole(), commento);
     }
 
-    public static boolean dettagliAnnuncio(Annuncio annuncio, List<Commento> commentoList) {
-        return DAO.getDettagliAnnuncio(ActiveUser.getRole(), annuncio, commentoList);
+    public static DBResult dettagliAnnuncio(Annuncio annuncio, List<Commento> commentoList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.getDettagliAnnuncio(ActiveUser.getRole(), annuncio, commentoList));
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("45004")) {
+                dbResult.setMessage(String.format("L'annuncio cercato non esiste, [%s]", e.getMessage()));
+            } else {
+                dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            }
+        }
+        return dbResult;
     }
 
     public static boolean scrivereMessaggioPrivato(MessaggioPrivato messaggioPrivato) {

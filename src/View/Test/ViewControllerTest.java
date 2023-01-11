@@ -147,7 +147,7 @@ public class ViewControllerTest {
 
         Annuncio annuncioDettaglio = new Annuncio(annuncio_1.getID());
         List<Commento> commentoListDettaglio = new ArrayList<>();
-        boolean dettaglioResult = BaseController.dettagliAnnuncio(annuncioDettaglio, commentoListDettaglio);
+        boolean dettaglioResult = BaseController.dettagliAnnuncio(annuncioDettaglio, commentoListDettaglio).getResult();
         if (dettaglioResult) {
             System.out.println("--> Dettagli annuncio: OK");
             System.out.println(annuncioDettaglio);

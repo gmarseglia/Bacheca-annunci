@@ -34,7 +34,7 @@ public class ViewUtente {
 
 
         public static OPERATION dispatchMap(String input) {
-            OPERATION result = switch (input) {
+            return switch (input) {
                 case "1" -> INSERIRE_ANNUNCIO;
                 case "2" -> VENDERE_ANNUNCIO;
                 case "3" -> CERCARE_PER_UTENTE;
@@ -54,8 +54,6 @@ public class ViewUtente {
                 case "u", "U" -> TERMINARE_APPLICAZIONE;
                 default -> null;
             };
-
-            return result;
         }
     }
 
@@ -159,9 +157,9 @@ public class ViewUtente {
                 }
             } while (onlyAvailable == null);
             System.out.printf("""
-                    
+                                        
                     Trovare tutti gli annunci la cui descrizione contiene:
-                    \"%s\"
+                    "%s"
                     Filtrare per solo disponibili: %s.
                     """, descrizione, onlyAvailable ? "Vero" : "Falso");
 
@@ -178,7 +176,7 @@ public class ViewUtente {
 
         System.out.print("\nRicerca degli annunci per descrizione... ");
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = BaseController.cercareAnnunciPerDescrizione(descrizione, onlyAvailable , foundAnnunciList);
+        DBResult dbResult = BaseController.cercareAnnunciPerDescrizione(descrizione, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -208,7 +206,7 @@ public class ViewUtente {
                 }
             } while (onlyAvailable == null);
             System.out.printf("""
-                    
+                                        
                     Trovare tutti gli annunci della categoria %s e delle sue categorie figlie
                     Filtrare per solo disponibili: %s.
                     """, categoriaID, onlyAvailable ? "Vero" : "Falso");
@@ -226,7 +224,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci della categoria \"%s\" e delle categorie figlie... ", categoriaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = BaseController.cercareAnnunciPerCategoria(categoriaID, onlyAvailable , foundAnnunciList);
+        DBResult dbResult = BaseController.cercareAnnunciPerCategoria(categoriaID, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -256,7 +254,7 @@ public class ViewUtente {
                 }
             } while (onlyAvailable == null);
             System.out.printf("""
-                    
+                                        
                     Trovare tutti gli annunci di %s
                     Filtrare per solo disponibili: %s.
                     """, inserzionistaID, onlyAvailable ? "Vero" : "Falso");
@@ -274,7 +272,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci di \"%s\"... ", inserzionistaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = BaseController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable , foundAnnunciList);
+        DBResult dbResult = BaseController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -372,26 +370,43 @@ public class ViewUtente {
     }
 
     private static void dettagliAnnuncio() {
-        long annuncioID;
+        Long numero;
+        Boolean confirmOp;
 
-        /*
-        #TODO: ask users to give info
-         */
-        annuncioID = 1;
+        do {
+            numero = ScannerUtility.askLong("Numero identificativo dell'annuncio di cui visualizzare i dettagli");
 
-        Annuncio annuncio = new Annuncio(annuncioID);
+            System.out.printf("\nNumero: %s\n", numero);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+        } while (!confirmOp);
+
+        Annuncio annuncio = new Annuncio(numero);
         List<Commento> commentoList = new ArrayList<>();
-        boolean dettaglioResult = BaseController.dettagliAnnuncio(annuncio, commentoList);
 
-        //#TODO: improve
-        if (dettaglioResult) {
+        System.out.printf("\nRicerca dei dettagli dell'annuncio %s... ", numero);
+        DBResult dbResult = BaseController.dettagliAnnuncio(annuncio, commentoList);
+        if (dbResult.getResult()) {
+            System.out.println("terminata con successo.");
+            //TODO: Issue #21
             System.out.println(annuncio);
-            for (Commento commento : commentoList) {
+            for (Commento commento : commentoList)
+                //TODO: Issue #22
                 System.out.println(commento);
-            }
         } else {
-            System.out.println("Dettagli annuncio: insuccesso.\n");
+            System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
         }
+
+        ScannerUtility.askAny();
     }
 
     protected static void inserireAnnuncio() {

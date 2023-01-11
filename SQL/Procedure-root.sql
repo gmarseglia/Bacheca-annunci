@@ -109,6 +109,7 @@ END!
 CREATE PROCEDURE `dettagli_annuncio` (
 	in var_annuncio_id INT UNSIGNED)
 BEGIN
+	DECLARE counter INT;
 	declare exit handler for sqlexception
 	begin
 		rollback;
@@ -117,6 +118,15 @@ BEGIN
 
 	set transaction isolation level read committed;
 	start transaction;
+
+		SELECT COUNT(*) INTO counter
+		FROM `annuncio`
+		WHERE `numero`=var_annuncio_id;
+
+		IF (COUNTER <> 1) THEN
+			SIGNAL SQLSTATE "45004" SET message_text="Annuncio non esistente";
+		END IF;
+
 		select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`prezzo`,
 		`annuncio`.`categoria`, `annuncio`.`inserito`, `annuncio`.`modificato`, `annuncio`.`venduto`,
 		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
