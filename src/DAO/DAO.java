@@ -835,30 +835,27 @@ public class DAO {
         return true;
     }
 
-    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, boolean onlyAvailable, List<Annuncio> annuncioList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT * FROM `annuncio` WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)";
-            query = query.concat((onlyAvailable) ? " AND `venduto` IS NULL;" : ";");
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, descrizione);
-            ps.closeOnCompletion();
+        String query = "SELECT * " +
+                "FROM `annuncio` " +
+                "WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)" +
+                "AND ((NOT ?) OR `venduto` IS NULL);";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, descrizione);
+        ps.setBoolean(2, onlyAvailable);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
-            result = true;
+        ResultSet rs = ps.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
     public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {

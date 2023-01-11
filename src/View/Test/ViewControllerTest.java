@@ -220,17 +220,17 @@ public class ViewControllerTest {
 
         List<Annuncio> selectAnnuncioList = new ArrayList<>();
         printResultList("Cerca per inserzionista",
-                BaseController.cercareAnnunciPerInserzionista(utente.getUsername(), false, selectAnnuncioList).getResult(),
+                BaseController.cercareAnnunciPerInserzionista(utente.getUsername(), true, selectAnnuncioList).getResult(),
                 selectAnnuncioList);
 
         selectAnnuncioList.clear();
         printResultList("Cerca per categoria",
-                BaseController.cercareAnnunciPerCategoria(categoria.getNome(), false, selectAnnuncioList).getResult(),
+                BaseController.cercareAnnunciPerCategoria(categoria.getNome(), true, selectAnnuncioList).getResult(),
                 selectAnnuncioList);
 
         selectAnnuncioList.clear();
         printResultList("Cerca per descrizione",
-                BaseController.cercareAnnunciPerDescrizione("annuncio", selectAnnuncioList),
+                BaseController.cercareAnnunciPerDescrizione("annuncio", true, selectAnnuncioList).getResult(),
                 selectAnnuncioList);
 
         List<ReportEntry> reportEntryList = new ArrayList<>();

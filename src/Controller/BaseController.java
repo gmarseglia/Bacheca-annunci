@@ -110,7 +110,13 @@ public class BaseController {
         return dbResult;
     }
 
-    public static boolean cercareAnnunciPerDescrizione(String descrizione, List<Annuncio> annuncioList) {
-        return DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, true, annuncioList);
+    public static DBResult cercareAnnunciPerDescrizione(String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, onlyAvailable, annuncioList));
+        } catch (SQLException e) {
+            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+        }
+        return dbResult;
     }
 }
