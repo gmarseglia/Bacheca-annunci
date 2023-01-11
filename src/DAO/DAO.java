@@ -801,29 +801,18 @@ public class DAO {
         return result;
     }
 
-    public static boolean updateAnnuncioVendere(Role role, long annuncioID) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `vendere_annuncio`(?)};";
-            CallableStatement cs = conn.prepareCall(call);
-            cs.setLong(1, annuncioID);
+        String call = "{call `vendere_annuncio`(?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setLong(1, annuncioID);
+        cs.setString(2, utenteID);
+        cs.closeOnCompletion();
 
-            cs.executeUpdate();
+        cs.executeUpdate();
 
-            result = true;
-
-            cs.close();
-
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("45001")) {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return true;
     }
 
     public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) {

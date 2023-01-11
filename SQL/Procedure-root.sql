@@ -124,7 +124,8 @@ BEGIN
 	commit;
 END!
 
-CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED)
+CREATE PROCEDURE `vendere_annuncio` (
+	in var_annuncio_id INT UNSIGNED, in var_utente_id VARCHAR(30))
 BEGIN
 	declare counter INT;
 
@@ -143,15 +144,21 @@ BEGIN
 	if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
 	end if;
 
+	select count(`numero`) into counter
+		from `annuncio`
+		where `numero`=var_annuncio_id AND `inserzionista`=var_utente_id;
+
+	IF (counter<>1) THEN
+		SIGNAL SQLSTATE "45002" SET message_text="Utente non è inserzionista";
+	END IF;
+
 	update `annuncio`
 		set `venduto`=CURRENT_TIMESTAMP
 		where `numero`=var_annuncio_id;
 
 	update `utente`
 		set `annunci_venduti`=`annunci_venduti`+1
-		where `username`=(select `inserzionista`
-							from `annuncio`
-							where `numero`=var_annuncio_id);
+		where `username`=var_utente_id;
 
 	commit;
 END!

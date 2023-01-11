@@ -10,6 +10,10 @@ import java.util.List;
 
 
 public class BaseController {
+    private static String getGenericSQLExceptionMessage(SQLException e) {
+        return e.getSQLState() + ", " + e.getMessage();
+    }
+
     public static DBResult inserireAnnuncio(Annuncio annuncio) {
         DBResult result = new DBResult(false);
         try {
@@ -18,7 +22,7 @@ public class BaseController {
             if (e.getSQLState().equals("23000")) {
                 result.setMessage(String.format("Categoria non esistente, [%s].", e.getMessage()));
             } else {
-                result.setMessage(e.getSQLState() + ", " + e.getMessage());
+                result.setMessage(getGenericSQLExceptionMessage(e));
             }
         }
         return result;
@@ -44,8 +48,20 @@ public class BaseController {
         return DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), utenteID1, utenteID2, messaggioPrivatoList);
     }
 
-    public static boolean vendereAnnuncio(Long annuncioID) throws AnnuncioVendutoException {
-        return DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID);
+    public static DBResult vendereAnnuncio(Long annuncioID) {
+        DBResult result = new DBResult(false);
+        try {
+            result.setResult(DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID, ActiveUser.getUsername()));
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("45001")) {
+                result.setMessage(String.format("Annuncio già venduto, [%s].", e.getMessage()));
+            } else if (e.getSQLState().equals("45002")) {
+                result.setMessage(String.format("Utente attivo non è l'inserzionista dell'annuncio, [%s].", e.getMessage()));
+            } else {
+                result.setMessage(getGenericSQLExceptionMessage(e));
+            }
+        }
+        return result;
     }
 
     public static boolean dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {

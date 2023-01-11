@@ -7,6 +7,7 @@ import DAO.DAO;
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,14 +194,12 @@ public class ViewControllerTest {
         printResult("Stop seguire annuncio utente 2", deleteSegue2Result);
 
         boolean vendereResult;
-        try {
-            vendereResult = BaseController.vendereAnnuncio(annuncio_1.getID());
-            Annuncio annuncioVenduto = new Annuncio(annuncio_1.getID());
-            BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
-            printResult("Vendere annuncio #1", vendereResult, annuncioVenduto);
-        } catch (AnnuncioVendutoException e) {
-            printResult("Vendere annuncio #1", false, "Annuncio già venduto.");
-        }
+
+        vendereResult = BaseController.vendereAnnuncio(annuncio_1.getID()).getResult();
+        Annuncio annuncioVenduto = new Annuncio(annuncio_1.getID());
+        BaseController.dettagliAnnuncio(annuncioVenduto, new ArrayList<>());
+        printResult("Vendere annuncio #1", vendereResult, annuncioVenduto);
+
 
         annunciSeguitiModificati = new ArrayList<>();
         controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
@@ -212,14 +211,11 @@ public class ViewControllerTest {
         printResultList(" Secondo controllo seguiti annuncio dopo vendita", controlloSeguiti1Result, annunciSeguitiModificati);
 
         boolean vendere2Result;
-        try {
-            vendere2Result = BaseController.vendereAnnuncio(annuncio_1.getID());
-            Annuncio annuncioGiaVenduto = new Annuncio(annuncio_1.getID());
-            BaseController.dettagliAnnuncio(annuncioGiaVenduto, new ArrayList<>());
-            printResult("Vendere annuncio", vendere2Result, annuncioGiaVenduto);
-        } catch (AnnuncioVendutoException e) {
-            printResult("Vendere annuncio #2", false, "Annuncio già venduto.");
-        }
+
+        vendere2Result = BaseController.vendereAnnuncio(annuncio_1.getID()).getResult();
+        Annuncio annuncioGiaVenduto = new Annuncio(annuncio_1.getID());
+        BaseController.dettagliAnnuncio(annuncioGiaVenduto, new ArrayList<>());
+        printResult("Vendere annuncio", vendere2Result, annuncioGiaVenduto);
 
 
         List<Annuncio> selectAnnuncioList = new ArrayList<>();

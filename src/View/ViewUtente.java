@@ -8,10 +8,8 @@ import Model.Exception.AnnuncioVendutoException;
 import Utility.RndData;
 import Utility.ScannerUtility;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class ViewUtente {
 
@@ -188,9 +186,35 @@ public class ViewUtente {
     }
 
     private static void vendereAnnuncio() {
-        /*
-        #TODO
-         */
+        Long numero;
+        Boolean confirmOp;
+        do {
+            numero = ScannerUtility.askLong("Numero identificativo dell'annuncio da vendere");
+
+            System.out.printf("\nNumero ID: %s\n", numero);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+        } while (!confirmOp);
+
+        System.out.printf("Vendita dell'annuncio %d... ", numero);
+
+        DBResult dbResult = BaseController.vendereAnnuncio(numero);
+        if (dbResult.getResult()) {
+            System.out.print("terminata con successo.\n");
+        } else {
+            System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
+        }
+
+        ScannerUtility.askAny();
     }
 
     private static void messaggiConUtente() {
@@ -285,7 +309,7 @@ public class ViewUtente {
             System.out.printf("terminato con insuccesso (%s).\n", inserimentoResult.getMessage());
         }
 
-        ScannerUtility.askAnyChar();
+        ScannerUtility.askAny();
     }
 
     private static void scrivereCommento() {
