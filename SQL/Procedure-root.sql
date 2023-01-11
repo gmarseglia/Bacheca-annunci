@@ -342,7 +342,7 @@ BEGIN
     	WHERE `nome`=var_categoria_id;
 
     	IF (counter <> 1) THEN
-    		SIGNAL SQLSTATE "45003" SET message_text="categoria non esistente";
+    		SIGNAL SQLSTATE "45003" SET message_text="ategoria non esistente";
 		END IF;	
 
         CREATE TEMPORARY TABLE `temp_categoria`

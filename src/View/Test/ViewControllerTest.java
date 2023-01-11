@@ -102,7 +102,7 @@ public class ViewControllerTest {
         printResult("Inserimento annuncio_3", BaseController.inserireAnnuncio(annuncio_3).getResult());
 
         List<Annuncio> annunciSeguitiModificati = new ArrayList<>();
-        boolean controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        boolean controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList("Controllo seguiti vuoto", controlloSeguiti1Result, annunciSeguitiModificati);
 
 
@@ -113,12 +113,12 @@ public class ViewControllerTest {
 
 
         annunciSeguitiModificati = new ArrayList<>();
-        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList("Controllo seguiti annuncio pulito", controlloSeguiti1Result, annunciSeguitiModificati);
         Thread.sleep(1100);
 
         annunciSeguitiModificati = new ArrayList<>();
-        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList(" Secondo controllo seguiti annuncio pulito", controlloSeguiti1Result, annunciSeguitiModificati);
 
         for (int commIndex = 0; commIndex < 1; commIndex++) {
@@ -135,12 +135,12 @@ public class ViewControllerTest {
         }
 
         annunciSeguitiModificati = new ArrayList<>();
-        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList(" Controllo seguiti annuncio dopo commenti", controlloSeguiti1Result, annunciSeguitiModificati);
         Thread.sleep(1100);
 
         annunciSeguitiModificati = new ArrayList<>();
-        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList(" Secondo controllo seguiti annuncio dopo commenti", controlloSeguiti1Result, annunciSeguitiModificati);
 
         Annuncio annuncioDettaglio = new Annuncio(annuncio_1.getID());
@@ -201,12 +201,12 @@ public class ViewControllerTest {
 
 
         annunciSeguitiModificati = new ArrayList<>();
-        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList(" Controllo seguiti annuncio dopo vendita", controlloSeguiti1Result, annunciSeguitiModificati);
         Thread.sleep(1100);
 
         annunciSeguitiModificati = new ArrayList<>();
-        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
+        controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(annunciSeguitiModificati).getResult();
         printResultList(" Secondo controllo seguiti annuncio dopo vendita", controlloSeguiti1Result, annunciSeguitiModificati);
 
         boolean vendere2Result;

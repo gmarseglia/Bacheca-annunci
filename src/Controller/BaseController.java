@@ -4,7 +4,6 @@ import DAO.DAO;
 import DAO.DBResult;
 import Model.*;
 import Model.Exception.AnnuncioVendutoException;
-import Model.Exception.CustomSQLException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -107,8 +106,16 @@ public class BaseController {
         return dbResult;
     }
 
-    public static boolean controllareAnnunciSeguiti(String utenteID, List<Annuncio> annunciSegutiModificatiList) {
-        return DAO.selectAnnunciSeguitiModificati(ActiveUser.getRole(), utenteID, annunciSegutiModificatiList, true, true);
+    public static DBResult controllareAnnunciSeguiti(List<Annuncio> annunciSegutiModificatiList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectAnnunciSeguitiModificati(ActiveUser.getRole(), ActiveUser.getUsername(), annunciSegutiModificatiList, true, true));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
     }
 
     public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, Boolean onlyAvailable, List<Annuncio> annuncioList) {

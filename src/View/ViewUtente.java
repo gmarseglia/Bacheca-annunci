@@ -21,7 +21,7 @@ public class ViewUtente {
         CERCARE_PER_DESCRIZIONE,        //A0203
         SEGUIRE_ANNUNCIO,               //A0300
         STOP_SEGUIRE_ANNUNCIO,          //A0301
-        CONTROLLARE_MODIFICHE_SEGUITI,  //A0400
+        CONTROLLARE_SEGUITI,  //A0400
         VENDERE_ANNUNCIO,               //A0500
         DETTAGLI_INSERZIONISTA,         //A0600
         INVIARE_MESSAGGIO,              //M0000
@@ -43,7 +43,7 @@ public class ViewUtente {
                 case "6" -> DETTAGLI_ANNUNCIO;
                 case "7" -> SEGUIRE_ANNUNCIO;
                 case "8" -> STOP_SEGUIRE_ANNUNCIO;
-                case "9" -> CONTROLLARE_MODIFICHE_SEGUITI;
+                case "9" -> CONTROLLARE_SEGUITI;
                 case "a", "A" -> DETTAGLI_INSERZIONISTA;
                 case "b", "B" -> SCRIVERE_COMMENTO;
                 case "c", "C" -> VISUALIZZARE_CHAT;
@@ -109,7 +109,7 @@ public class ViewUtente {
             case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
-            case CONTROLLARE_MODIFICHE_SEGUITI -> controllareModificheSeguiti();
+            case CONTROLLARE_SEGUITI -> controllareSeguiti();
             case DETTAGLI_INSERZIONISTA -> dettagliInserzionista();
             case SCRIVERE_COMMENTO -> scrivereCommento();
             case VISUALIZZARE_CHAT -> visualizzareChat();
@@ -286,10 +286,33 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    private static void controllareModificheSeguiti() {
-        /*
-        #TODO
-         */
+    // (9)
+    private static void controllareSeguiti() {
+        Boolean confirmOp = null;
+        do {
+            switch (ScannerUtility.askFirstChar("Visualizzare gli annunci \"seguiti\" che hanno subito modifiche?\n" +
+                    "Procedere? (S)i, (N)o")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+            }
+        } while (confirmOp == null);
+
+        if (!confirmOp) return;
+
+        List<Annuncio> foundAnnunciList = new ArrayList<>();
+
+        System.out.println("Ricerca degli annunci \"seguiti\" modificati... ");
+
+        DBResult dbResult = BaseController.controllareAnnunciSeguiti(foundAnnunciList);
+
+        printResult(dbResult, () -> {
+            for (Annuncio annuncio : foundAnnunciList) {
+                //TODO: Issue 21
+                System.out.println(annuncio);
+            }
+        });
+
+        ScannerUtility.askAny();
     }
 
     // (8)
@@ -538,11 +561,18 @@ public class ViewUtente {
         return numero;
     }
 
-    private static void printResult(DBResult dbResult) {
+    private static void printResult(DBResult dbResult, Runnable codeIfSuccess) {
         if (dbResult.getResult()) {
             System.out.println("terminata con successo.");
+            if (codeIfSuccess != null) {
+                codeIfSuccess.run();
+            }
         } else {
             System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
         }
+    }
+
+    private static void printResult(DBResult dbResult) {
+        printResult(dbResult, null);
     }
 }

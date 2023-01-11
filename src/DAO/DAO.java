@@ -774,24 +774,26 @@ public class DAO {
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
-            annuncio = BuilderAnnuncio.newFromResultSet(rs);
-//            annuncio.setNumero(rs.getInt(1));
-//            annuncio.setInserzionista(rs.getString(2));
-//            annuncio.setDescrizione(rs.getString(3));
-//            annuncio.setPrice((rs.getFloat(4)));
-//            annuncio.setCategoria(rs.getString(5));
-//            annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
-//            annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
-//            annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
+//            annuncio = BuilderAnnuncio.newFromResultSet(rs);
+            annuncio.setNumero(rs.getInt(1));
+            annuncio.setInserzionista(rs.getString(2));
+            annuncio.setDescrizione(rs.getString(3));
+            annuncio.setPrice((rs.getFloat(4)));
+            annuncio.setCategoria(rs.getString(5));
+            annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
+            annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
+            annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
 
             do {
-                Commento commento = new Commento(
-                        rs.getString(9),
-                        annuncio.getID(),
-                        rs.getTimestamp(10).toLocalDateTime(),
-                        rs.getString(11)
-                );
-                commentoList.add(commento);
+                if (rs.getString(9) != null) {
+                    Commento commento = new Commento(
+                            rs.getString(9),
+                            annuncio.getID(),
+                            rs.getTimestamp(10).toLocalDateTime(),
+                            rs.getString(11)
+                    );
+                    commentoList.add(commento);
+                }
             } while (rs.next());
         }
 
@@ -899,7 +901,7 @@ public class DAO {
         ps.setLong(2, annuncioID);
         ps.closeOnCompletion();
 
-        if(ps.executeUpdate() == 0){
+        if (ps.executeUpdate() == 0) {
             CustomSQLException e = new CustomSQLException();
             e.setState("45005");
             e.setMessage("Annuncio non presente fra i seguiti");
@@ -942,38 +944,25 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID,
-                                                         List<Annuncio> annunciSeguitiModificatiList,
-                                                         boolean updateLastCheck, boolean deleteSold) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList, boolean updateLastCheck, boolean deleteSold) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
-            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setString(1, utenteID);
-            cs.setBoolean(2, updateLastCheck);
-            cs.setBoolean(3, deleteSold);
+        String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, utenteID);
+        cs.setBoolean(2, updateLastCheck);
+        cs.setBoolean(3, deleteSold);
+        cs.closeOnCompletion();
 
-            ResultSet rs = cs.executeQuery();
-            result = true;
+        ResultSet rs = cs.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    Annuncio newAnnuncio = new Annuncio(rs.getLong(1), rs.getString(2), rs.getString(3),
-                            (long) (rs.getFloat(4) * 100), rs.getString(5),
-                            rs.getTimestamp(6).toLocalDateTime(), rs.getTimestamp(7).toLocalDateTime(),
-                            (rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
-                    annunciSeguitiModificatiList.add(newAnnuncio);
-                } while (rs.next());
-            }
-
-            cs.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annunciSeguitiModificatiList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
     // COMMENTO
