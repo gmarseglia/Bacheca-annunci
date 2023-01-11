@@ -875,30 +875,18 @@ public class DAO {
     }
 
     // SEGUE
-    public static boolean insertSegue(Role role, Segue segue) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean insertSegue(Role role, Segue segue) throws  SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `seguire_annuncio`(?, ?)};";
-            CallableStatement cs = conn.prepareCall(call);
-            cs.setString(1, segue.getUtente());
-            cs.setLong(2, segue.getAnnuncio());
-            cs.closeOnCompletion();
+        String call = "{call `seguire_annuncio`(?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setString(1, segue.getUtente());
+        cs.setLong(2, segue.getAnnuncio());
+        cs.closeOnCompletion();
 
-            cs.execute();
+        cs.execute();
 
-            result = true;
-
-        } catch (SQLException e) {
-            if (e.getSQLState() == "45001") {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
+        return true;
     }
 
     public static boolean deleteSegue(Role role, Segue segue) {

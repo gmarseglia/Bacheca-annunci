@@ -299,9 +299,19 @@ public class ViewUtente {
     }
 
     private static void seguireAnnuncio() {
-        /*
-        #TODO
-         */
+        Long numero;
+
+        numero = askNumeroAnnuncio("Numero annuncio da aggiungere ai \"seguiti\"");
+
+        if (numero == null) return;
+
+        System.out.printf("Aggiunta dell'annuncio %s ai \"seguiti\"... ", numero);
+
+        DBResult dbResult = BaseController.seguireAnnuncio(numero);
+
+        printResult(dbResult);
+
+        ScannerUtility.askAny();
     }
 
     private static void dettagliInserzionista() {
@@ -409,7 +419,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    protected static void inserireAnnuncio() {
+    private static void inserireAnnuncio() {
         String descrizione;
         float prezzo;
         String categoria;
@@ -494,4 +504,35 @@ public class ViewUtente {
         System.out.printf("La categoria %s%s è stata creata con %s.\n", categoria.getNome(), categoria.getPadre() != null ? " figlia di " + categoria.getPadre() : "", createResult ? "successo" : "insuccesso");
     }
 
+    private static Long askNumeroAnnuncio(String ask) {
+        Long numero;
+        Boolean confirmOp;
+
+        do {
+            numero = ScannerUtility.askLong(ask);
+
+            System.out.printf("\nNumero: %s\n", numero);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return null;
+                    }
+                }
+            } while (confirmOp == null);
+        } while (!confirmOp);
+
+        return numero;
+    }
+
+    private static void printResult(DBResult dbResult) {
+        if (dbResult.getResult()) {
+            System.out.println("terminata con successo.");
+        } else {
+            System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
+        }
+    }
 }

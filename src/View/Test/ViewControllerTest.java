@@ -105,14 +105,12 @@ public class ViewControllerTest {
         boolean controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
         printResultList("Controllo seguiti vuoto", controlloSeguiti1Result, annunciSeguitiModificati);
 
-        Segue segue = new Segue(utente.getID(), annuncio_1.getID());
+
         boolean segueResult;
-        try {
-            segueResult = BaseController.seguireAnnuncio(segue);
-            printResult("Seguire annuncio da utente", segueResult);
-        } catch (AnnuncioVendutoException e) {
-            printResult("Seguire annuncio da utente", false, "Annuncio già venduto");
-        }
+
+        segueResult = BaseController.seguireAnnuncio(annuncio_1.getID()).getResult();
+        printResult("Seguire annuncio da utente", segueResult);
+
 
         annunciSeguitiModificati = new ArrayList<>();
         controlloSeguiti1Result = BaseController.controllareAnnunciSeguiti(utente.getID(), annunciSeguitiModificati);
@@ -183,12 +181,12 @@ public class ViewControllerTest {
 
         Segue segue2 = new Segue(utente2.getID(), annuncio_1.getID());
         boolean segueResult2;
-        try {
-            segueResult2 = BaseController.seguireAnnuncio(segue2);
-            printResult("Seguire annuncio da utente2", segueResult2);
-        } catch (AnnuncioVendutoException e) {
-            printResult("Seguire annuncio da utente2", false, "Annuncio già venduto");
-        }
+        String oldUsername = ActiveUser.getUsername();
+        ActiveUser.setUsername(utente2.getID());
+        segueResult2 = BaseController.seguireAnnuncio(annuncio_1.getID()).getResult();
+        printResult("Seguire annuncio da utente2", segueResult2);
+        ActiveUser.setUsername(oldUsername);
+
 
         boolean deleteSegue2Result = BaseController.stopSeguireAnnuncio(segue2);
         printResult("Stop seguire annuncio utente 2", deleteSegue2Result);

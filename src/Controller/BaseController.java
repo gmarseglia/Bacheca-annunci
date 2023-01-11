@@ -78,8 +78,18 @@ public class BaseController {
         return DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList);
     }
 
-    public static boolean seguireAnnuncio(Segue segue) throws AnnuncioVendutoException {
-        return DAO.insertSegue(ActiveUser.getRole(), segue);
+    public static DBResult seguireAnnuncio(Long annuncioID) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.insertSegue(ActiveUser.getRole(), new Segue(ActiveUser.getUsername(), annuncioID)));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45001" -> String.format("L'annuncio non è più disponibile [%s].", e.getMessage());
+                case "45004" -> String.format("L'annuncio non è esistente [%s].", e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
     }
 
     public static boolean stopSeguireAnnuncio(Segue segue) {

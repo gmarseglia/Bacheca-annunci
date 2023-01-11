@@ -210,7 +210,8 @@ CREATE PROCEDURE `seguire_annuncio` (
     IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED
 )
 BEGIN
-    DECLARE counter INT;
+    DECLARE counter_totale INT;
+    DECLARE counter_venduto INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -221,13 +222,18 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-        SELECT COUNT(*)
-        INTO counter
-        FROM `annuncio`
-        WHERE `numero`=var_annuncio_id AND `venduto` IS NOT NULL;
 
-        IF (counter > 0) THEN
-            SIGNAL SQLSTATE '45001' SET message_text="Annuncio gia venduto.";
+        SELECT COUNT(*), COUNT(`venduto`)
+        INTO counter_totale, counter_venduto
+        FROM `annuncio`
+        WHERE `numero`=var_annuncio_id;
+
+        IF (counter_totale <> 1) THEN
+        	SIGNAL SQLSTATE '45004' SET message_text="Annuncio non esistente.";
+        END IF;
+
+        IF (counter_venduto = 1) THEN
+        	SIGNAL SQLSTATE '45001' SET message_text="Annuncio gia venduto.";
         END IF;
 
         INSERT INTO `segue` (`utente`, `annuncio`) VALUES (var_utente_id, var_annuncio_id);
