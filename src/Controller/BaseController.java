@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 
+@SuppressWarnings("SwitchStatementWithTooFewBranches")
 public class BaseController {
     private static String getGenericSQLExceptionMessage(SQLException e) {
         return e.getSQLState() + ", " + e.getMessage();
@@ -55,8 +56,18 @@ public class BaseController {
         return dbResult;
     }
 
-    public static boolean scrivereMessaggioPrivato(MessaggioPrivato messaggioPrivato) {
-        return DAO.insertMessaggio(ActiveUser.getRole(), messaggioPrivato);
+    public static DBResult scrivereMessaggioPrivato(String usernameDestinatario, String testo) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.insertMessaggio(ActiveUser.getRole(), ActiveUser.getUsername(), usernameDestinatario, testo));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45006", "23000" ->
+                        String.format("Il destinatario \"%s\" non esiste (%s)", usernameDestinatario, e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
     }
 
     public static DBResult visualizzareUtentiConMessaggi(List<String> utenteIDList) {
@@ -74,8 +85,9 @@ public class BaseController {
         try {
             dbResult.setResult(DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), ActiveUser.getUsername(), utenteID2, messaggioPrivatoList));
         } catch (SQLException e) {
-            dbResult.setMessage(switch (e.getSQLState()){
-                case "45008" -> String.format("Non sono presenti messaggi con l'utente \"%s\" (%s)", utenteID2, e.getMessage());
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45008" ->
+                        String.format("Non sono presenti messaggi con l'utente \"%s\" (%s)", utenteID2, e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
         }

@@ -510,27 +510,25 @@ public class DAO {
     }
 
     // MESSAGGI PRIVATI
-    public static boolean insertMessaggio(Role role, MessaggioPrivato messaggioPrivato) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean insertMessaggio(Role role, String usernameMittente, String usernameDestinatario, String testo) throws SQLException {
+        openRoleConnection(role);
 
-            String updateQuery = "INSERT INTO `messaggio_privato` " +
-                    "(`mittente`, `destinatario`, `testo`) " +
-                    "VALUES (?, ?, ?);";
-            PreparedStatement ps = conn.prepareStatement(updateQuery);
-            ps.setString(1, messaggioPrivato.getMittente());
-            ps.setString(2, messaggioPrivato.getDestinatario());
-            ps.setString(3, messaggioPrivato.getTesto());
-            ps.executeUpdate();
+        String updateQuery = "INSERT INTO `messaggio_privato` " +
+                "(`mittente`, `destinatario`, `testo`) " +
+                "VALUES (?, ?, ?);";
+        PreparedStatement ps = conn.prepareStatement(updateQuery);
+        ps.setString(1, usernameMittente);
+        ps.setString(2, usernameDestinatario);
+        ps.setString(3, testo);
+        ps.closeOnCompletion();
 
-            result = true;
-
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if(ps.executeUpdate() == 0){
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45006");
+            e.setMessage("Utente non esistente");
         }
-        return result;
+
+        return true;
     }
 
     public static BatchResult insertBatchMessaggioPrivato(Role role, List<MessaggioPrivato> listOfMessaggioPrivato) {

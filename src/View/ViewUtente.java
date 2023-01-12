@@ -486,19 +486,43 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // (E)
     private static void inviareMessaggio() {
         String destinatario;
         String testo;
+        Boolean confirmOp;
 
-        /*
-        #TODO: ask users to give info
-         */
-        destinatario = "user2";
-        testo = "prova";
+        do {
+            destinatario = ScannerUtility.askText("Destinatario del messaggio privato", 30);
+            testo = ScannerUtility.askText("Testo del messaggio", 250);
 
-        MessaggioPrivato messaggioPrivato = new MessaggioPrivato(ActiveUser.getUsername(), destinatario, null, testo);
-        boolean messageResult = BaseController.scrivereMessaggioPrivato(messaggioPrivato);
-        System.out.printf("Messaggio inviato con %s.\n", messageResult ? "successo" : "insuccesso");
+            System.out.printf("""
+                                                
+                    Destinatario: %s
+                    Testo:
+                    %s
+                    """, destinatario, testo);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+
+        } while (!confirmOp);
+
+        System.out.print("Invio del messaggio... ");
+
+        DBResult dbResult = BaseController.scrivereMessaggioPrivato(destinatario, testo);
+
+        printResult(dbResult);
+
+        ScannerUtility.askAny();
     }
 
     private static void dettagliAnnuncio() {
