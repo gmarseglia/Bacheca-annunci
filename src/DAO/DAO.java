@@ -215,7 +215,6 @@ public class DAO {
                     case CELLULARE -> "cellulare";
                     case TELEFONO -> "telefono";
                     case EMAIL -> "email";
-                    default -> throw new RuntimeException("No type found in Recapito");
                 };
                 ps.setString(3, tipo);
                 ps.addBatch();
@@ -225,14 +224,8 @@ public class DAO {
             batchResult = (ps.executeBatch());
             conn.commit();
 
-        } catch (SQLException e) {
-            throw e;
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            conn.setAutoCommit(true);
         }
 
         return batchResult;
