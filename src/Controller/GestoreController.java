@@ -15,7 +15,12 @@ public class GestoreController extends BaseController {
         try {
             dbResult.setResult(DAO.insertCategoria(ActiveUser.getRole(), nomeCategoria, nomePadre));
         } catch (SQLException e) {
-            getGenericSQLExceptionMessage(e);
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "23000" ->
+                        String.format("Esiste già una categoria con lo stesso nome o non esiste la categoria padre [%s]", e.getMessage());
+                case "45010" -> String.format("La categoria non può essere padre di se stessa [%s]", e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }

@@ -644,12 +644,14 @@ public class DAO {
     public static boolean insertCategoria(Role role, String nomeCategoria, String nomePadre) throws SQLException {
         openRoleConnection(role);
 
-        String query = "INSERT INTO `categoria` VALUES (?, ?)";
-        PreparedStatement ps = conn.prepareStatement(query);
+        String update = "INSERT INTO `categoria` VALUES (?, ?)";
+        PreparedStatement ps = conn.prepareStatement(update);
 
         ps.setString(1, nomeCategoria);
         ps.setString(2, nomePadre);
         ps.closeOnCompletion();
+
+        ps.executeUpdate();
 
         return true;
     }
