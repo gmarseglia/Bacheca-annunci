@@ -172,7 +172,7 @@ public class ViewControllerTest {
         printResult("Visualizzare chat", chatResult, utenteIDList);
 
         List<MessaggioPrivato> messaggioPrivatoList = new ArrayList<>();
-        boolean messageSelectResult = BaseController.visualizzareMessaggi(utente.getID(), utente3.getID(), messaggioPrivatoList);
+        boolean messageSelectResult = BaseController.visualizzareMessaggi(utente3.getID(), messaggioPrivatoList).getResult();
         printResultList("Visualizzare messaggi fra utenti", messageSelectResult, messaggioPrivatoList);
 
         Segue segue2 = new Segue(utente2.getID(), annuncio_1.getID());

@@ -423,10 +423,40 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // (D)
     private static void visualizzareMessaggiConUtente() {
-        /*
-        #TODO
-         */
+        String targetUsername;
+        Boolean confirmOp;
+        do {
+            targetUsername = ScannerUtility.askString("Username dell'utente di cui visualizzare i messaggi scambiati", 30);
+
+            System.out.printf("\nUsername: %s\n", targetUsername);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+        } while (!confirmOp);
+
+        System.out.printf("Ricerca dei messaggi scambiati con \"%s\"... ", targetUsername);
+
+        List<MessaggioPrivato> messaggioPrivatoList = new ArrayList<>();
+        DBResult dbResult = BaseController.visualizzareMessaggi(targetUsername, messaggioPrivatoList);
+
+        printResult(dbResult, () -> {
+            System.out.println("Messaggi:");
+            for (MessaggioPrivato messaggioPrivato : messaggioPrivatoList)
+                //TODO: issue #26
+                System.out.println(messaggioPrivato);
+        });
+
+        ScannerUtility.askAny();
     }
 
     // (C)

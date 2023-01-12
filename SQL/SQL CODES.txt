@@ -6,3 +6,4 @@ SQL CODES
 45005	-> 	Annuncio non fra seguiti
 45006	->	Utente non esistente
 45007	->	Enum error
+45008	->	Messaggi con l'utente non esistenti

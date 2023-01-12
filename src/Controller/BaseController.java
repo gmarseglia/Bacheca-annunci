@@ -69,8 +69,17 @@ public class BaseController {
         return dbResult;
     }
 
-    public static boolean visualizzareMessaggi(String utenteID1, String utenteID2, List<MessaggioPrivato> messaggioPrivatoList) {
-        return DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), utenteID1, utenteID2, messaggioPrivatoList);
+    public static DBResult visualizzareMessaggi(String utenteID2, List<MessaggioPrivato> messaggioPrivatoList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectMessaggiTraUtenti(ActiveUser.getRole(), ActiveUser.getUsername(), utenteID2, messaggioPrivatoList));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()){
+                case "45008" -> String.format("Non sono presenti messaggi con l'utente \"%s\" (%s)", utenteID2, e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
     }
 
     public static DBResult vendereAnnuncio(Long annuncioID) {

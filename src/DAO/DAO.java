@@ -590,38 +590,38 @@ public class DAO {
         return true;
     }
 
-    public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-            String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
-                    " FROM `messaggio_privato` " +
-                    " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
-                    " ORDER BY `inviato` ASC;";
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, utente1ID);
-            ps.setString(2, utente2ID);
-            ps.setString(3, utente2ID);
-            ps.setString(4, utente1ID);
+    public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) throws SQLException {
+        openRoleConnection(role);
+        String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
+                " FROM `messaggio_privato` " +
+                " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
+                " ORDER BY `inviato` ASC;";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, utente1ID);
+        ps.setString(2, utente2ID);
+        ps.setString(3, utente2ID);
+        ps.setString(4, utente1ID);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
-            if (!rs.first()) throw new RuntimeException("Empty result set.");
-
-            do {
-                MessaggioPrivato messaggioPrivato = new MessaggioPrivato(
-                        rs.getString(1), rs.getString(2), rs.getTimestamp(3).toLocalDateTime(), rs.getString(4)
-                );
-                messaggioPrivatoList.add(messaggioPrivato);
-            } while (rs.next());
-
-            result = true;
-
-            ps.close();
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
+        if (!rs.first()) {
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45008");
+            e.setMessage("Messaggi con l'utente non esistenti");
+            throw e;
         }
-        return result;
+
+        do {
+            messaggioPrivatoList.add(new MessaggioPrivato(
+                    rs.getString(1),
+                    rs.getString(2),
+                    rs.getTimestamp(3).toLocalDateTime(),
+                    rs.getString(4)
+            ));
+        } while (rs.next());
+
+        return true;
     }
 
     // CATEGORIA
