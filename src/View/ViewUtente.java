@@ -158,7 +158,7 @@ public class ViewUtente {
 
         printResult(dbResult, () -> {
             System.out.println("Lista delle categorie:");
-            for(Categoria categoria : categoriaList)
+            for (Categoria categoria : categoriaList)
                 //TODO: issue #31
                 System.out.println(categoria);
         });
@@ -167,9 +167,30 @@ public class ViewUtente {
     }
 
     private static void creareReport() {
-        /*
-        #TODO
-         */
+        Boolean confirmOp = null;
+        do {
+            switch (ScannerUtility.askFirstChar("Visualizzare report sulle vendite degli utenti?\n" +
+                    "Procedere? (S)i, (N)o")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+            }
+        } while (confirmOp == null);
+
+        if (!confirmOp) return;
+
+        System.out.print("Creazione del report... ");
+
+        List<ReportEntry> reportEntries = new ArrayList<>();
+        DBResult dbResult = GestoreController.generareReport(reportEntries);
+
+        printResult(dbResult, () -> {
+            System.out.println("\nReport per utenti:");
+            for (ReportEntry reportEntry : reportEntries)
+                //TODO: issue #33
+                System.out.println(reportEntry);
+        });
+
+        ScannerUtility.askAny();
     }
 
     private static void cercaPerDescrizione() {

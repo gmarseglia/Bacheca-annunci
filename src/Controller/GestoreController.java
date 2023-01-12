@@ -25,7 +25,13 @@ public class GestoreController extends BaseController {
         return dbResult;
     }
 
-    public static boolean generareReport(List<ReportEntry> reportEntryList) {
-        return DAO.selectReport(ActiveUser.getRole(), reportEntryList);
+    public static DBResult generareReport(List<ReportEntry> reportEntryList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectReport(ActiveUser.getRole(), reportEntryList));
+        } catch (SQLException e) {
+            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+        }
+        return dbResult;
     }
 }

@@ -1024,36 +1024,30 @@ public class DAO {
     }
 
     // REPORT
-    public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`" +
-                    " FROM `utente`;";
+        String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`" +
+                " FROM `utente`;";
 
-            /*
-            QUERY SENZA USARE ATTRIBUTI DI UTENTE
-            String query = "SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) as `percentuale`" +
-            "FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`" +
-            "GROUP BY `username`;";
-            */
+        /*
+        QUERY SENZA USARE ATTRIBUTI DI UTENTE
+        String query = "SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) as `percentuale`" +
+        "FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`" +
+        "GROUP BY `username`;";
+        */
 
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.closeOnCompletion();
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
-            result = true;
+        ResultSet rs = ps.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    reportEntryList.add(new ReportEntry(rs.getString(1), rs.getFloat(2)));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                reportEntryList.add(new ReportEntry(rs.getString(1), rs.getFloat(2)));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 }
