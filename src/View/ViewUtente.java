@@ -105,6 +105,7 @@ public class ViewUtente {
         System.out.print("Log out dall'applicazione... ");
         ActiveUser.setRole(Role.REGISTRATORE);
         ActiveUser.setUsername(null);
+        DatabaseConnectionController.closeConnection();
         System.out.println("terminato con successo.");
         ScannerUtility.askAny();
         ViewLogin.main(null);
@@ -366,7 +367,7 @@ public class ViewUtente {
 
         List<Annuncio> foundAnnunciList = new ArrayList<>();
 
-        System.out.println("Ricerca degli annunci \"seguiti\" modificati... ");
+        System.out.print("Ricerca degli annunci \"seguiti\" modificati... ");
 
         DBResult dbResult = BaseController.controllareAnnunciSeguiti(foundAnnunciList);
 
