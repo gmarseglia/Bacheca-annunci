@@ -24,7 +24,7 @@ public class DAO {
     private static void openRoleConnection(Role role) throws SQLException {
         if (conn == null || LAST_ROLE != role) {
 
-            conn.close();
+            if(conn != null) conn.close();
 
             String targetUser = null;
             String targetPass = null;
