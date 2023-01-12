@@ -34,8 +34,8 @@ public class BaseController {
             dbResult.setResult(DAO.insertCommento(ActiveUser.getRole(), ActiveUser.getUsername(), numero, testo));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
-                case "45001" -> String.format("L'annuncio non è più disponibile (%s)", e.getMessage());
-                case "23000" -> String.format("L'annuncio non esiste (%s)", e.getMessage());
+                case "45001" -> String.format("L'annuncio non è più disponibile [%s]", e.getMessage());
+                case "23000" -> String.format("L'annuncio non esiste [%s]", e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -63,8 +63,8 @@ public class BaseController {
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45006", "23000" ->
-                        String.format("Il destinatario \"%s\" non esiste (%s)", usernameDestinatario, e.getMessage());
-                case "45009" -> String.format("Il destinatario deve essere diverso dal mittente (%s)", e.getMessage());
+                        String.format("Il destinatario \"%s\" non esiste [%s]", usernameDestinatario, e.getMessage());
+                case "45009" -> String.format("Il destinatario deve essere diverso dal mittente [%s]", e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -88,7 +88,7 @@ public class BaseController {
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45008" ->
-                        String.format("Non sono presenti messaggi con l'utente \"%s\" (%s)", utenteID2, e.getMessage());
+                        String.format("Non sono presenti messaggi con l'utente \"%s\" [%s]", utenteID2, e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -117,7 +117,7 @@ public class BaseController {
             dbResult.setResult(DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList));
         } catch (SQLException e) {
             switch (e.getSQLState()) {
-                case "45006" -> dbResult.setMessage(String.format("Username non registrato (%s)", e.getMessage()));
+                case "45006" -> dbResult.setMessage(String.format("Username non registrato [%s]", e.getMessage()));
                 default -> dbResult.setMessage(getGenericSQLExceptionMessage(e));
             }
         }
