@@ -648,22 +648,51 @@ public class ViewUtente {
     }
 
     private static void creareCategoria() {
-        String nome, padre;
+        String nomeCategoria, nomePadre;
 
-        boolean random = false;
-        if (random) {
-            nome = RndData.randomString(15);
-            padre = RndData.randomString(15);
-        } else {
-            nome = "cat1";
-            padre = null;
-        }
+        Boolean confirmOp, confirmPadre;
 
-        Categoria categoria = new Categoria(nome, padre);
+        do {
+            nomeCategoria = ScannerUtility.askString("Nome della categoria da creare", 60);
+            nomePadre = null;
 
-        boolean createResult = GestoreController.creareCategoria(categoria);
+            confirmPadre = null;
+            do {
+                switch (ScannerUtility.askFirstChar("La categoria è figlia di un'altra categoria? (S)i o (N)o")) {
+                    case "s", "S" -> confirmPadre = true;
+                    case "n", "N" -> confirmPadre = false;
+                }
+            } while (confirmPadre == null);
 
-        System.out.printf("La categoria %s%s è stata creata con %s.\n", categoria.getNome(), categoria.getPadre() != null ? " figlia di " + categoria.getPadre() : "", createResult ? "successo" : "insuccesso");
+            if (confirmPadre)
+                nomePadre = ScannerUtility.askString("Nome della categoria padre", 60);
+
+            System.out.printf("""
+                                                    
+                    Nome della categoria: %s
+                    Nome della categoria padre: %s
+                    """, nomeCategoria, (nomePadre == null) ? "" : nomePadre);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+
+        } while (!confirmOp);
+
+        System.out.printf("Inserimento della categoria \"%s\"... ", nomeCategoria);
+
+        DBResult dbResult = GestoreController.creareCategoria(nomeCategoria, nomePadre);
+
+        printResult(dbResult);
+
+        ScannerUtility.askAny();
     }
 
     private static Long askNumeroAnnuncio(String ask) {

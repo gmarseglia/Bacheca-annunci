@@ -522,7 +522,7 @@ public class DAO {
         ps.setString(3, testo);
         ps.closeOnCompletion();
 
-        if(ps.executeUpdate() == 0){
+        if (ps.executeUpdate() == 0) {
             CustomSQLException e = new CustomSQLException();
             e.setSQLState("45006");
             e.setMessage("Utente non esistente");
@@ -623,11 +623,17 @@ public class DAO {
     }
 
     // CATEGORIA
-    public static boolean insertCategoria(Role role, Categoria categoria) {
-        List<Categoria> categoriaList = new ArrayList<>();
-        categoriaList.add(categoria);
-        BatchResult batchResult = insertBatchCategoria(role, categoriaList);
-        return batchResult.getAllTrue();
+    public static boolean insertCategoria(Role role, String nomeCategoria, String nomePadre) throws SQLException {
+        openRoleConnection(role);
+
+        String query = "INSERT INTO `categoria` VALUES (?, ?)";
+        PreparedStatement ps = conn.prepareStatement(query);
+
+        ps.setString(1, nomeCategoria);
+        ps.setString(2, nomePadre);
+        ps.closeOnCompletion();
+
+        return true;
     }
 
     public static BatchResult insertBatchCategoria(Role role, List<Categoria> listOfCategoria) {

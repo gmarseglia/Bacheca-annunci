@@ -10,7 +10,7 @@ import java.util.List;
 
 @SuppressWarnings("SwitchStatementWithTooFewBranches")
 public class BaseController {
-    private static String getGenericSQLExceptionMessage(SQLException e) {
+    protected static String getGenericSQLExceptionMessage(SQLException e) {
         return e.getSQLState() + ", " + e.getMessage();
     }
 
