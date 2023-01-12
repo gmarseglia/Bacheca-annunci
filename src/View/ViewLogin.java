@@ -49,7 +49,7 @@ public class ViewLogin {
             }
 
         } catch (InputInterruptedRuntimeException e) {
-            ExceptionHandler.handleInputInterrupted(e);
+            ExceptionHandler.handleInputInterrupted();
         }
     }
 
@@ -70,11 +70,12 @@ public class ViewLogin {
         }
 
         if (loginResult.getResult())
-            System.out.printf("eseguito con successo.\n");
+            System.out.print("eseguito con successo.\n");
         else {
             System.out.printf("eseguito con insuccesso (%s).\n", loginResult.getMessage());
         }
 
+        ScannerUtility.askAny();
 
         dispatch(loginResult.getResult());
     }
@@ -132,7 +133,7 @@ public class ViewLogin {
         } while (!confirmCredenziali);
 
         // ANAGRAFICA
-        Boolean confirmAnagrafica = null;
+        Boolean confirmAnagrafica;
         do {
             System.out.println();
             codiceFiscale = ScannerUtility.askString("Codice fiscale", 16);
@@ -160,8 +161,17 @@ public class ViewLogin {
                 }
             } while (askFatturazione == null);
 
-            System.out.printf("\nCodice fiscale: %s\nNome: %s\nCognome: %s\nSesso: %s\n" +
-                            "Data di nascita: %s\nComune di nascita: %s\nIndirizzo di residenza: %s\nIndirizzo di fatturazione: %s\n",
+            System.out.printf("""
+
+                            Codice fiscale: %s
+                            Nome: %s
+                            Cognome: %s
+                            Sesso: %s
+                            Data di nascita: %s
+                            Comune di nascita: %s
+                            Indirizzo di residenza: %s
+                            Indirizzo di fatturazione: %s
+                            """,
                     codiceFiscale, nome, cognome, (sesso == Sesso.DONNA) ? "Donna" : "Uomo",
                     dataNascita.format(DateTimeFormatter.ofPattern(ScannerUtility.DATE_FORMAT)),
                     comuneNascita, indirizzoResidenza, (indirizzoFatturazione == null) ? "" : indirizzoFatturazione
@@ -290,6 +300,8 @@ public class ViewLogin {
             ActiveUser.setRole(credenziali.getRole());
             ActiveUser.setUsername(credenziali.getUsername());
         }
+
+        ScannerUtility.askAny();
 
         dispatch(registrationResult.getExtraResult());
     }

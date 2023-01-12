@@ -4,6 +4,7 @@ import Model.Exception.InputInterruptedRuntimeException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -13,7 +14,12 @@ public class ScannerUtility {
     public static final String DATE_FORMAT = "dd-MM-yyyy";
 
     public static String getFirstNChar(int n) {
-        String nextLine = scanner.nextLine();
+        String nextLine;
+        try {
+            nextLine = scanner.nextLine();
+        } catch (NoSuchElementException e) {
+            throw new InputInterruptedRuntimeException();
+        }
         return nextLine.substring(0, Math.min(nextLine.length(), n));
     }
 
@@ -70,7 +76,7 @@ public class ScannerUtility {
     }
 
     public static LocalDate askLocalDate(String ask) {
-        LocalDate resultDate = null;
+        LocalDate resultDate;
         String input;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
@@ -79,7 +85,7 @@ public class ScannerUtility {
             input = getString();
             try {
                 resultDate = LocalDate.parse(input, formatter);
-            } catch (Exception e) {
+            } catch (DateTimeParseException e) {
                 resultDate = null;
             }
         } while (resultDate == null);
@@ -89,11 +95,13 @@ public class ScannerUtility {
 
     public static Float askFloat(String ask) {
         Float result;
+        String toParse;
         do {
             System.out.printf("%s (es. 10.20) ->", ask);
+            toParse = getString();
             try {
-                result = Float.parseFloat(getString());
-            } catch (RuntimeException e) {
+                result = Float.parseFloat(toParse);
+            } catch (NumberFormatException e) {
                 result = null;
             }
         } while (result == null);
@@ -108,11 +116,13 @@ public class ScannerUtility {
 
     public static Long askLong(String ask) {
         Long result;
+        String toParse;
         do {
             System.out.printf("%s ->", ask);
+            toParse = getString();
             try {
-                result = Long.parseLong(getString());
-            } catch (RuntimeException e) {
+                result = Long.parseLong(toParse);
+            } catch (NumberFormatException e) {
                 result = null;
             }
         } while (result == null);

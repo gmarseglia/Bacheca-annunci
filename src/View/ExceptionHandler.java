@@ -1,17 +1,15 @@
 package View;
 
-import Model.Exception.InputInterruptedRuntimeException;
-
-import java.sql.SQLException;
+import Controller.DatabaseConnectionController;
 
 public class ExceptionHandler {
-    public static void handleSQLException(SQLException e) {
-        System.out.printf("SQLException avvenuta: %s.", e.getMessage());
-        System.exit(1);
-    }
 
-    public static void handleInputInterrupted(InputInterruptedRuntimeException e){
-        System.out.println("Ricevuto CTRL+D durante la richiesta di input.");
+    public static void handleInputInterrupted() {
+        System.out.println("Ricevuto CTRL+D durante la richiesta di input.\n" +
+                "Chiusura applicazione.");
+        String message;
+        message = DatabaseConnectionController.closeConnection();
+        if (message != null) System.out.println(message);
         System.exit(0);
     }
 }

@@ -5,7 +5,6 @@ import Controller.DatabaseConnectionController;
 import Controller.GestoreController;
 import DAO.DBResult;
 import Model.*;
-import Utility.RndData;
 import Utility.ScannerUtility;
 
 import java.util.ArrayList;
