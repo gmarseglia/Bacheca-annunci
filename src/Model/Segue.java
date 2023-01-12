@@ -2,7 +2,7 @@ package Model;
 
 public class Segue {
     private String utente;
-    private long annuncio;
+    private Long annuncio;
 
     public Segue(String utente, long annuncio) {
         this.utente = utente;
@@ -17,11 +17,11 @@ public class Segue {
         this.utente = utente;
     }
 
-    public long getAnnuncio() {
+    public Long getAnnuncio() {
         return annuncio;
     }
 
-    public void setAnnuncio(long annuncio) {
+    public void setAnnuncio(Long annuncio) {
         this.annuncio = annuncio;
     }
 }

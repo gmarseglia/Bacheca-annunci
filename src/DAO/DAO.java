@@ -15,6 +15,9 @@ public class DAO {
     private static final String BASE_USER = "base";
     private static final String BASE_PASS = "base";
 
+    private static final String GESTORE_USER = "gestore";
+    private static final String GESTORE_PASS = "gestore";
+
     private static final String REGISTRATORE_USER = "registratore";
     private static final String REGISTRATORE_PASS = "registratore";
 
@@ -24,7 +27,7 @@ public class DAO {
     private static void openRoleConnection(Role role) throws SQLException {
         if (conn == null || LAST_ROLE != role) {
 
-            if(conn != null) conn.close();
+            if (conn != null) conn.close();
 
             String targetUser = null;
             String targetPass = null;
@@ -33,6 +36,10 @@ public class DAO {
                 case BASE -> {
                     targetUser = BASE_USER;
                     targetPass = BASE_PASS;
+                }
+                case GESTORE -> {
+                    targetUser = GESTORE_USER;
+                    targetPass = GESTORE_PASS;
                 }
                 case REGISTRATORE -> {
                     targetUser = REGISTRATORE_USER;
@@ -162,7 +169,6 @@ public class DAO {
             case "email" -> TipoRecapito.EMAIL;
             default -> null;
         });
-        recapitoPreferito.setAnagrafica(anagrafica.getID());
         recapitoList.add(recapitoPreferito);
 
         if (cs.getMoreResults()) {
@@ -178,7 +184,6 @@ public class DAO {
                         case "email" -> TipoRecapito.EMAIL;
                         default -> null;
                     });
-                    recapito.setAnagrafica(anagrafica.getID());
                     recapitoList.add(recapito);
                 } while (rs.next());
             }
@@ -376,7 +381,7 @@ public class DAO {
 
         if (rs.first()) {
 //            annuncio = BuilderAnnuncio.newFromResultSet(rs);
-            annuncio.setNumero(rs.getInt(1));
+            annuncio.setNumero(rs.getLong(1));
             annuncio.setInserzionista(rs.getString(2));
             annuncio.setDescrizione(rs.getString(3));
             annuncio.setPrice((rs.getFloat(4)));

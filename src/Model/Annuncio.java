@@ -3,20 +3,20 @@ package Model;
 import java.time.LocalDateTime;
 
 public class Annuncio {
-    private long numero;
+    private Long numero;
     private String inserzionista;
     private String descrizione;
-    private float price;
+    private Float price;
     private String categoria;
     private LocalDateTime inserito;
     private LocalDateTime modificato;
     private LocalDateTime venduto;
 
-    public Annuncio(long numero) {
+    public Annuncio(Long numero) {
         this.numero = numero;
     }
 
-    public Annuncio(long numero, String inserzionista, String descrizione, float price, String categoria, LocalDateTime inserito, LocalDateTime modificato, LocalDateTime venduto) {
+    public Annuncio(Long numero, String inserzionista, String descrizione, Float price, String categoria, LocalDateTime inserito, LocalDateTime modificato, LocalDateTime venduto) {
         this.numero = numero;
         this.inserzionista = inserzionista;
         this.descrizione = descrizione;
@@ -27,7 +27,7 @@ public class Annuncio {
         this.venduto = venduto;
     }
 
-    public Annuncio(String inserzionista, String descrizione, float price, String categoria, LocalDateTime inserito) {
+    public Annuncio(String inserzionista, String descrizione, Float price, String categoria, LocalDateTime inserito) {
         this.inserzionista = inserzionista;
         this.descrizione = descrizione;
         this.price = price;
@@ -35,15 +35,15 @@ public class Annuncio {
         this.inserito = inserito;
     }
 
-    public long getID() {
+    public Long getID() {
         return this.numero;
     }
 
-    public long getNumero() {
+    public Long getNumero() {
         return numero;
     }
 
-    public void setNumero(long numero) {
+    public void setNumero(Long numero) {
         this.numero = numero;
     }
 
@@ -63,11 +63,11 @@ public class Annuncio {
         this.descrizione = descrizione;
     }
 
-    public float getPrice() {
+    public Float getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(Float price) {
         this.price = price;
     }
 

@@ -11,10 +11,9 @@ public class Anagrafica {
     private String comuneNascita;
     private String indirizzoResidenza;
     private String indirizzoFatturazione;
-    private String usernameUtente;
 
     public Anagrafica(String codiceFiscale, String nome, String cognome, Sesso sesso,
-                      LocalDate dataNascita, String comuneNascita, String indirizzoResidenza, String usernameUtente) {
+                      LocalDate dataNascita, String comuneNascita, String indirizzoResidenza) {
         this.codiceFiscale = codiceFiscale;
         this.nome = nome;
         this.cognome = cognome;
@@ -22,10 +21,9 @@ public class Anagrafica {
         this.dataNascita = dataNascita;
         this.comuneNascita = comuneNascita;
         this.indirizzoResidenza = indirizzoResidenza;
-        this.usernameUtente = usernameUtente;
     }
 
-    public Anagrafica(String codiceFiscale, String nome, String cognome, Sesso sesso, LocalDate dataNascita, String comuneNascita, String indirizzoResidenza, String indirizzoFatturazione, String usernameUtente) {
+    public Anagrafica(String codiceFiscale, String nome, String cognome, Sesso sesso, LocalDate dataNascita, String comuneNascita, String indirizzoResidenza, String indirizzoFatturazione) {
         this.codiceFiscale = codiceFiscale;
         this.nome = nome;
         this.cognome = cognome;
@@ -34,7 +32,6 @@ public class Anagrafica {
         this.comuneNascita = comuneNascita;
         this.indirizzoResidenza = indirizzoResidenza;
         this.indirizzoFatturazione = indirizzoFatturazione;
-        this.usernameUtente = usernameUtente;
     }
 
     public Anagrafica(){}
@@ -103,14 +100,6 @@ public class Anagrafica {
         this.indirizzoFatturazione = indirizzoFatturazione;
     }
 
-    public String getUsernameUtente() {
-        return usernameUtente;
-    }
-
-    public void setUsernameUtente(String usernameUtente) {
-        this.usernameUtente = usernameUtente;
-    }
-
     public String getID(){
         return this.codiceFiscale;
     }
@@ -126,7 +115,6 @@ public class Anagrafica {
                 ", comuneNascita='" + comuneNascita + '\'' +
                 ", indirizzoResidenza='" + indirizzoResidenza + '\'' +
                 ", indirizzoFatturazione='" + indirizzoFatturazione + '\'' +
-                ", usernameUtente='" + usernameUtente + '\'' +
                 '}';
     }
 }

@@ -2,9 +2,9 @@ package Model;
 
 public class ReportEntry {
     private String utente;
-    private float percentuale;
+    private Float percentuale;
 
-    public ReportEntry(String utente, float percentuale) {
+    public ReportEntry(String utente, Float percentuale) {
         this.utente = utente;
         this.percentuale = percentuale;
     }
@@ -17,11 +17,11 @@ public class ReportEntry {
         this.utente = utente;
     }
 
-    public float getPercentuale() {
+    public Float getPercentuale() {
         return percentuale;
     }
 
-    public void setPercentuale(float percentuale) {
+    public void setPercentuale(Float percentuale) {
         this.percentuale = percentuale;
     }
 

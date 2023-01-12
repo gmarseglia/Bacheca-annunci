@@ -4,8 +4,6 @@ public class Utente {
     private String username;
     private long annunci_inseriti;
     private long annunci_venduti;
-    private Credenziali credenziali;
-    private Anagrafica anagrafica;
 
     public Utente(String username) {
         this.username = username;
@@ -41,22 +39,6 @@ public class Utente {
         this.annunci_venduti = annunci_venduti;
     }
 
-    public Credenziali getCredenziali() {
-        return credenziali;
-    }
-
-    public void setCredenziali(Credenziali credenziali) {
-        this.credenziali = credenziali;
-    }
-
-    public Anagrafica getAnagrafica() {
-        return anagrafica;
-    }
-
-    public void setAnagrafica(Anagrafica anagrafica) {
-        this.anagrafica = anagrafica;
-    }
-
     public String getID() {
         return this.username;
     }
@@ -67,8 +49,6 @@ public class Utente {
                 "username='" + username + '\'' +
                 ", annunci_inseriti=" + annunci_inseriti +
                 ", annunci_venduti=" + annunci_venduti +
-                ", credenziali=" + credenziali +
-                ", anagrafica=" + anagrafica +
                 '}';
     }
 }

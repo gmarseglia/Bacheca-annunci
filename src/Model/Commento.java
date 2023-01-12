@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 public class Commento {
     private String utente;
-    private long annuncio;
+    private Long annuncio;
     private LocalDateTime scritto;
     private String testo;
 
-    public Commento(String utente, long annuncio, LocalDateTime scritto, String testo) {
+    public Commento(String utente, Long annuncio, LocalDateTime scritto, String testo) {
         this.utente = utente;
         this.annuncio = annuncio;
         this.scritto = scritto;
@@ -23,11 +23,11 @@ public class Commento {
         this.utente = utente;
     }
 
-    public long getAnnuncio() {
+    public Long getAnnuncio() {
         return annuncio;
     }
 
-    public void setAnnuncio(long annuncio) {
+    public void setAnnuncio(Long annuncio) {
         this.annuncio = annuncio;
     }
 

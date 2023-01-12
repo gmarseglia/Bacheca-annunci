@@ -192,8 +192,17 @@ GRANT INSERT, UPDATE, SELECT ON `annuncio` TO 'base';
 GRANT SELECT ON `categoria` TO 'base';
 
 -- Grant to gestore
+GRANT INSERT, SELECT ON `messaggio_privato` TO 'gestore';
+GRANT UPDATE, SELECT ON `utente` TO 'gestore';
+GRANT SELECT ON `anagrafica` TO 'gestore';
+GRANT SELECT ON `recapito` TO 'gestore';
+GRANT SELECT ON `recapito_preferito` TO 'gestore';
+GRANT INSERT, SELECT ON `commento` TO 'gestore';
+GRANT INSERT, SELECT, DELETE ON `commento` TO 'gestore';
+GRANT INSERT, UPDATE, SELECT ON `annuncio` TO 'gestore';
+GRANT SELECT ON `categoria` TO 'gestore';
 GRANT SELECT ON `utente` TO 'gestore';
-GRANT INSERT ON `categoria` TO 'gestore';
+GRANT SELECT, INSERT ON `categoria` TO 'gestore';
 
 -- Grant to registratore
 GRANT INSERT ON `utente` TO 'registratore';

@@ -172,7 +172,7 @@ public class ViewLogin {
                 switch (ScannerUtility.askFirstChar("Confermi? (S)i o (N)o?")) {
                     case "s", "S" -> {
                         confirmAnagrafica = true;
-                        anagrafica = new Anagrafica(codiceFiscale, nome, cognome, sesso, dataNascita, comuneNascita, indirizzoResidenza, indirizzoFatturazione, username);
+                        anagrafica = new Anagrafica(codiceFiscale, nome, cognome, sesso, dataNascita, comuneNascita, indirizzoResidenza, indirizzoFatturazione);
                     }
                     case "n", "N" -> confirmAnagrafica = false;
                 }
@@ -207,7 +207,7 @@ public class ViewLogin {
                 switch (ScannerUtility.askFirstChar("Confermi recapito preferito? (S)i o (N)o")) {
                     case "s", "S" -> {
                         confirmRecapitoPreferito = true;
-                        recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, anagrafica.getID()));
+                        recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, codiceFiscale));
                     }
                     case "n", "N" -> confirmRecapitoPreferito = false;
                 }
@@ -258,7 +258,7 @@ public class ViewLogin {
                             case "s", "S" -> {
                                 recapitiCounter++;
                                 confirmRecapito = true;
-                                recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, anagrafica.getID()));
+                                recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, codiceFiscale));
                             }
                             case "n", "N" -> confirmRecapito = false;
                         }
