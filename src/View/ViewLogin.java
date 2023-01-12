@@ -79,8 +79,6 @@ public class ViewLogin {
             System.out.printf("eseguito con insuccesso (%s).\n", loginResult.getMessage());
         }
 
-        ScannerUtility.askAny();
-
         dispatch(loginResult.getResult());
     }
 
