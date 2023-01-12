@@ -347,10 +347,8 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // (A)
     private static void dettagliUtente() {
-        /*
-        #TODO
-         */
         Boolean confirmOp;
         String targetUsername;
 
@@ -538,25 +536,41 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // (B)
     private static void scrivereCommento() {
+        Long numero;
         String testo;
-        long annuncioID;
+        Boolean confirmOp;
 
-        /*
-        #TODO: ask users to give info
-         */
-        testo = "Testo del commento.";
-        annuncioID = 1;
-        Commento commento = new Commento(ActiveUser.getUsername(), annuncioID, null, testo);
+        do {
+            numero = ScannerUtility.askLong("Numero dell'annuncio su cui scrivere un commento");
+            testo = ScannerUtility.askText("Testo del commento", 250);
 
-        boolean insertResult = false;
-        try {
-            insertResult = BaseController.scrivereCommento(commento);
-            System.out.printf("Il commento è stato scritto con %s.\n", insertResult ? "successo" : "insuccesso");
-        } catch (AnnuncioVendutoException e) {
-            System.out.println("L'annuncio è già stato venduto, impossibile aggiungere nuovi commenti.\n");
-        }
+            System.out.printf("""
 
+                    Numero dell'annuncio: %s
+                    Testo del commento: "%s"
+                    """, numero, testo);
+
+            confirmOp = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
+                    case "s", "S" -> confirmOp = true;
+                    case "n", "N" -> confirmOp = false;
+                    case "a", "A" -> {
+                        return;
+                    }
+                }
+            } while (confirmOp == null);
+        } while (!confirmOp);
+
+        System.out.print("Inserimento del commento... ");
+
+        DBResult dbResult = BaseController.scrivereCommento(numero, testo);
+
+        printResult(dbResult);
+
+        ScannerUtility.askAny();
     }
 
     private static void creareCategoria() {

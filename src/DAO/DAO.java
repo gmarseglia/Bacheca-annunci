@@ -991,30 +991,19 @@ public class DAO {
     }
 
     // COMMENTO
-    public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean insertCommento(Role role, String utente, Long numero, String testo) throws SQLException {
+        openRoleConnection(role);
 
-            String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
-            cs.setString(1, commento.getUtente());
-            cs.setInt(2, (int) commento.getAnnuncio());
-            cs.setString(3, commento.getTesto());
+        String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
+        CallableStatement cs = conn.prepareCall(callQuery);
+        cs.setString(1, utente);
+        cs.setLong(2, numero);
+        cs.setString(3, testo);
+        cs.closeOnCompletion();
 
-            cs.executeUpdate();
+        cs.executeUpdate();
 
-            result = true;
-
-            cs.close();
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("45001")) {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return true;
     }
 
     // REPORT

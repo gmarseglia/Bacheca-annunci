@@ -109,7 +109,7 @@ public class ScannerUtility {
     public static Long askLong(String ask) {
         Long result;
         do {
-            System.out.printf("%s) ->", ask);
+            System.out.printf("%s ->", ask);
             try {
                 result = Long.parseLong(getString());
             } catch (RuntimeException e) {

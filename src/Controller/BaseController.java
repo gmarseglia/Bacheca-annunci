@@ -28,8 +28,18 @@ public class BaseController {
         return result;
     }
 
-    public static boolean scrivereCommento(Commento commento) throws AnnuncioVendutoException {
-        return DAO.insertCommento(ActiveUser.getRole(), commento);
+    public static DBResult scrivereCommento(Long numero, String testo) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.insertCommento(ActiveUser.getRole(), ActiveUser.getUsername(), numero, testo));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45001" -> String.format("L'annuncio non è più disponibile (%s)", e.getMessage());
+                case "23000" -> String.format("L'annuncio non esiste (%s)", e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
     }
 
     public static DBResult dettagliAnnuncio(Annuncio annuncio, List<Commento> commentoList) {

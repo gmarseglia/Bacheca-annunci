@@ -125,12 +125,10 @@ public class ViewControllerTest {
             Commento commento = new Commento(username, annuncio_1.getID(), null,
                     String.format("Testo del commento %d.", commIndex));
             boolean commentoResult;
-            try {
-                commentoResult = BaseController.scrivereCommento(commento);
-                printResult(String.format("Scrivere commento %d", commIndex), commentoResult);
-            } catch (AnnuncioVendutoException e) {
-                printResult("Scrivere commento %d", false, "Annuncio già venduto");
-            }
+
+            commentoResult = BaseController.scrivereCommento(commento.getAnnuncio(), commento.getTesto()).getResult();
+            printResult(String.format("Scrivere commento %d", commIndex), commentoResult);
+
             Thread.sleep(1100);
         }
 
