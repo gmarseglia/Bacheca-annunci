@@ -8,3 +8,5 @@ SQL CODES
 45007	->	Enum error
 45008	->	Messaggi con l'utente non esistenti
 45009	-> 	Messaggio non valido
+45010	->	Categoria non valida
+45011	->	Annuncio non valido
