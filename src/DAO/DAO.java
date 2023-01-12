@@ -1,6 +1,8 @@
 package DAO;
 
 import Model.*;
+import Model.Exception.AnnuncioVendutoException;
+import Model.Exception.CustomSQLException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -26,9 +28,7 @@ public class DAO {
 
     private static ResultSet rs = null;
 
-    /*
-    CONNESSIONE
-     */
+    // CONNESSIONE
     private static void openRoleConnection(Role role) throws SQLException {
         if (conn == null || LAST_ROLE != role) {
             try {
@@ -67,101 +67,80 @@ public class DAO {
         }
     }
 
-    /*
-    LOGIN E REGISTRAZIONE
-     */
-    public static boolean loginUtente(Role role, Credenziali credenziali) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    // LOGIN E REGISTRAZIONE
+    public static Boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT `ruolo` FROM `credenziali` " +
-                    "WHERE `username`=? AND `password`=?;";
+        String query = "SELECT `ruolo` FROM `credenziali` " +
+                "WHERE `username`=? AND `password`=?;";
 
-            ResultSet rs;
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, credenziali.getUsername());
-            ps.setString(2, credenziali.getPassword());
-            rs = ps.executeQuery();
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, credenziali.getUsername());
+        ps.setString(2, credenziali.getPassword());
+        ps.closeOnCompletion();
 
-            if (!rs.first()) return false;
+        ResultSet rs = ps.executeQuery();
 
-            Role selectedRole = switch (rs.getString(1)) {
-                case "base" -> Role.BASE;
-                case "gestore" -> Role.GESTORE;
-                default -> throw new RuntimeException("Invalid role");
-            };
-            credenziali.setRole(selectedRole);
+        rs.first();
 
-            result = true;
+        Role selectedRole = switch (rs.getString(1)) {
+            case "base" -> Role.BASE;
+            case "gestore" -> Role.GESTORE;
+            default -> throw new RuntimeException("Invalid role");
+        };
+        credenziali.setRole(selectedRole);
 
-            rs.close();
-            ps.close();
+        rs.close();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return true;
     }
 
-    public static boolean registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) {
-        boolean valueReturn = false;
+    public static boolean callRegistrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) throws SQLException {
+        // #1: connect
+        openRoleConnection(ActiveUser.getRole());
 
-        try {
-            // #1: connect
-            openRoleConnection(ActiveUser.getRole());
+        // #2: create statement
+        String callQuery = "{call `registrazione_utente` (" +
+                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        CallableStatement cs = conn.prepareCall(callQuery);
 
-            // #2: create statement
-            String callQuery = "{call `registrazione_utente` (" +
-                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
-            stmt = conn.createStatement();
+        // Prepare call
+        cs.setString(1, utente.getUsername());
+        cs.setString(2, credenziali.getPassword());
+        String userRole = switch (credenziali.getRole()) {
+            case BASE -> "base";
+            case GESTORE -> "gestore";
+            default -> throw new RuntimeException("Invalid role");
+        };
+        cs.setString(3, userRole);
+        cs.setString(4, anagrafica.getCodiceFiscale());
+        cs.setString(5, anagrafica.getNome());
+        cs.setString(6, anagrafica.getCognome());
+        String userSesso = switch (anagrafica.getSesso()) {
+            case UOMO -> "uomo";
+            case DONNA -> "donna";
+        };
+        cs.setString(7, userSesso);
+        cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
+        cs.setString(9, anagrafica.getComuneNascita());
+        cs.setString(10, anagrafica.getIndirizzoResidenza());
+        cs.setString(11, anagrafica.getIndirizzoFatturazione());
 
-            // Prepare call
-            cs.setString(1, utente.getUsername());
-            cs.setString(2, credenziali.getPassword());
-            String userRole = switch (credenziali.getRole()) {
-                case BASE -> "base";
-                case GESTORE -> "gestore";
-                default -> throw new RuntimeException("Invalid role");
-            };
-            cs.setString(3, userRole);
-            cs.setString(4, anagrafica.getCodiceFiscale());
-            cs.setString(5, anagrafica.getNome());
-            cs.setString(6, anagrafica.getCognome());
-            String userSesso = switch (anagrafica.getSesso()) {
-                case UOMO -> "uomo";
-                case DONNA -> "donna";
-            };
-            cs.setString(7, userSesso);
-            cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
-            cs.setString(9, anagrafica.getComuneNascita());
-            cs.setString(10, anagrafica.getIndirizzoResidenza());
-            cs.setString(11, anagrafica.getIndirizzoFatturazione());
-            cs.setString(12, recapitoPreferito.getValore());
-            String tipoRecapito = switch (recapitoPreferito.getTipo()) {
-                case EMAIL -> "email";
-                case TELEFONO -> "telefono";
-                case CELLULARE -> "cellulare";
-            };
-            cs.setString(13, tipoRecapito);
+        cs.setString(12, recapitoPreferito.getValore());
+        String tipoRecapito = switch (recapitoPreferito.getTipo()) {
+            case EMAIL -> "email";
+            case TELEFONO -> "telefono";
+            case CELLULARE -> "cellulare";
+        };
+        cs.setString(13, tipoRecapito);
+        cs.closeOnCompletion();
 
-            cs.execute();
+        cs.execute();
 
-            cs.close();
-
-            valueReturn = true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return valueReturn;
+        return true;
     }
 
-    /*
-    UTENTE
-     */
+    // UTENTE
     public static boolean insertUtenteByUsername(String username) {
         boolean valueReturn = false;
 
@@ -196,45 +175,70 @@ public class DAO {
         return valueReturn;
     }
 
-    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `dettagli_utente`(?)}";
-            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setString(1, utente.getID());
+        String call = "{call `dettagli_utente`(?)}";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, utente.getID());
 
-            ResultSet rs = cs.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
-            if (!rs.first()) throw new RuntimeException("Utente non trovato.");
-
-            utente.setAnnunci_inseriti(rs.getInt(1));
-            utente.setAnnunci_venduti(rs.getInt(2));
-
-            anagrafica.setCodiceFiscale(rs.getString(3));
-            //#TODO
-
-            if (cs.getMoreResults()) {
-                rs = cs.getResultSet();
-
-                //#TODO
-                if (rs.first()) {
-                    do {
-                        Recapito recapito = new Recapito(rs.getString(1), null, null);
-                        recapitoList.add(recapito);
-                    } while (rs.next());
-                }
-            }
-
-            result = true;
-
-            cs.close();
-
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
+        if (!rs.first()) {
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45006");
+            e.setMessage("Utente non esistente");
+            throw e;
         }
-        return result;
+
+        utente.setAnnunci_inseriti(rs.getInt(1));
+        utente.setAnnunci_venduti(rs.getInt(2));
+
+        anagrafica.setCodiceFiscale(rs.getString(3));
+        anagrafica.setNome(rs.getString(4));
+        anagrafica.setCognome(rs.getString(5));
+        anagrafica.setSesso(switch (rs.getString(6)) {
+            case "uomo" -> Sesso.UOMO;
+            case "donna" -> Sesso.DONNA;
+            default -> null;
+        });
+        anagrafica.setDataNascita(rs.getTimestamp(7).toLocalDateTime().toLocalDate());
+        anagrafica.setIndirizzoResidenza(rs.getString(8));
+        anagrafica.setIndirizzoFatturazione(rs.getString(9));
+
+        Recapito recapitoPreferito = new Recapito();
+        recapitoPreferito.setValore(rs.getString(10));
+        recapitoPreferito.setTipo(switch (rs.getString(11)) {
+            case "telefono" -> TipoRecapito.TELEFONO;
+            case "cellulare" -> TipoRecapito.CELLULARE;
+            case "email" -> TipoRecapito.EMAIL;
+            default -> null;
+        });
+        recapitoPreferito.setAnagrafica(anagrafica.getID());
+        recapitoList.add(recapitoPreferito);
+
+        if (cs.getMoreResults()) {
+            rs = cs.getResultSet();
+
+            if (rs.first()) {
+                do {
+                    Recapito recapito = new Recapito();
+                    recapito.setValore(rs.getString(1));
+                    recapito.setTipo(switch (rs.getString(2)) {
+                        case "telefono" -> TipoRecapito.TELEFONO;
+                        case "cellulare" -> TipoRecapito.CELLULARE;
+                        case "email" -> TipoRecapito.EMAIL;
+                        default -> null;
+                    });
+                    recapito.setAnagrafica(anagrafica.getID());
+                    recapitoList.add(recapito);
+                } while (rs.next());
+            }
+        }
+
+        cs.close();
+
+        return true;
     }
 
     public static BatchResult insertBatchUtenteOnlyUsername(Role role, List<Utente> utenti) {
@@ -344,9 +348,7 @@ public class DAO {
         return valueReturn;
     }
 
-    /*
-    ANAGRAFICA
-     */
+    // ANAGRAFICA
     public static BatchResult insertBatchAnagrafica(Role role, List<Anagrafica> listOfAnagrafica) {
         int[] singlesResult = null;
         try {
@@ -394,9 +396,7 @@ public class DAO {
     }
 
 
-    /*
-    CREDENZIALI
-     */
+    // CREDENZIALI
     public static BatchResult insertBatchCredenziali(Role role, List<Credenziali> credentials) {
         int[] singlesResult = null;
         try {
@@ -431,12 +431,10 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    /*
-    RECAPITO
-     */
-    public static BatchResult insertBatchRecapito(List<Recapito> listOfRecapito) {
-        int[] singlesResult = null;
-        PreparedStatement psmnt;
+
+    // RECAPITO
+    public static int[] insertBatchRecapito(List<Recapito> listOfRecapito) throws SQLException {
+        int[] batchResult;
         try {
             openRoleConnection(ActiveUser.getRole());
 
@@ -445,28 +443,27 @@ public class DAO {
             String query = "INSERT IGNORE INTO `recapito` " +
                     "(`valore`, `anagrafica`, `tipo`)" +
                     "VALUES (?, ?, ?)";
-            psmnt = conn.prepareStatement(query);
+            PreparedStatement ps = conn.prepareStatement(query);
 
             for (Recapito recapito : listOfRecapito) {
-                psmnt.setString(1, recapito.getValore());
-                psmnt.setString(2, recapito.getAnagraficaID());
+                ps.setString(1, recapito.getValore());
+                ps.setString(2, recapito.getAnagraficaID());
                 String tipo = switch (recapito.getTipo()) {
                     case CELLULARE -> "cellulare";
                     case TELEFONO -> "telefono";
                     case EMAIL -> "email";
                     default -> throw new RuntimeException("No type found in Recapito");
                 };
-                psmnt.setString(3, tipo);
-                psmnt.addBatch();
+                ps.setString(3, tipo);
+                ps.addBatch();
             }
+            ps.closeOnCompletion();
 
-            singlesResult = psmnt.executeBatch();
+            batchResult = (ps.executeBatch());
             conn.commit();
 
-            psmnt.close();
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         } finally {
             try {
                 conn.setAutoCommit(true);
@@ -475,7 +472,7 @@ public class DAO {
             }
         }
 
-        return new BatchResult(singlesResult);
+        return batchResult;
     }
 
     public static BatchResult insertBatchRecapitoPreferito(Role role, List<Recapito> listOfRecapito) {
@@ -512,30 +509,26 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    /*
-    MESSAGGI PRIVATI
-     */
-    public static boolean insertMessaggio(Role role, MessaggioPrivato messaggioPrivato) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    // MESSAGGI PRIVATI
+    public static boolean insertMessaggio(Role role, String usernameMittente, String usernameDestinatario, String testo) throws SQLException {
+        openRoleConnection(role);
 
-            String updateQuery = "INSERT INTO `messaggio_privato` " +
-                    "(`mittente`, `destinatario`, `testo`) " +
-                    "VALUES (?, ?, ?);";
-            PreparedStatement ps = conn.prepareStatement(updateQuery);
-            ps.setString(1, messaggioPrivato.getMittente());
-            ps.setString(2, messaggioPrivato.getDestinatario());
-            ps.setString(3, messaggioPrivato.getTesto());
-            ps.executeUpdate();
+        String updateQuery = "INSERT INTO `messaggio_privato` " +
+                "(`mittente`, `destinatario`, `testo`) " +
+                "VALUES (?, ?, ?);";
+        PreparedStatement ps = conn.prepareStatement(updateQuery);
+        ps.setString(1, usernameMittente);
+        ps.setString(2, usernameDestinatario);
+        ps.setString(3, testo);
+        ps.closeOnCompletion();
 
-            result = true;
-
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (ps.executeUpdate() == 0) {
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45006");
+            e.setMessage("Utente non esistente");
         }
-        return result;
+
+        return true;
     }
 
     public static BatchResult insertBatchMessaggioPrivato(Role role, List<MessaggioPrivato> listOfMessaggioPrivato) {
@@ -574,76 +567,93 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-            String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
-                    "UNION " +
-                    "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, targetUtente);
-            ps.setString(2, targetUtente);
+    public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) throws SQLException, RuntimeException {
+        openRoleConnection(role);
+        String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
+                "UNION " +
+                "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, targetUtente);
+        ps.setString(2, targetUtente);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
-            if (!rs.first()) throw new RuntimeException("Empty result set.");
-
+        if (rs.first()) {
             do {
                 utenteIDList.add(rs.getString(1));
             } while (rs.next());
-
-            result = true;
-
-            ps.close();
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
         }
-        return result;
+
+        return true;
     }
 
-    public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-            String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
-                    " FROM `messaggio_privato` " +
-                    " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
-                    " ORDER BY `inviato` ASC;";
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, utente1ID);
-            ps.setString(2, utente2ID);
-            ps.setString(3, utente2ID);
-            ps.setString(4, utente1ID);
+    public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) throws SQLException {
+        openRoleConnection(role);
+        String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
+                " FROM `messaggio_privato` " +
+                " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
+                " ORDER BY `inviato` ASC;";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, utente1ID);
+        ps.setString(2, utente2ID);
+        ps.setString(3, utente2ID);
+        ps.setString(4, utente1ID);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
-            if (!rs.first()) throw new RuntimeException("Empty result set.");
+        if (!rs.first()) {
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45008");
+            e.setMessage("Messaggi con l'utente non esistenti");
+            throw e;
+        }
 
+        do {
+            messaggioPrivatoList.add(new MessaggioPrivato(
+                    rs.getString(1),
+                    rs.getString(2),
+                    rs.getTimestamp(3).toLocalDateTime(),
+                    rs.getString(4)
+            ));
+        } while (rs.next());
+
+        return true;
+    }
+
+    // CATEGORIA
+    public static boolean selectCategoria(Role role, List<Categoria> categoriaList) throws SQLException {
+        openRoleConnection(role);
+
+        String query = "SELECT `nome`,`padre` FROM `categoria`;";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.closeOnCompletion();
+
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.first()) {
             do {
-                MessaggioPrivato messaggioPrivato = new MessaggioPrivato(
-                        rs.getString(1), rs.getString(2), rs.getTimestamp(3).toLocalDateTime(), rs.getString(4)
-                );
-                messaggioPrivatoList.add(messaggioPrivato);
+                categoriaList.add(new Categoria(rs.getString(1), rs.getString(2)));
             } while (rs.next());
-
-            result = true;
-
-            ps.close();
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
         }
-        return result;
+
+        return true;
     }
 
-    /*
-    CATEGORIA
-     */
-    public static boolean insertCategoria(Role role, Categoria categoria) {
-        List<Categoria> categoriaList = new ArrayList<>();
-        categoriaList.add(categoria);
-        BatchResult batchResult = insertBatchCategoria(role, categoriaList);
-        return batchResult.getAllTrue();
+    public static boolean insertCategoria(Role role, String nomeCategoria, String nomePadre) throws SQLException {
+        openRoleConnection(role);
+
+        String update = "INSERT INTO `categoria` VALUES (?, ?)";
+        PreparedStatement ps = conn.prepareStatement(update);
+
+        ps.setString(1, nomeCategoria);
+        ps.setString(2, nomePadre);
+        ps.closeOnCompletion();
+
+        ps.executeUpdate();
+
+        return true;
     }
 
     public static BatchResult insertBatchCategoria(Role role, List<Categoria> listOfCategoria) {
@@ -699,10 +709,7 @@ public class DAO {
         return result;
     }
 
-    /*
-    ANNUNCIO
-     */
-
+    // ANNUNCIO
     public static boolean resetAutoincrement() {
         boolean valueReturn = false;
 
@@ -737,32 +744,24 @@ public class DAO {
         return valueReturn;
     }
 
-    public static boolean insertAnnuncio(Role role, Annuncio annuncio) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean insertAnnuncio(Role role, Annuncio annuncio) throws SQLException {
+        openRoleConnection(role);
 
-            String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
+        String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?, ?)}";
+        CallableStatement cs = conn.prepareCall(callQuery);
 
-            cs.setString(1, annuncio.getInserzionista());
-            cs.setString(2, annuncio.getDescrizione());
-            cs.setFloat(3, (float) annuncio.getPriceInCents() / 100);
-            cs.setString(4, annuncio.getCategoria());
-            cs.registerOutParameter(5, Types.INTEGER);
+        cs.setString(1, annuncio.getInserzionista());
+        cs.setString(2, annuncio.getDescrizione());
+        cs.setFloat(3, annuncio.getPrice());
+        cs.setString(4, annuncio.getCategoria());
+        cs.registerOutParameter(5, Types.INTEGER);
+        cs.closeOnCompletion();
 
-            cs.execute();
+        cs.execute();
 
-            annuncio.setNumero(cs.getLong(5));
+        annuncio.setNumero(cs.getLong(5));
 
-            result = true;
-
-            cs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return result;
+        return true;
     }
 
     public static BatchResult insertBatchAnnuncio(Role role, List<Annuncio> listOfAnnuncio) {
@@ -784,7 +783,7 @@ public class DAO {
             for (Annuncio annuncio : listOfAnnuncio) {
                 psmnt.setString(1, annuncio.getInserzionista());
                 psmnt.setString(2, annuncio.getDescrizione());
-                psmnt.setFloat(3, annuncio.getPriceInCents() / 100);
+                psmnt.setFloat(3, annuncio.getPrice());
                 psmnt.setString(4, annuncio.getCategoria());
                 psmnt.setTimestamp(5, Timestamp.valueOf(annuncio.getInserito()));
                 psmnt.addBatch();
@@ -806,201 +805,152 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-            String callQuery = "{call `dettagli_annuncio`(?)}";
-            CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setInt(1, (int) annuncio.getID());
-            ResultSet rs = cs.executeQuery();
+    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
+        openRoleConnection(role);
 
-            if (!rs.first()) throw new RuntimeException("No result");
+        String callQuery = "{call `dettagli_annuncio`(?)}";
+        CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
+        cs.setLong(1, annuncio.getID());
+        cs.closeOnCompletion();
+        ResultSet rs = cs.executeQuery();
+
+        if (rs.first()) {
+//            annuncio = BuilderAnnuncio.newFromResultSet(rs);
             annuncio.setNumero(rs.getInt(1));
             annuncio.setInserzionista(rs.getString(2));
             annuncio.setDescrizione(rs.getString(3));
-            annuncio.setPriceInCents((int) (rs.getFloat(4) * 100));
+            annuncio.setPrice((rs.getFloat(4)));
             annuncio.setCategoria(rs.getString(5));
             annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
             annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
             annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
 
             do {
-                Commento commento = new Commento(
-                        rs.getString(9),
-                        annuncio.getID(),
-                        rs.getTimestamp(10).toLocalDateTime(),
-                        rs.getString(11)
-                );
-                commentoList.add(commento);
+                if (rs.getString(9) != null) {
+                    Commento commento = new Commento(
+                            rs.getString(9),
+                            annuncio.getID(),
+                            rs.getTimestamp(10).toLocalDateTime(),
+                            rs.getString(11)
+                    );
+                    commentoList.add(commento);
+                }
             } while (rs.next());
-
-            result = true;
-
-            cs.close();
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
         }
-        return result;
+
+        return true;
     }
 
-    public static boolean updateAnnuncioVendere(Role role, long annuncioID) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `vendere_annuncio`(?)};";
-            CallableStatement cs = conn.prepareCall(call);
-            cs.setLong(1, annuncioID);
+        String call = "{call `vendere_annuncio`(?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setLong(1, annuncioID);
+        cs.setString(2, utenteID);
+        cs.closeOnCompletion();
 
-            cs.executeUpdate();
+        cs.executeUpdate();
 
-            result = true;
-
-            cs.close();
-
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("45001")) {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return true;
     }
 
-    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, " +
-                    "`categoria`, `inserito`, `modificato`, `venduto` " +
-                    "FROM `annuncio` " +
-                    "WHERE `inserzionista`=?";
-            query = query.concat((onlyAvailable) ? " AND `venduto` IS NULL;" : ";");
+        String call = "{call `select_annunci_by_inserzionista` (?, ?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, inserzionistaID);
+        cs.setBoolean(2, onlyAvailable);
+        cs.closeOnCompletion();
 
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, inserzionistaID);
-            ps.closeOnCompletion();
+        ResultSet rs = cs.executeQuery();
 
-            ResultSet rs = ps.executeQuery();
-            result = true;
-
-            if (rs.first()) {
-                do {
-                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
-    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, boolean onlyAvailable, List<Annuncio> annuncioList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT * FROM `annuncio` WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)";
-            query = query.concat((onlyAvailable) ? " AND `venduto` IS NULL;" : ";");
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, descrizione);
-            ps.closeOnCompletion();
+        String query = "SELECT * " +
+                "FROM `annuncio` " +
+                "WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)" +
+                "AND ((NOT ?) OR `venduto` IS NULL);";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, descrizione);
+        ps.setBoolean(2, onlyAvailable);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
-            result = true;
+        ResultSet rs = ps.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
-    public static boolean selectAvailableAnnuncioByCategoria(Role role, String categoriaID, boolean onlyAvailable, List<Annuncio> annuncioList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
-            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setString(1, categoriaID);
-            cs.setBoolean(2, onlyAvailable);
-            cs.closeOnCompletion();
+        String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, categoriaID);
+        cs.setBoolean(2, onlyAvailable);
+        cs.closeOnCompletion();
 
-            ResultSet rs = cs.executeQuery();
-            result = true;
+        ResultSet rs = cs.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
-    /*
-    SEGUE
-     */
-    public static boolean insertSegue(Role role, Segue segue) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    // SEGUE
+    public static boolean insertSegue(Role role, Segue segue) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `seguire_annuncio`(?, ?)};";
-            CallableStatement cs = conn.prepareCall(call);
-            cs.setString(1, segue.getUtente());
-            cs.setLong(2, segue.getAnnuncio());
-            cs.closeOnCompletion();
+        String call = "{call `seguire_annuncio`(?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setString(1, segue.getUtente());
+        cs.setLong(2, segue.getAnnuncio());
+        cs.closeOnCompletion();
 
-            cs.execute();
+        cs.execute();
 
-            result = true;
-
-        } catch (SQLException e) {
-            if (e.getSQLState() == "45001") {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
+        return true;
     }
 
-    public static boolean deleteSegue(Role role, Segue segue) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean deleteSegue(Role role, String utenteID, Long annuncioID) throws SQLException {
+        openRoleConnection(role);
 
-            String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
-            PreparedStatement ps = conn.prepareStatement(update);
-            ps.setString(1, segue.getUtente());
-            ps.setLong(2, segue.getAnnuncio());
-            ps.closeOnCompletion();
+        String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
+        PreparedStatement ps = conn.prepareStatement(update);
+        ps.setString(1, utenteID);
+        ps.setLong(2, annuncioID);
+        ps.closeOnCompletion();
 
-            ps.execute();
-
-            result = true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (ps.executeUpdate() == 0) {
+            CustomSQLException e = new CustomSQLException();
+            e.setSQLState("45005");
+            e.setMessage("Annuncio non presente fra i seguiti");
+            throw e;
         }
 
-        return result;
+        return true;
     }
 
     public static BatchResult insertBatchSegue(Role role, List<Segue> listOfSegue) {
@@ -1036,102 +986,68 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID,
-                                                         List<Annuncio> annunciSeguitiModificatiList,
-                                                         boolean updateLastCheck, boolean deleteSold) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList, boolean updateLastCheck, boolean deleteSold) throws SQLException {
+        openRoleConnection(role);
 
-            String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
-            CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            cs.setString(1, utenteID);
-            cs.setBoolean(2, updateLastCheck);
-            cs.setBoolean(3, deleteSold);
+        String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, utenteID);
+        cs.setBoolean(2, updateLastCheck);
+        cs.setBoolean(3, deleteSold);
+        cs.closeOnCompletion();
 
-            ResultSet rs = cs.executeQuery();
-            result = true;
+        ResultSet rs = cs.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    Annuncio newAnnuncio = new Annuncio(rs.getLong(1), rs.getString(2), rs.getString(3),
-                            (long) (rs.getFloat(4) * 100), rs.getString(5),
-                            rs.getTimestamp(6).toLocalDateTime(), rs.getTimestamp(7).toLocalDateTime(),
-                            (rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
-                    annunciSeguitiModificatiList.add(newAnnuncio);
-                } while (rs.next());
-            }
-
-            cs.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                annunciSeguitiModificatiList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 
-    /*
-    COMMENTO
-     */
-    public static boolean insertCommento(Role role, Commento commento) throws AnnuncioVendutoException {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    // COMMENTO
+    public static boolean insertCommento(Role role, String utente, Long numero, String testo) throws SQLException {
+        openRoleConnection(role);
 
-            String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
-            CallableStatement cs = conn.prepareCall(callQuery);
-            cs.setString(1, commento.getUtente());
-            cs.setInt(2, (int) commento.getAnnuncio());
-            cs.setString(3, commento.getTesto());
+        String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
+        CallableStatement cs = conn.prepareCall(callQuery);
+        cs.setString(1, utente);
+        cs.setLong(2, numero);
+        cs.setString(3, testo);
+        cs.closeOnCompletion();
 
-            cs.executeUpdate();
+        cs.executeUpdate();
 
-            result = true;
-
-            cs.close();
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("45001")) {
-                throw new AnnuncioVendutoException();
-            } else {
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return true;
     }
 
-    /*
-    REPORT
-     */
-    public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
+    // REPORT
+    public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) throws SQLException {
+        openRoleConnection(role);
 
-            String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`" +
-                    " FROM `utente`;";
+        String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`" +
+                " FROM `utente`;";
 
-            /*
-            QUERY SENZA USARE ATTRIBUTI DI UTENTE
-            String query = "SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) as `percentuale`" +
-            "FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`" +
-            "GROUP BY `username`;";
-            */
+        /*
+        QUERY SENZA USARE ATTRIBUTI DI UTENTE
+        String query = "SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) as `percentuale`" +
+        "FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`" +
+        "GROUP BY `username`;";
+        */
 
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.closeOnCompletion();
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
-            result = true;
+        ResultSet rs = ps.executeQuery();
 
-            if (rs.first()) {
-                do {
-                    reportEntryList.add(new ReportEntry(rs.getString(1), rs.getFloat(2)));
-                } while (rs.next());
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (rs.first()) {
+            do {
+                reportEntryList.add(new ReportEntry(rs.getString(1), rs.getFloat(2)));
+            } while (rs.next());
         }
-        return result;
+
+        return true;
     }
 }

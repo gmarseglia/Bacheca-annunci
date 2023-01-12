@@ -57,7 +57,18 @@ public class Utente {
         this.anagrafica = anagrafica;
     }
 
-    public String getID(){
+    public String getID() {
         return this.username;
+    }
+
+    @Override
+    public String toString() {
+        return "Utente{" +
+                "username='" + username + '\'' +
+                ", annunci_inseriti=" + annunci_inseriti +
+                ", annunci_venduti=" + annunci_venduti +
+                ", credenziali=" + credenziali +
+                ", anagrafica=" + anagrafica +
+                '}';
     }
 }

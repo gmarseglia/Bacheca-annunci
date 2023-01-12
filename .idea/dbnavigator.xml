@@ -25,6 +25,13 @@
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files />
   </component>
+  <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="8b3f0ed7-6efc-4973-8b96-e62c4fc0c2a3" dataset="bacheca_annunci.annuncio" active-filter-id="">
+      <filter id="016dc80b-96e3-4628-b969-c8a1adc5c834" name="Filter 1" temporary="false" custom-name="false" type="basic" join-type="AND">
+        <condition column="numero" operator="=" value="" active="true" />
+      </filter>
+    </filter-actions>
+  </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
   </component>

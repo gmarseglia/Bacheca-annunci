@@ -12,6 +12,7 @@ DROP PROCEDURE IF EXISTS `seguire_annuncio`;
 DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`;
 DROP PROCEDURE IF EXISTS `get_all_child_categories`;
 DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`;
+DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`;
 
 DELIMITER !
 
@@ -108,6 +109,7 @@ END!
 CREATE PROCEDURE `dettagli_annuncio` (
 	in var_annuncio_id INT UNSIGNED)
 BEGIN
+	DECLARE counter INT;
 	declare exit handler for sqlexception
 	begin
 		rollback;
@@ -116,6 +118,15 @@ BEGIN
 
 	set transaction isolation level read committed;
 	start transaction;
+
+		SELECT COUNT(*) INTO counter
+		FROM `annuncio`
+		WHERE `numero`=var_annuncio_id;
+
+		IF (COUNTER <> 1) THEN
+			SIGNAL SQLSTATE "45004" SET message_text="Annuncio non esistente";
+		END IF;
+
 		select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`prezzo`,
 		`annuncio`.`categoria`, `annuncio`.`inserito`, `annuncio`.`modificato`, `annuncio`.`venduto`,
 		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
@@ -124,7 +135,8 @@ BEGIN
 	commit;
 END!
 
-CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED)
+CREATE PROCEDURE `vendere_annuncio` (
+	in var_annuncio_id INT UNSIGNED, in var_utente_id VARCHAR(30))
 BEGIN
 	declare counter INT;
 
@@ -143,15 +155,21 @@ BEGIN
 	if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
 	end if;
 
+	select count(`numero`) into counter
+		from `annuncio`
+		where `numero`=var_annuncio_id AND `inserzionista`=var_utente_id;
+
+	IF (counter<>1) THEN
+		SIGNAL SQLSTATE "45002" SET message_text="Utente non è inserzionista";
+	END IF;
+
 	update `annuncio`
 		set `venduto`=CURRENT_TIMESTAMP
 		where `numero`=var_annuncio_id;
 
 	update `utente`
 		set `annunci_venduti`=`annunci_venduti`+1
-		where `username`=(select `inserzionista`
-							from `annuncio`
-							where `numero`=var_annuncio_id);
+		where `username`=var_utente_id;
 
 	commit;
 END!
@@ -192,7 +210,8 @@ CREATE PROCEDURE `seguire_annuncio` (
     IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED
 )
 BEGIN
-    DECLARE counter INT;
+    DECLARE counter_totale INT;
+    DECLARE counter_venduto INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -203,13 +222,18 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-        SELECT COUNT(*)
-        INTO counter
-        FROM `annuncio`
-        WHERE `numero`=var_annuncio_id AND `venduto` IS NOT NULL;
 
-        IF (counter > 0) THEN
-            SIGNAL SQLSTATE '45001' SET message_text="Annuncio gia venduto.";
+        SELECT COUNT(*), COUNT(`venduto`)
+        INTO counter_totale, counter_venduto
+        FROM `annuncio`
+        WHERE `numero`=var_annuncio_id;
+
+        IF (counter_totale <> 1) THEN
+        	SIGNAL SQLSTATE '45004' SET message_text="Annuncio non esistente.";
+        END IF;
+
+        IF (counter_venduto = 1) THEN
+        	SIGNAL SQLSTATE '45001' SET message_text="Annuncio gia venduto.";
         END IF;
 
         INSERT INTO `segue` (`utente`, `annuncio`) VALUES (var_utente_id, var_annuncio_id);
@@ -302,7 +326,7 @@ CREATE PROCEDURE `select_annunci_categorie_figlie` (
     IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean
 )
 BEGIN
-    DECLARE counter INT DEFAULT 1;
+    DECLARE counter INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -312,6 +336,14 @@ BEGIN
 
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
+
+    	SELECT COUNT(*) INTO counter
+    	FROM `categoria`
+    	WHERE `nome`=var_categoria_id;
+
+    	IF (counter <> 1) THEN
+    		SIGNAL SQLSTATE "45003" SET message_text="ategoria non esistente";
+		END IF;	
 
         CREATE TEMPORARY TABLE `temp_categoria`
         SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
@@ -343,6 +375,36 @@ BEGIN
     COMMIT;
 END !
 
+CREATE PROCEDURE `select_annunci_by_inserzionista` (
+    IN var_inserzionista_id VARCHAR(30), IN var_solo_disponibili boolean
+)
+BEGIN
+    DECLARE counter INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    START TRANSACTION;
+
+        SELECT COUNT(*) INTO counter
+        FROM `utente`
+        WHERE `username`=var_inserzionista_id;
+
+        IF (counter <> 1) THEN
+            SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
+        END IF;
+
+        SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`, `venduto`
+        FROM `annuncio`
+        WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
+
+    COMMIT;
+END !
+
 DELIMITER ;
 
 -- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
@@ -365,3 +427,5 @@ GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `gestore`;
 GRANT EXECUTE ON PROCEDURE `get_all_child_categories` TO `gestore`;
 GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `base`;
 GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `gestore`;
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `base`;
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`;
