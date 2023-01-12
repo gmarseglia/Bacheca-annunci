@@ -414,6 +414,7 @@ public class ViewUtente {
             System.out.println("Recapito preferito:");
             //TODO: issue #25
             System.out.println(recapitoList.get(0));
+            System.out.println("Altri recapiti:");
             for (Recapito recapito : recapitoList.subList(1, recapitoList.size())) {
                 //TODO: issue #25
                 System.out.println(recapito);
