@@ -100,16 +100,14 @@ public class ViewUtente {
 
             dispatch(operation);
 
-            System.out.print("Log out dall'applicazione... ");
-            ActiveUser.setRole(Role.REGISTRATORE);
-            ActiveUser.setUsername(null);
-            System.out.println("terminato con successo.");
-            ScannerUtility.askAny();
-            ViewLogin.main(null);
-
-
         } while (operation != OPERATION.LOGOUT);
 
+        System.out.print("Log out dall'applicazione... ");
+        ActiveUser.setRole(Role.REGISTRATORE);
+        ActiveUser.setUsername(null);
+        System.out.println("terminato con successo.");
+        ScannerUtility.askAny();
+        ViewLogin.main(null);
     }
 
     protected static void dispatch(OPERATION operation) {
