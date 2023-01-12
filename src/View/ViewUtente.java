@@ -27,6 +27,7 @@ public class ViewUtente {
         MESSAGGI_CON_UTENTE,            //M0100
         VISUALIZZARE_UTENTI_CON_MESSAGGI,              //M0101
         SCRIVERE_COMMENTO,              //C0000
+        VISUALIZZARE_CATEGORIE,         //T0000
         CREARE_CATEGORIA,               //G0000
         CREARE_REPORT,                  //R0001
         TERMINARE_APPLICAZIONE;
@@ -48,8 +49,9 @@ public class ViewUtente {
                 case "c", "C" -> VISUALIZZARE_UTENTI_CON_MESSAGGI;
                 case "d", "D" -> MESSAGGI_CON_UTENTE;
                 case "e", "E" -> INVIARE_MESSAGGIO;
-                case "f", "F" -> CREARE_CATEGORIA;
-                case "g", "G" -> CREARE_REPORT;
+                case "f", "F" -> VISUALIZZARE_CATEGORIE;
+                case "g", "G" -> CREARE_CATEGORIA;
+                case "h", "H" -> CREARE_REPORT;
                 case "u", "U" -> TERMINARE_APPLICAZIONE;
                 default -> null;
             };
@@ -72,8 +74,9 @@ public class ViewUtente {
             (C) Visualizzare utenti con cui sono stati scambiati messaggi privati.
             (D) Visualizzare tutti i messaggi privati scambiati con un utente.
             (E) Inviare un messaggio privato ad un utente.
-            (F) Creare una categoria.
-            (G) Generare report sulla percentuale di vendita degli utenti.
+            (F) Visualizzare le categorie.
+            (G) Creare una categoria.
+            (H) Generare report sulla percentuale di vendita degli utenti.
             (U) Uscire dall'applicazione.
             """;
 
@@ -114,6 +117,7 @@ public class ViewUtente {
             case VISUALIZZARE_UTENTI_CON_MESSAGGI -> visualizzareUtentiConMessaggi();
             case MESSAGGI_CON_UTENTE -> visualizzareMessaggiConUtente();
             case INVIARE_MESSAGGIO -> inviareMessaggio();
+            case VISUALIZZARE_CATEGORIE -> visualizzareCategorie();
             case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
             case TERMINARE_APPLICAZIONE -> {
                 System.out.println("Uscita dall'applicazione.");
@@ -132,6 +136,34 @@ public class ViewUtente {
             case CREARE_CATEGORIA -> creareCategoria();
             case CREARE_REPORT -> creareReport();
         }
+    }
+
+    // (F)
+    private static void visualizzareCategorie() {
+        Boolean confirmOp = null;
+        do {
+            switch (ScannerUtility.askFirstChar("Visualizzare tutte le categorie?\n" +
+                    "Procedere? (S)i, (N)o")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+            }
+        } while (confirmOp == null);
+
+        if (!confirmOp) return;
+
+        System.out.print("Ricerca delle categorie... ");
+
+        List<Categoria> categoriaList = new ArrayList<>();
+        DBResult dbResult = BaseController.visualizzareCategorie(categoriaList);
+
+        printResult(dbResult, () -> {
+            System.out.println("Lista delle categorie:");
+            for(Categoria categoria : categoriaList)
+                //TODO: issue #31
+                System.out.println(categoria);
+        });
+
+        ScannerUtility.askAny();
     }
 
     private static void creareReport() {

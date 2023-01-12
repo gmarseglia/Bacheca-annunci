@@ -203,4 +203,14 @@ public class BaseController {
         }
         return dbResult;
     }
+
+    public static DBResult visualizzareCategorie(List<Categoria> categoriaList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectCategoria(ActiveUser.getRole(), categoriaList));
+        } catch (SQLException e) {
+            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+        }
+        return dbResult;
+    }
 }

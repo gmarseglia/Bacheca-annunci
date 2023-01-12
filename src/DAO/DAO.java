@@ -623,6 +623,24 @@ public class DAO {
     }
 
     // CATEGORIA
+    public static boolean selectCategoria(Role role, List<Categoria> categoriaList) throws SQLException {
+        openRoleConnection(role);
+
+        String query = "SELECT `nome`,`padre` FROM `categoria`;";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.closeOnCompletion();
+
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.first()) {
+            do {
+                categoriaList.add(new Categoria(rs.getString(1), rs.getString(2)));
+            } while (rs.next());
+        }
+
+        return true;
+    }
+
     public static boolean insertCategoria(Role role, String nomeCategoria, String nomePadre) throws SQLException {
         openRoleConnection(role);
 

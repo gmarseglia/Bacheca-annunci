@@ -32,4 +32,14 @@ public class Categoria {
     public String getID() {
         return this.nome;
     }
+
+    @Override
+    public String toString() {
+        return "Categoria{" +
+                "nome='" + nome + '\'' +
+                ", padre='" + padre + '\'' +
+                '}';
+    }
 }
+
+
