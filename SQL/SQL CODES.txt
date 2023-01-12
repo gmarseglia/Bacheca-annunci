@@ -7,3 +7,4 @@ SQL CODES
 45006	->	Utente non esistente
 45007	->	Enum error
 45008	->	Messaggi con l'utente non esistenti
+45009	-> 	Messaggio non valido

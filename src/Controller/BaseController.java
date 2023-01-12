@@ -64,6 +64,7 @@ public class BaseController {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45006", "23000" ->
                         String.format("Il destinatario \"%s\" non esiste (%s)", usernameDestinatario, e.getMessage());
+                case "45009" -> String.format("Il destinatario deve essere diverso dal mittente (%s)", e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
