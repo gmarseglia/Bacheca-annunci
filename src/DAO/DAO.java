@@ -59,12 +59,9 @@ public class DAO {
         }
     }
 
-    public static void closeConnection() {
-        try {
+    public static void closeConnection() throws SQLException {
+        if (conn != null)
             conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     // LOGIN E REGISTRAZIONE

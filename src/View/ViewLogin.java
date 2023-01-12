@@ -1,6 +1,7 @@
 package View;
 
 
+import Controller.DatabaseConnectionController;
 import Controller.RegistrationController;
 import DAO.BatchResult;
 import DAO.DBResult;
@@ -38,6 +39,10 @@ public class ViewLogin {
                 case LOGIN -> login();
                 case REGISTRATION -> register();
                 case EXIT -> {
+                    System.out.println("Chiusura della connessione con il database.");
+                    String message = DatabaseConnectionController.closeConnection();
+                    if (message != null)
+                        System.out.println(message);
                     System.out.println("Uscita dall'applicazione.");
                     System.exit(0);
                 }

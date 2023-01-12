@@ -1,6 +1,7 @@
 package View;
 
 import Controller.BaseController;
+import Controller.DatabaseConnectionController;
 import Controller.GestoreController;
 import DAO.DBResult;
 import Model.*;
@@ -120,6 +121,10 @@ public class ViewUtente {
             case VISUALIZZARE_CATEGORIE -> visualizzareCategorie();
             case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
             case TERMINARE_APPLICAZIONE -> {
+                System.out.println("Chiusura della connessione con il database.");
+                String message = DatabaseConnectionController.closeConnection();
+                if (message != null)
+                    System.out.println(message);
                 System.out.println("Uscita dall'applicazione.");
                 System.exit(0);
             }
