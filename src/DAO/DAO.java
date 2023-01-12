@@ -569,32 +569,25 @@ public class DAO {
         return new BatchResult(singlesResult);
     }
 
-    public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) {
-        boolean result = false;
-        try {
-            openRoleConnection(role);
-            String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
-                    "UNION " +
-                    "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
-            PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ps.setString(1, targetUtente);
-            ps.setString(2, targetUtente);
+    public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) throws SQLException, RuntimeException {
+        openRoleConnection(role);
+        String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
+                "UNION " +
+                "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setString(1, targetUtente);
+        ps.setString(2, targetUtente);
+        ps.closeOnCompletion();
 
-            ResultSet rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
-            if (!rs.first()) throw new RuntimeException("Empty result set.");
-
+        if (rs.first()) {
             do {
                 utenteIDList.add(rs.getString(1));
             } while (rs.next());
-
-            result = true;
-
-            ps.close();
-        } catch (SQLException | RuntimeException e) {
-            e.printStackTrace();
         }
-        return result;
+
+        return true;
     }
 
     public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) {

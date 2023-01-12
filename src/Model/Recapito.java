@@ -42,4 +42,13 @@ public class Recapito {
     public String getAnagraficaID() {
         return this.anagrafica;
     }
+
+    @Override
+    public String toString() {
+        return "Recapito{" +
+                "valore='" + valore + '\'' +
+                ", tipo=" + tipo +
+                ", anagrafica='" + anagrafica + '\'' +
+                '}';
+    }
 }

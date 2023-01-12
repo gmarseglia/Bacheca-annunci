@@ -5,9 +5,7 @@ import Controller.GestoreController;
 import Controller.RegistrationController;
 import DAO.DAO;
 import Model.*;
-import Model.Exception.AnnuncioVendutoException;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +168,7 @@ public class ViewControllerTest {
         printResult("Scrivere Messaggio Privato", messageResult);
 
         List<String> utenteIDList = new ArrayList<>();
-        boolean chatResult = BaseController.visualizzareChat(utente.getID(), utenteIDList);
+        boolean chatResult = BaseController.visualizzareUtentiConMessaggi(utenteIDList).getResult();
         printResult("Visualizzare chat", chatResult, utenteIDList);
 
         List<MessaggioPrivato> messaggioPrivatoList = new ArrayList<>();

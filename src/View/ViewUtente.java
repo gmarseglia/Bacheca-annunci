@@ -4,7 +4,6 @@ import Controller.BaseController;
 import Controller.GestoreController;
 import DAO.DBResult;
 import Model.*;
-import Model.Exception.AnnuncioVendutoException;
 import Utility.RndData;
 import Utility.ScannerUtility;
 
@@ -26,7 +25,7 @@ public class ViewUtente {
         DETTAGLI_UTENTE,         //A0600
         INVIARE_MESSAGGIO,              //M0000
         MESSAGGI_CON_UTENTE,            //M0100
-        VISUALIZZARE_CHAT,              //M0101
+        VISUALIZZARE_UTENTI_CON_MESSAGGI,              //M0101
         SCRIVERE_COMMENTO,              //C0000
         CREARE_CATEGORIA,               //G0000
         CREARE_REPORT,                  //R0001
@@ -46,7 +45,7 @@ public class ViewUtente {
                 case "9" -> CONTROLLARE_SEGUITI;
                 case "a", "A" -> DETTAGLI_UTENTE;
                 case "b", "B" -> SCRIVERE_COMMENTO;
-                case "c", "C" -> VISUALIZZARE_CHAT;
+                case "c", "C" -> VISUALIZZARE_UTENTI_CON_MESSAGGI;
                 case "d", "D" -> MESSAGGI_CON_UTENTE;
                 case "e", "E" -> INVIARE_MESSAGGIO;
                 case "f", "F" -> CREARE_CATEGORIA;
@@ -112,8 +111,8 @@ public class ViewUtente {
             case CONTROLLARE_SEGUITI -> controllareSeguiti();
             case DETTAGLI_UTENTE -> dettagliUtente();
             case SCRIVERE_COMMENTO -> scrivereCommento();
-            case VISUALIZZARE_CHAT -> visualizzareChat();
-            case MESSAGGI_CON_UTENTE -> messaggiConUtente();
+            case VISUALIZZARE_UTENTI_CON_MESSAGGI -> visualizzareUtentiConMessaggi();
+            case MESSAGGI_CON_UTENTE -> visualizzareMessaggiConUtente();
             case INVIARE_MESSAGGIO -> inviareMessaggio();
             case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
             case TERMINARE_APPLICAZIONE -> {
@@ -424,16 +423,37 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    private static void messaggiConUtente() {
+    private static void visualizzareMessaggiConUtente() {
         /*
         #TODO
          */
     }
 
-    private static void visualizzareChat() {
-        /*
-        #TODO
-         */
+    // (C)
+    private static void visualizzareUtentiConMessaggi() {
+        Boolean confirmOp = null;
+        do {
+            switch (ScannerUtility.askFirstChar("Visualizzare gli utenti con cui ci sono dei messaggi?\n" +
+                    "Procedere? (S)i, (N)o")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+            }
+        } while (confirmOp == null);
+
+        if (!confirmOp) return;
+
+        List<String> usernameList = new ArrayList<>();
+
+        System.out.println("Ricerca degli utenti con messaggi scambiati... ");
+
+        DBResult dbResult = BaseController.visualizzareUtentiConMessaggi(usernameList);
+
+        printResult(dbResult, () -> {
+            System.out.println("Utenti con messaggi scambiati:");
+            for (String username : usernameList) System.out.printf("\t%s\n", username);
+        });
+
+        ScannerUtility.askAny();
     }
 
     private static void inviareMessaggio() {

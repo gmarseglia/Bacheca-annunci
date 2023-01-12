@@ -3,7 +3,6 @@ package Controller;
 import DAO.DAO;
 import DAO.DBResult;
 import Model.*;
-import Model.Exception.AnnuncioVendutoException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -60,8 +59,14 @@ public class BaseController {
         return DAO.insertMessaggio(ActiveUser.getRole(), messaggioPrivato);
     }
 
-    public static boolean visualizzareChat(String utenteID, List<String> utenteIDList) {
-        return DAO.selectUtentiConMessaggi(ActiveUser.getRole(), utenteID, utenteIDList);
+    public static DBResult visualizzareUtentiConMessaggi(List<String> utenteIDList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectUtentiConMessaggi(ActiveUser.getRole(), ActiveUser.getUsername(), utenteIDList));
+        } catch (SQLException e) {
+            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+        }
+        return dbResult;
     }
 
     public static boolean visualizzareMessaggi(String utenteID1, String utenteID2, List<MessaggioPrivato> messaggioPrivatoList) {
