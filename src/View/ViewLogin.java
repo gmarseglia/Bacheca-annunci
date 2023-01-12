@@ -26,25 +26,29 @@ public class ViewLogin {
         try {
             ActiveUser.setRole(Role.REGISTRATORE);
 
-            MODE selectedMode = null;
-            do {
-                switch (ScannerUtility.askFirstChar("(L)ogin, (R)egistrazione o (U)scire?")) {
-                    case "l", "L" -> selectedMode = MODE.LOGIN;
-                    case "r", "R" -> selectedMode = MODE.REGISTRATION;
-                    case "u", "U" -> selectedMode = MODE.EXIT;
-                }
-            } while (selectedMode == null);
+            MODE selectedMode;
 
-            switch (selectedMode) {
-                case LOGIN -> login();
-                case REGISTRATION -> register();
-                case EXIT -> {
-                    System.out.println("Chiusura della connessione con il database.");
-                    String message = DatabaseConnectionController.closeConnection();
-                    if (message != null)
-                        System.out.println(message);
-                    System.out.println("Uscita dall'applicazione.");
-                    System.exit(0);
+            while (true) {
+                selectedMode = null;
+                do {
+                    switch (ScannerUtility.askFirstChar("(L)ogin, (R)egistrazione o (U)scire?")) {
+                        case "l", "L" -> selectedMode = MODE.LOGIN;
+                        case "r", "R" -> selectedMode = MODE.REGISTRATION;
+                        case "u", "U" -> selectedMode = MODE.EXIT;
+                    }
+                } while (selectedMode == null);
+
+                switch (selectedMode) {
+                    case LOGIN -> login();
+                    case REGISTRATION -> register();
+                    case EXIT -> {
+                        System.out.println("Chiusura della connessione con il database.");
+                        String message = DatabaseConnectionController.closeConnection();
+                        if (message != null)
+                            System.out.println(message);
+                        System.out.println("Uscita dall'applicazione.");
+                        System.exit(0);
+                    }
                 }
             }
 

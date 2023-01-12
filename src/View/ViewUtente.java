@@ -30,6 +30,7 @@ public class ViewUtente {
         VISUALIZZARE_CATEGORIE,         //T0000
         CREARE_CATEGORIA,               //G0000
         CREARE_REPORT,                  //R0001
+        LOGOUT,
         TERMINARE_APPLICAZIONE;
 
 
@@ -52,6 +53,7 @@ public class ViewUtente {
                 case "f", "F" -> VISUALIZZARE_CATEGORIE;
                 case "g", "G" -> CREARE_CATEGORIA;
                 case "h", "H" -> CREARE_REPORT;
+                case "l", "L" -> LOGOUT;
                 case "u", "U" -> TERMINARE_APPLICAZIONE;
                 default -> null;
             };
@@ -77,6 +79,7 @@ public class ViewUtente {
             (F) Visualizzare le categorie.
             (G) Creare una categoria.
             (H) Generare report sulla percentuale di vendita degli utenti.
+            (L) Log out.
             (U) Uscire dall'applicazione.
             """;
 
@@ -86,18 +89,26 @@ public class ViewUtente {
         begin();
     }
 
-    @SuppressWarnings("InfiniteLoopStatement")
     public static void begin() {
 
         OPERATION operation;
-        while (true) {
+        do {
             System.out.println();
             do {
                 operation = OPERATION.dispatchMap(ScannerUtility.askFirstChar(MAIN_DISPATCH));
             } while (operation == null);
 
             dispatch(operation);
-        }
+
+            System.out.print("Log out dall'applicazione... ");
+            ActiveUser.setRole(Role.REGISTRATORE);
+            ActiveUser.setUsername(null);
+            System.out.println("terminato con successo.");
+            ScannerUtility.askAny();
+            ViewLogin.main(null);
+
+
+        } while (operation != OPERATION.LOGOUT);
 
     }
 
