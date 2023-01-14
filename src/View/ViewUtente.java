@@ -374,7 +374,6 @@ public class ViewUtente {
 
         printResult(dbResult, () -> {
             for (Annuncio annuncio : foundAnnunciList) {
-                //TESTME: Issue 21
                 System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             }
         });
@@ -622,7 +621,6 @@ public class ViewUtente {
         DBResult dbResult = BaseController.dettagliAnnuncio(annuncio, commentoList);
         if (dbResult.getResult()) {
             System.out.println("terminata con successo.");
-            //TESTME: Issue #21
             System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             for (Commento commento : commentoList)
                 //TODO: Issue #22
