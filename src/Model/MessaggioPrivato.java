@@ -1,6 +1,7 @@
 package Model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class MessaggioPrivato {
     private String mittente;
@@ -55,5 +56,13 @@ public class MessaggioPrivato {
                 ", inviato=" + inviato +
                 ", testo='" + testo + '\'' +
                 '}';
+    }
+
+    public String toPrettyString(String dateTimeFormat) {
+        return String.format("""
+                        %s ha scritto il %s:
+                        \t%s""",
+                mittente, (dateTimeFormat == null) ? inviato : inviato.format(DateTimeFormatter.ofPattern(dateTimeFormat)),
+                testo + (testo.endsWith(".") ? "" : "."));
     }
 }

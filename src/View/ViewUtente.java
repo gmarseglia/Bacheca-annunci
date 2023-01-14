@@ -519,8 +519,8 @@ public class ViewUtente {
         printResult(dbResult, () -> {
             System.out.println("Messaggi:");
             for (MessaggioPrivato messaggioPrivato : messaggioPrivatoList)
-                //TODO: issue #26
-                System.out.println(messaggioPrivato);
+                //TESTME: issue #26
+                System.out.println(messaggioPrivato.toPrettyString(DATETIME_FORMAT));
         });
 
         ScannerUtility.askAny();
