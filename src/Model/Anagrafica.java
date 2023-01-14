@@ -1,6 +1,7 @@
 package Model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Anagrafica {
     private String codiceFiscale;
@@ -116,5 +117,24 @@ public class Anagrafica {
                 ", indirizzoResidenza='" + indirizzoResidenza + '\'' +
                 ", indirizzoFatturazione='" + indirizzoFatturazione + '\'' +
                 '}';
+    }
+
+    public String toPrettyString(String dateFormat) {
+        return String.format("""
+                Codice fiscale: %s
+                Nome e Cognome: %s %s
+                Sesso: %s
+                Nat%s il: %s a %s
+                Indirizzo di residenza: %s
+                Indirizzo di fatturazione: %s
+                """,
+                codiceFiscale,
+                nome, cognome,
+                sesso,
+                (sesso == Sesso.DONNA) ? "a" : "o", (dateFormat == null) ? dataNascita : dataNascita.format(DateTimeFormatter.ofPattern(dateFormat)),
+                comuneNascita,
+                indirizzoResidenza,
+                (indirizzoFatturazione == null) ? indirizzoResidenza : indirizzoFatturazione
+                );
     }
 }

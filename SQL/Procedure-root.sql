@@ -186,7 +186,7 @@ BEGIN
 	start transaction;
 
 		select `u`.`annunci_inseriti`, `u`.`annunci_venduti`,
-			`a`.`codice_fiscale`, `a`.`nome` ,`a`.`cognome`, `a`.`sesso`, `a`.`data_nascita`, `a`.`indirizzo_residenza`, `a`.`indirizzo_fatturazione`,
+			`a`.`codice_fiscale`, `a`.`nome` ,`a`.`cognome`, `a`.`sesso`, `a`.`data_nascita`, `a`.`comune_nascita`, `a`.`indirizzo_residenza`, `a`.`indirizzo_fatturazione`,
 			`r`.`valore`, `r`.`tipo`
 		from `utente` as `u`
 			inner join `anagrafica` as `a` on `u`.`username` = `a`.`utente`

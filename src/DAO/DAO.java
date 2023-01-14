@@ -153,17 +153,18 @@ public class DAO {
         anagrafica.setNome(rs.getString(4));
         anagrafica.setCognome(rs.getString(5));
         anagrafica.setSesso(switch (rs.getString(6)) {
-            case "uomo" -> Sesso.UOMO;
-            case "donna" -> Sesso.DONNA;
+            case "uomo", "Uomo" -> Sesso.UOMO;
+            case "donna", "Donna" -> Sesso.DONNA;
             default -> null;
         });
         anagrafica.setDataNascita(rs.getTimestamp(7).toLocalDateTime().toLocalDate());
-        anagrafica.setIndirizzoResidenza(rs.getString(8));
-        anagrafica.setIndirizzoFatturazione(rs.getString(9));
+        anagrafica.setComuneNascita(rs.getString(8));
+        anagrafica.setIndirizzoResidenza(rs.getString(9));
+        anagrafica.setIndirizzoFatturazione(rs.getString(10));
 
         Recapito recapitoPreferito = new Recapito();
-        recapitoPreferito.setValore(rs.getString(10));
-        recapitoPreferito.setTipo(switch (rs.getString(11)) {
+        recapitoPreferito.setValore(rs.getString(11));
+        recapitoPreferito.setTipo(switch (rs.getString(12)) {
             case "telefono" -> TipoRecapito.TELEFONO;
             case "cellulare" -> TipoRecapito.CELLULARE;
             case "email" -> TipoRecapito.EMAIL;

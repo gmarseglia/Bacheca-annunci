@@ -84,6 +84,7 @@ public class ViewUtente {
             """;
 
     private static final String DATETIME_FORMAT = "dd-MM-yyyy 'alle' HH:mm:ss";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     public static void main(String[] args) {
         ActiveUser.setUsername("user");
@@ -442,10 +443,10 @@ public class ViewUtente {
         DBResult dbResult = BaseController.dettagliUtente(targetUtente, anagrafica, recapitoList);
 
         printResult(dbResult, () -> {
-            //TODO: issue #23
-            System.out.println(targetUtente);
-            //TODO: issue #24
-            System.out.println(anagrafica);
+            System.out.println("\nDati di " + targetUsername + ":");
+            //TESTME: issue #24
+            System.out.println(anagrafica.toPrettyString(DATE_FORMAT));
+//            System.out.println(anagrafica);
             System.out.println("Recapito preferito:");
             //TODO: issue #25
             System.out.println(recapitoList.get(0));
