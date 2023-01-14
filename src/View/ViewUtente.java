@@ -445,14 +445,13 @@ public class ViewUtente {
         printResult(dbResult, () -> {
             System.out.println("\nDati di " + targetUsername + ":");
             System.out.println(anagrafica.toPrettyString(DATE_FORMAT));
-//            System.out.println(anagrafica);
+
             System.out.println("Recapito preferito:");
-            //TODO: issue #25
-            System.out.println(recapitoList.get(0));
+            System.out.println(recapitoList.get(0).toPrettyString(false));
+
             System.out.println("Altri recapiti:");
             for (Recapito recapito : recapitoList.subList(1, recapitoList.size())) {
-                //TODO: issue #25
-                System.out.println(recapito);
+                System.out.println(recapito.toPrettyString(false));
             }
         });
 

@@ -51,4 +51,17 @@ public class Recapito {
                 ", anagrafica='" + anagrafica + '\'' +
                 '}';
     }
+
+    public String toPrettyString(boolean printAnagrafica) {
+        return String.format("""
+                        Recapito "%s" di tipo %s%s
+                        """,
+                valore,
+                switch (tipo) {
+                    case EMAIL -> "email";
+                    case CELLULARE -> "cellulare";
+                    case TELEFONO -> "telefono";
+                },
+                (printAnagrafica ? " riferito a " + anagrafica : "") + ".");
+    }
 }
