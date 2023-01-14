@@ -552,7 +552,7 @@ public class DAO {
     public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) throws SQLException {
         openRoleConnection(role);
 
-        String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`" +
+        String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`, `annunci_inseriti`" +
                 " FROM `utente`;";
 
         /*
@@ -569,7 +569,7 @@ public class DAO {
 
         if (rs.first()) {
             do {
-                reportEntryList.add(new ReportEntry(rs.getString(1), rs.getFloat(2)));
+                reportEntryList.add(new ReportEntry(rs.getString(1), rs.getFloat(2), rs.getInt(3)));
             } while (rs.next());
         }
 

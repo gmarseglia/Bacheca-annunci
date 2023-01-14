@@ -202,8 +202,8 @@ public class ViewUtente {
         printResult(dbResult, () -> {
             System.out.println("\nReport per utenti:");
             for (ReportEntry reportEntry : reportEntries)
-                //TODO: issue #33
-                System.out.println(reportEntry);
+                //TESTME: issue #33
+                System.out.println(reportEntry.toPrettyString());
         });
 
         ScannerUtility.askAny();

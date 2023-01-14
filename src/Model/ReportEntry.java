@@ -3,10 +3,12 @@ package Model;
 public class ReportEntry {
     private String utente;
     private Float percentuale;
+    private Integer venduti;
 
-    public ReportEntry(String utente, Float percentuale) {
+    public ReportEntry(String utente, Float percentuale, Integer venduti) {
         this.utente = utente;
         this.percentuale = percentuale;
+        this.venduti = venduti;
     }
 
     public String getUtente() {
@@ -25,11 +27,25 @@ public class ReportEntry {
         this.percentuale = percentuale;
     }
 
+    public Integer getVenduti() {
+        return venduti;
+    }
+
+    public void setVenduti(Integer venduti) {
+        this.venduti = venduti;
+    }
+
     @Override
     public String toString() {
         return "ReportEntry{" +
                 "utente='" + utente + '\'' +
                 ", percentuale=" + percentuale +
+                ", venduti=" + venduti +
                 '}';
+    }
+
+    public String toPrettyString() {
+        return String.format("\"%s\" ha venduto il %.1f%% su %d annunci inseriti.",
+                utente, percentuale, venduti);
     }
 }
