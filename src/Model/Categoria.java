@@ -40,6 +40,12 @@ public class Categoria {
                 ", padre='" + padre + '\'' +
                 '}';
     }
+
+    public String toPrettyString() {
+        return String.format("Categoria \"%s\" figlia di %s.",
+                this.nome,
+                (this.padre == null) ? "nessuna categoria" : "\"" + this.getPadre() + "\"");
+    }
 }
 
 

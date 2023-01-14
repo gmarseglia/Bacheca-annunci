@@ -173,8 +173,7 @@ public class ViewUtente {
         printResult(dbResult, () -> {
             System.out.println("Lista delle categorie:");
             for (Categoria categoria : categoriaList)
-                //TODO: issue #31
-                System.out.println(categoria);
+                System.out.println(categoria.toPrettyString());
         });
 
         ScannerUtility.askAny();
