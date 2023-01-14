@@ -350,7 +350,7 @@ public class DAO {
 
         cs.setString(1, annuncio.getInserzionista());
         cs.setString(2, annuncio.getDescrizione());
-        cs.setFloat(3, annuncio.getPrice());
+        cs.setFloat(3, annuncio.getPrezzo());
         cs.setString(4, annuncio.getCategoria());
         cs.registerOutParameter(5, Types.INTEGER);
         cs.closeOnCompletion();
@@ -377,7 +377,7 @@ public class DAO {
             annuncio.setNumero(rs.getLong(1));
             annuncio.setInserzionista(rs.getString(2));
             annuncio.setDescrizione(rs.getString(3));
-            annuncio.setPrice((rs.getFloat(4)));
+            annuncio.setPrezzo((rs.getFloat(4)));
             annuncio.setCategoria(rs.getString(5));
             annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
             annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());

@@ -83,6 +83,8 @@ public class ViewUtente {
             (U) [USCIRE] dall'applicazione.
             """;
 
+    private static final String DATETIME_FORMAT = "dd-MM-yyyy 'alle' HH:mm:ss";
+
     public static void main(String[] args) {
         ActiveUser.setUsername("user");
         ActiveUser.setRole(Role.GESTORE);
@@ -340,9 +342,9 @@ public class ViewUtente {
         DBResult dbResult = BaseController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
-            System.out.print("terminata con successo.\n");
+            System.out.print("terminata con successo.\nLista degli annunci:\n\n");
             for (Annuncio annuncio : foundAnnunciList) {
-                System.out.println(annuncio);
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             }
         } else {
             System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
@@ -372,8 +374,8 @@ public class ViewUtente {
 
         printResult(dbResult, () -> {
             for (Annuncio annuncio : foundAnnunciList) {
-                //TODO: Issue 21
-                System.out.println(annuncio);
+                //TESTME: Issue 21
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             }
         });
 
@@ -620,8 +622,8 @@ public class ViewUtente {
         DBResult dbResult = BaseController.dettagliAnnuncio(annuncio, commentoList);
         if (dbResult.getResult()) {
             System.out.println("terminata con successo.");
-            //TODO: Issue #21
-            System.out.println(annuncio);
+            //TESTME: Issue #21
+            System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             for (Commento commento : commentoList)
                 //TODO: Issue #22
                 System.out.println(commento);
