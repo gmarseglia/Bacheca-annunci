@@ -444,7 +444,6 @@ public class ViewUtente {
 
         printResult(dbResult, () -> {
             System.out.println("\nDati di " + targetUsername + ":");
-            //TESTME: issue #24
             System.out.println(anagrafica.toPrettyString(DATE_FORMAT));
 //            System.out.println(anagrafica);
             System.out.println("Recapito preferito:");
