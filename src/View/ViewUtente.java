@@ -623,8 +623,7 @@ public class ViewUtente {
             System.out.println("terminata con successo.");
             System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             for (Commento commento : commentoList)
-                //TODO: Issue #22
-                System.out.println(commento);
+                System.out.println(commento.toPrettyString(DATETIME_FORMAT, false));
         } else {
             System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
         }

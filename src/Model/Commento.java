@@ -1,6 +1,7 @@
 package Model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Commento {
     private String utente;
@@ -55,5 +56,15 @@ public class Commento {
                 ", scritto=" + scritto +
                 ", testo='" + testo + '\'' +
                 '}';
+    }
+
+    public String toPrettyString(String dateTimeFormat, boolean printAnnuncio) {
+        return String.format("""
+                        "%s" ha commentato %s %s:
+                        \t%s""",
+                utente, ((printAnnuncio) ? "sotto l'annuncio " + annuncio : "") + " il",
+                (dateTimeFormat == null) ? scritto : scritto.format(DateTimeFormatter.ofPattern(dateTimeFormat)),
+                testo
+        );
     }
 }
