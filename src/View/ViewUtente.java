@@ -62,25 +62,25 @@ public class ViewUtente {
 
     private static final String MAIN_DISPATCH = """
             Operazioni possibili:
-            (1) Inserire un annuncio.
-            (2) Indicare un annuncio inserito come venduto.
-            (3) Cercare gli annunci di un utente.
-            (4) Cercare gli annunci disponibili per categoria.
-            (5) Cercare gli annunci disponibili per descrizione.
-            (6) Visualizzare i dettagli di un annuncio.
-            (7) Aggiungere un annuncio disponibile ai "seguiti".
-            (8) Rimuovere un annuncio dai "seguiti".
-            (9) Controllare quali annunci "seguiti" hanno subito modifiche.
-            (A) Visualizzare i dettagli di un utente.
-            (B) Scrivere un commento sotto un annuncio disponibile.
-            (C) Visualizzare utenti con cui sono stati scambiati messaggi privati.
-            (D) Visualizzare tutti i messaggi privati scambiati con un utente.
-            (E) Inviare un messaggio privato ad un utente.
-            (F) Visualizzare le categorie.
-            (G) Creare una categoria.
-            (H) Generare report sulla percentuale di vendita degli utenti.
-            (L) Log out.
-            (U) Uscire dall'applicazione.
+            (1) [INSERIRE] un ANNUNCIO.
+            (2) [INDICARE come VENDUTO] un annuncio inserito.
+            (3) [CERCARE per UTENTE] gli annunci.
+            (4) [CERCARE per CATEGORIA] gli annunci.
+            (5) [CERCARE per DESCRIZIONE] gli annunci disponibili.
+            (6) Visualizzare i [DETTAGLI di un ANNUNCIO].
+            (7) [AGGIUNGERE ai "SEGUITI"] un annuncio disponibile .
+            (8) [RIMUOVERE dai "SEGUITI"] un annuncio.
+            (9) [CONTROLLARE fra i "SEGUITI"] quali annunci hanno subito modifiche.
+            (A) Visualizzare i [DETTAGLI di un UTENTE].
+            (B) [SCRIVERE un COMMENTO] sotto un annuncio disponibile.
+            (C) Visualizzare utenti con cui sono stati [SCAMBIATI MESSAGGI PRIVATI].
+            (D) Visualizzare tutti i [MESSAGGI PRIVATI scambiati CON un UTENTE].
+            (E) [INVIARE un MESSAGGIO PRIVATO] ad un utente.
+            (F) [VISUALIZZARE le CATEGORIE].
+            (G) [CREARE una CATEGORIA].
+            (H) [GENERARE REPORT] sulla percentuale di vendita degli utenti.
+            (L) [LOGOUT].
+            (U) [USCIRE] dall'applicazione.
             """;
 
     public static void main(String[] args) {
