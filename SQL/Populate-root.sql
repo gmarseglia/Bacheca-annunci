@@ -85,16 +85,16 @@ DELETE FROM `annuncio`;
 ALTER TABLE `annuncio` AUTO_INCREMENT = 1;
 
 INSERT INTO `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`) VALUES
-	('user1', 'Abito lungo verde.', 100.00, 'Indumenti', '2023-01-01 12:00:00', '2023-01-06 12:00:00'),
+	('user1', 'Abito lungo verde.', 100.00, 'Indumenti', '2023-01-01 12:00:00', '2023-01-06 22:00:00'),
 	('user1', 'Jeans.', 25.00, 'Pantaloni', '2023-01-01 12:10:00', '2023-01-01 12:10:00'),
 	('user2', 'Cargo corti verdi.', 15.99, 'Pantaloncini', '2023-01-01 09:00:00', '2023-01-07 12:00:00'),
-	('user2', 'Cargo corti blu.', 15.99, 'Pantaloncini', '2023-01-01 09:30:00', '2023-01-02 11:10:00'),
+	('user2', 'Cargo corti blu.', 15.99, 'Pantaloncini', '2023-01-01 09:30:00', '2023-01-10 12:00:00'),
 	('userg', 'Tshirt rossa.', 5.99, 'Magliette', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
 	('GioAma', 'Gazebo blu.', 320.50, 'Articoli da esterno', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
 	('GioAma', 'Paletta carina.', 1.99, 'Giardinaggio', '2023-01-07 11:10:00', '2023-01-07 11:10:00');
 
 
--- INSERIMENTO DEI COMMENTI
+-- (RE)INSERIMENTO DEI COMMENTI
 DELETE FROM `commento`;
 
 INSERT INTO `commento` (`utente`, `annuncio`, `scritto`,  `testo`) VALUES
@@ -106,11 +106,15 @@ INSERT INTO `commento` (`utente`, `annuncio`, `scritto`,  `testo`) VALUES
 	('user1', 3,  '2023-01-02 11:05:00', 'Molto carini.'),
 	('user1', 4,  '2023-01-02 11:10:00', 'Molto carini anche questi.'),
 	('GioAma', 3, '2023-01-07 12:00:00', 'Non sembrano di buona qualità.');
-	
+
+
+-- (RI)VENDITA DI ANNUNCI
+UPDATE `annuncio` SET `venduto` = '2023-01-06 22:00:00' WHERE `numero` = 1;
+UPDATE `annuncio` SET `venduto` = '2023-01-10 12:00:00' WHERE `numero` = 4;
 
 -- INSERIMENTO DEI SEGUE
 
 
--- VENDITA DI ANNUNCI
+
 
 COMMIT;
