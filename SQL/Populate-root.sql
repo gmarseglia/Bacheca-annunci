@@ -113,6 +113,9 @@ UPDATE `annuncio` SET `venduto` = '2023-01-06 22:00:00' WHERE `numero` = 1;
 UPDATE `annuncio` SET `venduto` = '2023-01-10 12:00:00' WHERE `numero` = 4;
 
 -- INSERIMENTO DEI SEGUE
+DELETE * FROM `segue`;
+
+-- #TODO: INSERT INTO `segue` (`utente`, `annuncio`) VALUES ();
 
 
 
