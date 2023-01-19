@@ -131,7 +131,9 @@ BEGIN
 		`annuncio`.`categoria`, `annuncio`.`inserito`, `annuncio`.`modificato`, `annuncio`.`venduto`,
 		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
 		from `annuncio` left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
-		where `annuncio`.`numero`=var_annuncio_id;
+		where `annuncio`.`numero`=var_annuncio_id
+		ORDER BY `commento`.`scritto` ASC;
+
 	commit;
 END!
 
