@@ -1,12 +1,11 @@
 USE `bacheca_annunci`;
 
--- (RE)INSERIMENTO DI UTENTI E DI RECAPITI EXTRA
+START TRANSACTION;
+
+-- (RE)INSERIMENTO DI UTENTI, CREDENZIALI e ANAGRAFICA
 DELETE FROM `utente`;
 DELETE FROM `credenziali`;
 DELETE FROM `anagrafica`;
-DELETE FROM `recapito`;
-DELETE FROM `recapito_preferito`;
-
 
 INSERT INTO `utente` (`username`) VALUES 
 	('user1'),
@@ -15,7 +14,6 @@ INSERT INTO `utente` (`username`) VALUES
 	('GioAma'),
 	('MarBia'),
 	('MasFab');
-
 INSERT INTO `credenziali` (`username`, `password`, `ruolo`) VALUES
 	('user1',	'pass',		'base'),
 	('user2',	'pass',		'base'),
@@ -23,32 +21,39 @@ INSERT INTO `credenziali` (`username`, `password`, `ruolo`) VALUES
 	('GioAma',	'gvnn',		'base'),
 	('MarBia',	'mr',		'gestore'),
 	('MasFab',	'mssm',		'base');
+INSERT INTO `anagrafica` (`codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`, `indirizzo_residenza`, `indirizzo_fatturazione`, `utente`) VALUES
+	('GNNGNC00A00A123D', 'Giancarlo', 'Giannini', 'uomo', '2000-01-01', 'Firenze', 'Via Bologna, 4', 'Viale Napoli, 15', 'user1'),
+	('LZZNNA00A00A123D', 'Anna', 'Lazzari', 'donna','2001-02-02', 'Bologna', 'Piazza Venezia, 5', 'Piazza Firenze', 'user2'),
+	('MRNVLN00A00A123D', 'Valentina', 'Mariani', 'donna', '1985-06-16', 'Venezia', 'Viale Genova, 1', NULL, 'userg'),
+	('MTAGVN00A00A123D', 'Giovanni', 'Amato', 'uomo', '1960-01-01', 'Roma', 'Via Milano, 1', 'Via Trieste, 10', 'GioAma'),
+	('BNCMRA00A00A123D', 'Maria', 'Bianchi', 'donna', '1965-02-04', 'Milano', 'Piazza Napoli, 2', 'Via Roma, 3', 'MarBia'),
+	('FBRMSS00A00A123D', 'Massimo', 'Fabri', 'uomo', '1970-03-07', 'Napoli', 'Viale Firenze, 3', NULL, 'MasFab');
 
 
--- CALL `registrazione_utente` ('user1',	'pass',		'base',		'CGNNME00A00A123D',	'Nome',			'Cognome',		'uomo',		'2000-01-01',	'Comune',	'Indirizzo di residenza',	'Indirizzo di fatturazione',	'1234567890',	'telefono');
--- CALL `registrazione_utente` ('user2',	'pass',		'base',		'CGNNME01A00A123D',	'Nome',			'Cognome',		'donna',	'2001-02-02',	'Comune',	'Indirizzo di residenza',	'Indirizzo di fatturazione',	'1234567891',	'cellulare');
--- CALL `registrazione_utente` ('userg',	'gest',		'gestore',	'CGNNME02A00A123D',	'Nome',			'Cognome',		'donna',	'2002-03-03',	'Comune',	'Indirizzo di residenza',	'Indirizzo di fatturazione',	'e@mail.com',	'email');
--- CALL `registrazione_utente` ('GioAma',	'gvnn',		'base',		'MTAGVN00A00A123D',	'Giovanni',		'Amato',		'uomo',		'1960-01-01',	'Roma',		'Via Milano, 1',			'Via Trieste, 10',				'3391234567',	'cellulare');
--- CALL `registrazione_utente` ('MarBia',	'mr',		'gestore',	'BNCMRA00A00A123D',	'Maria',		'Bianchi',		'donna',	'1965-02-04',	'Milano',	'Piazza Napoli, 2',			'Via Roma, 3',					'061234564',	'telefono');
--- CALL `registrazione_utente` ('MasFab',	'mssm',		'base',		'FBRMSS00A00A123D',	'Massimo',		'Fabri',		'uomo',		'1970-03-07',	'Napoli',	'Viale Firenze, 3',			'Piazza Milano, 11',			'a@mail.com',	'email');
+-- (RE)INSERIMENTO DEI RECAPITI E DEI RECAPITI PREFERITI
+DELETE FROM `recapito`;
+DELETE FROM `recapito_preferito`;
 
--- CALL `registrazione_utente` ('GiaGia',	'gncrl',	'gestore',	'GNNGNC00A00A123D',	'Giancarlo',	'Giannini',		'uomo',		'1975-04-10',	'Firenze',	'Via Bologna, 4',			'Viale Napoli, 15',				'3471122334',	'cellulare');
--- CALL `registrazione_utente` ('AnnLazz',	'nn',		'base',		'LZZNNA00A00A123D',	'Anna',			'Lazzari',		'donna',	'1980-05-13',	'Bologna',	'Piazza Venezia, 5',		'Piazza Firenze',				'061122334',	'telefono');
--- CALL `registrazione_utente` ('ValMar',	'vlntn',	'gestore',	'MRNVLN00A00A123D',	'Valentina',	'Mariani',		'donna',	'1985-06-16',	'Venezia',	'Viale Genova, 1',			NULL,							'b@mail.com',	'email');
--- CALL `registrazione_utente` ('ClaMor',	'cld',		'base',		'MROCLD00A00A123D',	'Claudia',		'Mori',			'donna',	'1990-07-19',	'Genova',	'Via Palermo, 2',			NULL,							'3317788994',	'cellulare');
--- CALL `registrazione_utente` ('PaoPan',	'pl',		'gestore',	'PNTPLA00A00A123D',	'Paolo',		'Pantalo',		'uomo',		'1995-08-21',	'Palermo',	'Piazza Torino, 3',			NULL,							'065544464',	'telefono');
--- CALL `registrazione_utente` ('FabPod',	'fb',		'base',		'PDSFBA00A00A123D',	'Fabio',		'Podesta',		'uomo',		'2000-09-24',	'Torino',	'Viale Trieste, 4',			NULL,							'c@mail.com',	'email');
--- CALL `registrazione_utente` ('TomSci',	'tmms',		'gestore',	'SCCTMM00A00A123D',	'Tommaso',		'Sciacca',		'uomo',		'2005-10-27',	'Trieste',	'Via Roma, 1',				NULL,							'1122334455',	'telefono');
-
--- INSERT INTO `recapito` (`valore`, `anagrafica`, `tipo`) VALUES
--- 	('07112233', 'CGNNME00A00A123D', 'telefono'),
--- 	('user@email.com', 'CGNNME00A00A123D', 'email'),
--- 	('05112233', 'MTAGVN00A00A123D', 'telefono'),
--- 	('prova@email.com', 'MTAGVN00A00A123D', 'email'),
--- 	('331598647', 'MTAGVN00A00A123D', 'cellulare'),
--- 	('04112568', 'BNCMRA00A00A123D', 'telefono'),
--- 	('extra@mail.com', 'BNCMRA00A00A123D', 'email'),
--- 	('finale@mail.com', 'FBRMSS00A00A123D', 'email');
+INSERT INTO `recapito` (`valore`, `anagrafica`, `tipo`) VALUES
+	('3471122334', 'GNNGNC00A00A123D', 'cellulare'),
+	('05112233', 'GNNGNC00A00A123D', 'telefono'),
+	('prova@email.com', 'GNNGNC00A00A123D', 'email'),
+	('331598647', 'GNNGNC00A00A123D', 'cellulare'),
+	('061122334', 'LZZNNA00A00A123D', 'telefono'),
+	('04112568', 'LZZNNA00A00A123D', 'telefono'),
+	('extra@mail.com', 'LZZNNA00A00A123D', 'email'),
+	('b@mail.com', 'MRNVLN00A00A123D', 'email'),
+	('3391234567', 'MTAGVN00A00A123D', 'cellulare'),
+	('061234564', 'BNCMRA00A00A123D', 'telefono'),
+	('a@mail.com', 'FBRMSS00A00A123D', 'email'),
+	('finale@mail.com', 'FBRMSS00A00A123D', 'email');
+INSERT INTO `recapito_preferito` (`anagrafica`, `recapito`) VALUES
+	('GNNGNC00A00A123D', '3471122334'),
+	('LZZNNA00A00A123D', '061122334'),
+	('MRNVLN00A00A123D', 'b@mail.com'),
+	('MTAGVN00A00A123D', '3391234567'),
+	('BNCMRA00A00A123D', '061234564'),
+	('FBRMSS00A00A123D', 'a@mail.com');
 
 
 -- (RE)INSERIMENTO DEI MESSAGGI PRIVATI
@@ -77,19 +82,35 @@ INSERT INTO `categoria` (`nome`, `padre`) VALUES
 
 -- (RE)INSERIMENTO DEGLI ANNUNCI
 DELETE FROM `annuncio`;
-CALL `inserire_annuncio` ('user', 'Abito lungo.', 100.00, 'Indumenti');
-CALL `inserire_annuncio` ('user', 'Jeans.', 25.00, 'Pantaloni');
-CALL `inserire_annuncio` ('user2', 'Cargo corti verdi.', 15.99, 'Pantaloncini');
-CALL `inserire_annuncio` ('user2', 'Cargo corti blu.', 15.99, 'Pantaloncini');
-CALL `inserire_annuncio` ('userg', 'Tshirt rossa.', 5.99, 'Magliette');
-CALL `inserire_annuncio` ('GioAma', 'Gazebo.', 320.50, 'Articoli da esterno');
-CALL `inserire_annuncio` ('GioAma', 'Paletta carina.', 1.99, 'Giardinaggio');
+ALTER TABLE `annuncio` AUTO_INCREMENT = 1;
+
+INSERT INTO `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`) VALUES
+	('user1', 'Abito lungo verde.', 100.00, 'Indumenti', '2023-01-01 12:00:00', '2023-01-06 12:00:00'),
+	('user1', 'Jeans.', 25.00, 'Pantaloni', '2023-01-01 12:10:00', '2023-01-01 12:10:00'),
+	('user2', 'Cargo corti verdi.', 15.99, 'Pantaloncini', '2023-01-01 09:00:00', '2023-01-07 12:00:00'),
+	('user2', 'Cargo corti blu.', 15.99, 'Pantaloncini', '2023-01-01 09:30:00', '2023-01-02 11:10:00'),
+	('userg', 'Tshirt rossa.', 5.99, 'Magliette', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
+	('GioAma', 'Gazebo blu.', 320.50, 'Articoli da esterno', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
+	('GioAma', 'Paletta carina.', 1.99, 'Giardinaggio', '2023-01-07 11:10:00', '2023-01-07 11:10:00');
 
 
 -- INSERIMENTO DEI COMMENTI
+DELETE FROM `commento`;
 
+INSERT INTO `commento` (`utente`, `annuncio`, `scritto`,  `testo`) VALUES
+	('user2', 1,  '2023-01-02 12:00:00', 'Veste bene?'),
+	('user1', 1,  '2023-01-03 11:00:00', 'Si.'),
+	('user2', 1,  '2023-01-03 13:15:00', 'Sono interessata.'),
+	('user1', 1,  '2023-01-05 12:00:00', 'Scrivimi.'),
+	('userg', 1,  '2023-01-06 12:00:00', 'Anche io sono interessata.'),
+	('user1', 3,  '2023-01-02 11:05:00', 'Molto carini.'),
+	('user1', 4,  '2023-01-02 11:10:00', 'Molto carini anche questi.'),
+	('GioAma', 3, '2023-01-07 12:00:00', 'Non sembrano di buona qualità.');
+	
 
 -- INSERIMENTO DEI SEGUE
 
 
 -- VENDITA DI ANNUNCI
+
+COMMIT;
