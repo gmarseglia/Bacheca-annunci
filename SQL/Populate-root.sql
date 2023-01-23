@@ -7,8 +7,9 @@ DELETE FROM `utente`;
 DELETE FROM `credenziali`;
 DELETE FROM `anagrafica`;
 
+INSERT INTO `utente` (`username`, `contr_seguiti`) VALUES 
+	('user1', '2023-01-05 12:00:00');
 INSERT INTO `utente` (`username`) VALUES 
-	('user1'),
 	('user2'),
 	('userg'),
 	('GioAma'),
@@ -113,11 +114,10 @@ UPDATE `annuncio` SET `venduto` = '2023-01-06 22:00:00' WHERE `numero` = 1;
 UPDATE `annuncio` SET `venduto` = '2023-01-10 12:00:00' WHERE `numero` = 4;
 
 -- INSERIMENTO DEI SEGUE
-DELETE * FROM `segue`;
-
--- #TODO: INSERT INTO `segue` (`utente`, `annuncio`) VALUES ();
-
-
-
+DELETE FROM `segue`;
+INSERT INTO `segue` (`utente`, `annuncio`) VALUES
+	('user1', 2),
+	('user1', 3),
+	('GioAma', 1);
 
 COMMIT;
