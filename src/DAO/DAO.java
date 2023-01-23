@@ -62,7 +62,7 @@ public class DAO {
         openRoleConnection(role);
 
         String query = "SELECT `ruolo` FROM `credenziali` " +
-                "WHERE `username`=? AND `password`=?;";
+                "WHERE `username`=? AND `password`=SHA1(?);";
 
         PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         ps.setString(1, credenziali.getUsername());

@@ -38,7 +38,7 @@ CREATE TABLE utente (
 --		Creo credenziali
 CREATE TABLE credenziali (
 	username		VARCHAR(30)					NOT NULL,
-	password		VARCHAR(30)					NOT NULL,
+	password		CHAR(40)					NOT NULL,
 	ruolo			ENUM('base', 'gestore')		NOT NULL,
 	PRIMARY KEY (username),
 	FOREIGN KEY (username) REFERENCES utente(username)

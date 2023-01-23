@@ -38,7 +38,7 @@ BEGIN
 			values (var_username);
 
 		insert into `credenziali` (`username`, `password`, `ruolo`)
-			values (var_username, var_password, var_ruolo);
+			values (var_username, SHA1(var_password), var_ruolo);
 
 		insert into `anagrafica` (`codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`,
 			`comune_nascita`, `indirizzo_residenza`, `indirizzo_fatturazione`, `utente`)

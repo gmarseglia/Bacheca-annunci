@@ -16,12 +16,12 @@ INSERT INTO `utente` (`username`) VALUES
 	('MarBia'),
 	('MasFab');
 INSERT INTO `credenziali` (`username`, `password`, `ruolo`) VALUES
-	('user1',	'pass',		'base'),
-	('user2',	'pass',		'base'),
-	('userg',	'gest',		'gestore'),
-	('GioAma',	'gvnn',		'base'),
-	('MarBia',	'mr',		'gestore'),
-	('MasFab',	'mssm',		'base');
+	('user1',	SHA1('pass'),		'base'),
+	('user2',	SHA1('pass'),		'base'),
+	('userg',	SHA1('gest'),		'gestore'),
+	('GioAma',	SHA1('gvnn'),		'base'),
+	('MarBia',	SHA1('mr'),		'gestore'),
+	('MasFab',	SHA1('mssm'),		'base');
 INSERT INTO `anagrafica` (`codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`, `indirizzo_residenza`, `indirizzo_fatturazione`, `utente`) VALUES
 	('GNNGNC00A00A123D', 'Giancarlo', 'Giannini', 'uomo', '2000-01-01', 'Firenze', 'Via Bologna, 4', 'Viale Napoli, 15', 'user1'),
 	('LZZNNA00A00A123D', 'Anna', 'Lazzari', 'donna','2001-02-02', 'Bologna', 'Piazza Venezia, 5', 'Piazza Firenze', 'user2'),
