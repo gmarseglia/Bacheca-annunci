@@ -86,12 +86,6 @@ public class ViewUtente {
     private static final String DATETIME_FORMAT = "dd-MM-yyyy 'alle' HH:mm:ss";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
-    public static void main(String[] args) {
-        ActiveUser.setUsername("user");
-        ActiveUser.setRole(Role.GESTORE);
-        begin();
-    }
-
     public static void begin() {
 
         OPERATION operation;
