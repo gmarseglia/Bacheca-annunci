@@ -2,6 +2,7 @@
 
 USE `bacheca_annunci`;
 
+DROP PROCEDURE IF EXISTS `login`;
 DROP PROCEDURE IF EXISTS `registrazione_utente`;
 DROP PROCEDURE IF EXISTS `inserire_annuncio`;
 DROP PROCEDURE IF EXISTS `dettagli_annuncio`;
@@ -15,6 +16,13 @@ DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`;
 DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`;
 
 DELIMITER !
+
+CREATE PROCEDURE `login` (IN var_username VARCHAR(30), IN var_password VARCHAR(30))
+BEGIN
+    SELECT `ruolo`
+    FROM `credenziali`
+	WHERE `username`=var_username AND `password`=SHA1(var_password);
+END !
 
 CREATE PROCEDURE `registrazione_utente` (
     in var_username VARCHAR(30), in var_password VARCHAR(30), in var_ruolo ENUM('base', 'gestore'),
@@ -411,6 +419,7 @@ DELIMITER ;
 
 -- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
 
+GRANT EXECUTE ON PROCEDURE `login` TO `registratore`;
 GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`;
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`;
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`;

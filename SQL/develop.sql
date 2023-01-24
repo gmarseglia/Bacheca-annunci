@@ -1,8 +1,20 @@
-use `bacheca_annunci`;
+USE `bacheca_annunci`;
 
-DELETE IGNORE FROM `utente` WHERE `username`='crypt';
-DELETE IGNORE FROM `credenziali` WHERE `username`='crypt';
+DROP PROCEDURE IF EXISTS `login`;
 
-INSERT INTO `utente` (`username`) VALUES ('crypt');
-INSERT INTO `credenziali` (`username`, `password`, `ruolo`) VALUES
-	('crypt', PASSWORD('pass'), 'base');
+DELIMITER !
+
+CREATE PROCEDURE `login` (IN var_username VARCHAR(30), IN var_password VARCHAR(30))
+BEGIN
+
+    SELECT `ruolo`
+    FROM `credenziali`
+	WHERE `username`=var_username AND `password`=SHA1(var_password);
+
+END !
+
+DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE `login` TO `registratore`;
+GRANT EXECUTE ON PROCEDURE `login` TO `gestore`;
+GRANT EXECUTE ON PROCEDURE `login` TO `base`;

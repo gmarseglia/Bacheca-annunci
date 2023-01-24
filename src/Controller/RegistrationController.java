@@ -48,10 +48,6 @@ public class RegistrationController {
             } else {
                 result.setMessage(e.getMessage() + ", " + e.getSQLState());
             }
-        } catch (RuntimeException e) {
-            result.setMessage("Credenziali di accesso non valide.");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return result;
     }

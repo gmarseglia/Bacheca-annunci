@@ -61,26 +61,29 @@ public class DAO {
     public static Boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
         openRoleConnection(role);
 
-        String query = "SELECT `ruolo` FROM `credenziali` " +
-                "WHERE `username`=? AND `password`=SHA1(?);";
+        String call = "{call `login`(?, ?)};";
 
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.setString(1, credenziali.getUsername());
-        ps.setString(2, credenziali.getPassword());
-        ps.closeOnCompletion();
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, credenziali.getUsername());
+        cs.setString(2, credenziali.getPassword());
+        cs.closeOnCompletion();
 
-        ResultSet rs = ps.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
         rs.first();
 
         Role selectedRole = switch (rs.getString(1)) {
             case "base" -> Role.BASE;
             case "gestore" -> Role.GESTORE;
-            default -> throw new RuntimeException("Invalid role");
+            default -> {
+                CustomSQLException e = new CustomSQLException();
+                e.setSQLState("45007");
+                e.setMessage("Ruolo non valido.");
+                throw e;
+            }
         };
-        credenziali.setRole(selectedRole);
 
-        rs.close();
+        credenziali.setRole(selectedRole);
 
         return true;
     }
