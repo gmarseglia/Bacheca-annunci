@@ -122,7 +122,7 @@ public class Annuncio {
         return String.format("""
                         Annuncio #%d inserito da "%s":
                         Stato: %s
-                        Prezzo: %.2f
+                        Prezzo: %.2f €
                         Descrizione: %s
                         Inserito il: %s
                         Ultima modifica: %s.
