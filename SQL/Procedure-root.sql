@@ -4,6 +4,7 @@ USE `bacheca_annunci`;
 
 DROP PROCEDURE IF EXISTS `login`;
 DROP PROCEDURE IF EXISTS `registrazione_utente`;
+DROP PROCEDURE IF EXISTS `inserire_recapito`;
 DROP PROCEDURE IF EXISTS `inserire_annuncio`;
 DROP PROCEDURE IF EXISTS `dettagli_annuncio`;
 DROP PROCEDURE IF EXISTS `scrivere_commento`;
@@ -60,6 +61,12 @@ BEGIN
 			values (var_codice_fiscale, var_valore_recapito_preferito);
 	commit;
 END!
+
+CREATE PROCEDURE `inserire_recapito` (IN var_valore VARCHAR(60), IN var_anagrafica CHAR(16), IN var_tipo ENUM('telefono', 'cellulare', 'email'))
+BEGIN
+    INSERT IGNORE INTO `recapito` (`valore`, `anagrafica`, `tipo`)
+    VALUES (var_valore, var_anagrafica, var_tipo);
+END !
 
 CREATE PROCEDURE `inserire_annuncio` (
 	in var_inserzionista VARCHAR(30), in var_descrizione TEXT, in var_prezzo NUMERIC(7, 2),
@@ -421,6 +428,8 @@ DELIMITER ;
 
 GRANT EXECUTE ON PROCEDURE `login` TO `registratore`;
 GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`;
+GRANT EXECUTE ON PROCEDURE `inserire_recapito` TO `registratore`;
+
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`;
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`;
 GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`;

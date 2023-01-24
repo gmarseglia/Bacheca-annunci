@@ -1,5 +1,7 @@
 package DAO;
 
+import java.util.Arrays;
+
 public class BatchResult {
     private int[] batchResult;
     private String batchMessage;
@@ -57,5 +59,15 @@ public class BatchResult {
 
     public void setExtraMessage(String extraMessage) {
         this.extraMessage = extraMessage;
+    }
+
+    @Override
+    public String toString() {
+        return "BatchResult{" +
+                "batchResult=" + Arrays.toString(batchResult) +
+                ", batchMessage='" + batchMessage + '\'' +
+                ", extraResult=" + extraResult +
+                ", extraMessage='" + extraMessage + '\'' +
+                '}';
     }
 }

@@ -207,25 +207,23 @@ public class DAO {
 
             conn.setAutoCommit(false);
 
-            String query = "INSERT IGNORE INTO `recapito` " +
-                    "(`valore`, `anagrafica`, `tipo`)" +
-                    "VALUES (?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(query);
+            String call = "{CALL `inserire_recapito`(?, ?, ?)};";
+            CallableStatement cs = conn.prepareCall(call);
 
             for (Recapito recapito : listOfRecapito) {
-                ps.setString(1, recapito.getValore());
-                ps.setString(2, recapito.getAnagraficaID());
+                cs.setString(1, recapito.getValore());
+                cs.setString(2, recapito.getAnagraficaID());
                 String tipo = switch (recapito.getTipo()) {
                     case CELLULARE -> "cellulare";
                     case TELEFONO -> "telefono";
                     case EMAIL -> "email";
                 };
-                ps.setString(3, tipo);
-                ps.addBatch();
+                cs.setString(3, tipo);
+                cs.addBatch();
             }
-            ps.closeOnCompletion();
+            cs.closeOnCompletion();
 
-            batchResult = (ps.executeBatch());
+            batchResult = (cs.executeBatch());
             conn.commit();
 
         } finally {
