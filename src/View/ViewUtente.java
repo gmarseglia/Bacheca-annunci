@@ -15,6 +15,7 @@ public class ViewUtente {
     protected enum OPERATION {
         INSERIRE_ANNUNCIO,              //A0000
         DETTAGLI_ANNUNCIO,              //A0100
+        CERCARE_TUTTI_ANNUNCI,           //A0204
         CERCARE_PER_CATEGORIA,          //A0200
         CERCARE_PER_UTENTE,             //A0202
         CERCARE_PER_DESCRIZIONE,        //A0203
@@ -36,8 +37,9 @@ public class ViewUtente {
 
         public static OPERATION dispatchMap(String input) {
             return switch (input) {
-                case "1" -> INSERIRE_ANNUNCIO;
-                case "2" -> VENDERE_ANNUNCIO;
+                case "0" -> INSERIRE_ANNUNCIO;
+                case "1" -> VENDERE_ANNUNCIO;
+                case "2" -> CERCARE_TUTTI_ANNUNCI;
                 case "3" -> CERCARE_PER_UTENTE;
                 case "4" -> CERCARE_PER_CATEGORIA;
                 case "5" -> CERCARE_PER_DESCRIZIONE;
@@ -62,8 +64,9 @@ public class ViewUtente {
 
     private static final String MAIN_DISPATCH = """
             Operazioni possibili:
-            (1) [INSERIRE] un ANNUNCIO.
-            (2) [INDICARE come VENDUTO] un annuncio inserito.
+            (0) [INSERIRE] un ANNUNCIO.
+            (1) [INDICARE come VENDUTO] un annuncio inserito.
+            (2) [CERCARE TUTTI] gli annunci.
             (3) [CERCARE per UTENTE] gli annunci.
             (4) [CERCARE per CATEGORIA] gli annunci.
             (5) [CERCARE per DESCRIZIONE] gli annunci disponibili.
@@ -112,6 +115,7 @@ public class ViewUtente {
         switch (operation) {
             case INSERIRE_ANNUNCIO -> inserireAnnuncio();
             case VENDERE_ANNUNCIO -> vendereAnnuncio();
+            case CERCARE_TUTTI_ANNUNCI -> cercareAnnunci();
             case CERCARE_PER_UTENTE -> cercaPerUtente();
             case CERCARE_PER_CATEGORIA -> cercaPerCategoria();
             case CERCARE_PER_DESCRIZIONE -> cercaPerDescrizione();
@@ -147,6 +151,49 @@ public class ViewUtente {
             case CREARE_CATEGORIA -> creareCategoria();
             case CREARE_REPORT -> creareReport();
         }
+    }
+
+    // (2)
+    private static void cercareAnnunci() {
+        Boolean confirmOp = null;
+        Boolean onlyAvailable;
+        do {
+            onlyAvailable = null;
+            do {
+                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
+                    case "s", "S" -> onlyAvailable = true;
+                    case "n", "N" -> onlyAvailable = false;
+                }
+            } while (onlyAvailable == null);
+
+            System.out.printf("""
+                                        
+                    Trovare tutti gli annunci.
+                    Filtrare per solo disponibili: %s.
+                    """, onlyAvailable ? "Vero" : "Falso");
+
+            switch (ScannerUtility.askFirstChar("Procedere? (S)i, (N)o o (A)nnulla")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+                case "a", "A" -> {
+                    return;
+                }
+            }
+        } while (confirmOp == null || !confirmOp);
+
+        List<Annuncio> foundAnnunciList = new ArrayList<>();
+
+        System.out.print("Ricerca degli annunci... ");
+
+        DBResult dbResult = BaseController.cercareAnnunci(onlyAvailable, foundAnnunciList);
+
+        printResult(dbResult, () -> {
+            for (Annuncio annuncio : foundAnnunciList) {
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
+            }
+        });
+
+        ScannerUtility.askAny();
     }
 
     // (F)

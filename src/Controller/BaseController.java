@@ -216,4 +216,14 @@ public class BaseController {
         }
         return dbResult;
     }
+
+    public static DBResult cercareAnnunci(Boolean onlyAvailable, List<Annuncio> foundAnnunciList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectAnnuncio(ActiveUser.getRole(), onlyAvailable, foundAnnunciList));
+        } catch (SQLException e) {
+            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+        }
+        return dbResult;
+    }
 }

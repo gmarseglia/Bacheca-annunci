@@ -414,6 +414,27 @@ public class DAO {
         return true;
     }
 
+    public static boolean selectAnnuncio(Role role, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
+
+        String query = "SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`, `venduto` " +
+                "FROM `annuncio` " +
+                "WHERE (`venduto` IS NULL OR NOT ?);";
+        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ps.setBoolean(1, onlyAvailable);
+        ps.closeOnCompletion();
+
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+            } while (rs.next());
+        }
+
+        return true;
+    }
+
     public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
@@ -476,8 +497,8 @@ public class DAO {
 
         return true;
     }
-
     // SEGUE
+
     public static boolean insertSegue(Role role, Segue segue) throws SQLException {
         openRoleConnection(role);
 
@@ -531,8 +552,8 @@ public class DAO {
 
         return true;
     }
-
     // COMMENTO
+
     public static boolean insertCommento(Role role, String utente, Long numero, String testo) throws SQLException {
         openRoleConnection(role);
 
@@ -547,8 +568,8 @@ public class DAO {
 
         return true;
     }
-
     // REPORT
+
     public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) throws SQLException {
         openRoleConnection(role);
 
