@@ -445,4 +445,13 @@ END!
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`!
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `gestore`!
 
+-- T0000
+DROP PROCEDURE IF EXISTS `select_categoria`!
+CREATE PROCEDURE `select_categoria` ()
+BEGIN
+    SELECT `nome`,`padre` FROM `categoria`;
+END!
+GRANT EXECUTE ON PROCEDURE `select_categoria` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_categoria` TO `gestore`!
+
 DELIMITER ;

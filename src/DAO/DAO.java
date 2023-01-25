@@ -313,12 +313,11 @@ public class DAO {
     public static boolean selectCategoria(Role role, List<Categoria> categoriaList) throws SQLException {
         openRoleConnection(role);
 
-        // FIXME
-        String query = "SELECT `nome`,`padre` FROM `categoria`;";
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.closeOnCompletion();
+        String call = "{CALL `select_categoria`};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.closeOnCompletion();
 
-        ResultSet rs = ps.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
