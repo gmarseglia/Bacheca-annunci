@@ -18,7 +18,7 @@ public class GestoreController extends BaseController {
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "23000" ->
-                        String.format("Esiste già una categoria con lo stesso nome o non esiste la categoria padre [%s]", e.getMessage());
+                        String.format("O esiste già una categoria con lo stesso nome OPPURE non esiste la categoria padre [%s]", e.getMessage());
                 case "45010" -> String.format("La categoria non può essere padre di se stessa [%s]", e.getMessage());
                 default -> getGenericSQLExceptionMessage(e);
             });
