@@ -223,6 +223,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // A0204
     public static DBResult cercareAnnunci(Boolean onlyAvailable, List<Annuncio> foundAnnunciList) {
         DBResult dbResult = new DBResult(false);
         try {

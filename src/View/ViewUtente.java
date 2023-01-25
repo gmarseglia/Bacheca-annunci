@@ -153,7 +153,7 @@ public class ViewUtente {
         }
     }
 
-    // (2)
+    // A0204
     private static void cercareAnnunci() {
         Boolean confirmOp = null;
         Boolean onlyAvailable;

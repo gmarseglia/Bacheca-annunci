@@ -416,17 +416,17 @@ public class DAO {
         return true;
     }
 
-    public static boolean selectAnnuncio(Role role, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    //      A0200
+    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String query = "SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto` " +
-                "FROM `annuncio` " +
-                "WHERE (`venduto` IS NULL OR NOT ?);";
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.setBoolean(1, onlyAvailable);
-        ps.closeOnCompletion();
+        String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, categoriaID);
+        cs.setBoolean(2, onlyAvailable);
+        cs.closeOnCompletion();
 
-        ResultSet rs = ps.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
@@ -479,14 +479,13 @@ public class DAO {
         return true;
     }
 
-    //      A0200
-    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    //      A0204
+    public static boolean selectAnnuncio(Role role, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
-        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        cs.setString(1, categoriaID);
-        cs.setBoolean(2, onlyAvailable);
+        String call = "{CALL `select_annunci_without_clauses`(?)};";
+        PreparedStatement cs = conn.prepareStatement(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setBoolean(1, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();

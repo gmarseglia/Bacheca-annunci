@@ -217,6 +217,15 @@ END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_by_descrizione` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_by_descrizione` TO `gestore`!
 
+-- A0204
+DROP PROCEDURE IF EXISTS `select_annunci_without_clauses`!
+CREATE PROCEDURE `select_annunci_without_clauses` (IN var_only_available BOOLEAN)
+BEGIN
+    SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto` FROM `annuncio` WHERE (`venduto` IS NULL OR NOT var_only_available);
+END!
+GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `gestore`!
+
 -- A0300
 DROP PROCEDURE IF EXISTS `seguire_annuncio`!
 CREATE PROCEDURE `seguire_annuncio` (IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED)
@@ -487,9 +496,9 @@ GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `gestore`!
 DROP PROCEDURE IF EXISTS `generate_report`!
 CREATE PROCEDURE `generate_report` ()
 BEGIN
-    SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) AS `percentuale`, `annunci_inseriti` FROM `utente`;
+    SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) AS `percentuale`, `annunci_inseriti` FROM `utente`
+    GROUP BY `username`;
     -- SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) AS `percentuale` FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`;
-GROUP BY `username`;
 END!
 GRANT EXECUTE ON PROCEDURE `generate_report` TO `gestore`!
 
