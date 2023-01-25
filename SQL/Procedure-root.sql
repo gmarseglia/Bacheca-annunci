@@ -221,7 +221,6 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-
         SELECT COUNT(*), COUNT(`venduto`)
         INTO counter_totale, counter_venduto
         FROM `annuncio`
@@ -362,6 +361,16 @@ BEGIN
 END!
 GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `base`!
 GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `gestore`!
+
+-- M0000
+DROP PROCEDURE IF EXISTS `insert_messaggio`!
+CREATE PROCEDURE `insert_messaggio` (IN var_mittente VARCHAR(30), IN var_destinatario VARCHAR(30), IN var_testo VARCHAR(250))
+BEGIN
+    INSERT INTO `messaggio_privato` (`mittente`, `destinatario`, `testo`)
+    VALUES (var_mittente, var_destinatario, var_testo);
+END!
+GRANT EXECUTE ON PROCEDURE `insert_messaggio` TO `base`!
+GRANT EXECUTE ON PROCEDURE `insert_messaggio` TO `gestore`!
 
 -- C0000
 DROP PROCEDURE IF EXISTS `scrivere_commento`!

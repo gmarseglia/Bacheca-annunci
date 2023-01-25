@@ -242,16 +242,15 @@ public class DAO {
         openRoleConnection(role);
 
         // FIXME
-        String updateQuery = "INSERT INTO `messaggio_privato` " +
-                "(`mittente`, `destinatario`, `testo`) " +
-                "VALUES (?, ?, ?);";
-        PreparedStatement ps = conn.prepareStatement(updateQuery);
-        ps.setString(1, usernameMittente);
-        ps.setString(2, usernameDestinatario);
-        ps.setString(3, testo);
-        ps.closeOnCompletion();
+        String updateQuery = "INSERT INTO `messaggio_privato` (`mittente`, `destinatario`, `testo`) VALUES (?, ?, ?);";
+        String call = "{CALL `insert_messaggio` (?, ?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setString(1, usernameMittente);
+        cs.setString(2, usernameDestinatario);
+        cs.setString(3, testo);
+        cs.closeOnCompletion();
 
-        if (ps.executeUpdate() == 0) {
+        if (cs.executeUpdate() == 0) {
             CustomSQLException e = new CustomSQLException();
             e.setSQLState("45006");
             e.setMessage("Utente non esistente");
