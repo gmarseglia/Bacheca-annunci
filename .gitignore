@@ -1,3 +1,6 @@
 # Ignore output dir
 out/
+SQL/develop-root.sh
+SQL/develop.sql
+SQL/*.sh
 src/View/Test/
