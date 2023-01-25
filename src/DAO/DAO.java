@@ -462,17 +462,13 @@ public class DAO {
     public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        // FIXME
-        String query = "SELECT * " +
-                "FROM `annuncio` " +
-                "WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)" +
-                "AND ((NOT ?) OR `venduto` IS NULL);";
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.setString(1, descrizione);
-        ps.setBoolean(2, onlyAvailable);
-        ps.closeOnCompletion();
+        String call = "{CALL `select_annunci_by_descrizione` (?, ?)}";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, descrizione);
+        cs.setBoolean(2, onlyAvailable);
+        cs.closeOnCompletion();
 
-        ResultSet rs = ps.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {

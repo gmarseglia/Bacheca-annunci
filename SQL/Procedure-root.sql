@@ -205,6 +205,18 @@ END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`!
 
+-- A0203
+DROP PROCEDURE IF EXISTS `select_annunci_by_descrizione`!
+CREATE PROCEDURE `select_annunci_by_descrizione` (IN var_descrizione TEXT, IN var_only_available BOOLEAN)
+BEGIN
+        SELECT `numero`, `inserzionista`, `descrizione` , `categoria`, `inserito`, `modificato`, `venduto`
+        FROM `annuncio` 
+        WHERE MATCH(`descrizione`) AGAINST (var_descrizione IN NATURAL LANGUAGE MODE)
+        AND ((NOT var_only_available) OR `venduto` IS NULL);
+END!
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_descrizione` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_descrizione` TO `gestore`!
+
 -- A0300
 DROP PROCEDURE IF EXISTS `seguire_annuncio`!
 CREATE PROCEDURE `seguire_annuncio` (IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED)
