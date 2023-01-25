@@ -372,6 +372,18 @@ END!
 GRANT EXECUTE ON PROCEDURE `insert_messaggio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `insert_messaggio` TO `gestore`!
 
+-- M0100
+DROP PROCEDURE IF EXISTS `select_messaggi_con_utente`!
+CREATE PROCEDURE `select_messaggi_con_utente` (IN var_utente_1 VARCHAR(30), IN var_utente_2 VARCHAR(30))
+BEGIN
+    SELECT `mittente`, `destinatario`, `inviato`, `testo`
+    FROM `messaggio_privato`
+    WHERE (`mittente`=var_utente_1 AND `destinatario`=var_utente_2) OR (`mittente`=var_utente_2 AND `destinatario`=var_utente_1)
+    ORDER BY `inviato` ASC;
+END!
+GRANT EXECUTE ON PROCEDURE `select_messaggi_con_utente` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_messaggi_con_utente` TO `gestore`!
+
 -- M0101
 DROP PROCEDURE IF EXISTS `select_utenti_con_messaggi`!
 CREATE PROCEDURE `select_utenti_con_messaggi` (IN var_target_utente VARCHAR(30))

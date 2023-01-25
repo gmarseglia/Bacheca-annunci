@@ -280,19 +280,14 @@ public class DAO {
     //      M0100
     public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) throws SQLException {
         openRoleConnection(role);
-        // FIXME
-        String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
-                " FROM `messaggio_privato` " +
-                " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
-                " ORDER BY `inviato` ASC;";
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.setString(1, utente1ID);
-        ps.setString(2, utente2ID);
-        ps.setString(3, utente2ID);
-        ps.setString(4, utente1ID);
-        ps.closeOnCompletion();
 
-        ResultSet rs = ps.executeQuery();
+        String call = "{CALL `select_messaggi_con_utente` (?, ?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, utente1ID);
+        cs.setString(2, utente2ID);
+        cs.closeOnCompletion();
+
+        ResultSet rs = cs.executeQuery();
 
         if (!rs.first()) {
             CustomSQLException e = new CustomSQLException();
