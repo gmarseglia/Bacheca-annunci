@@ -496,7 +496,8 @@ DROP PROCEDURE IF EXISTS `generate_report`!
 CREATE PROCEDURE `generate_report` ()
 BEGIN
     SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) AS `percentuale`, `annunci_inseriti` FROM `utente`
-    GROUP BY `username`;
+    GROUP BY `username`
+    ORDER BY `username` ASC;
     -- SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) AS `percentuale` FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`;
 END!
 GRANT EXECUTE ON PROCEDURE `generate_report` TO `gestore`!

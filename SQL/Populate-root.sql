@@ -7,14 +7,14 @@ DELETE FROM `utente`;
 DELETE FROM `credenziali`;
 DELETE FROM `anagrafica`;
 
-INSERT INTO `utente` (`username`, `contr_seguiti`) VALUES 
-	('user1', '2023-01-05 12:00:00');
-INSERT INTO `utente` (`username`) VALUES 
-	('user2'),
-	('userg'),
-	('GioAma'),
-	('MarBia'),
-	('MasFab');
+INSERT INTO `utente` (`username`, `annunci_inseriti`, `annunci_venduti`, `contr_seguiti`) VALUES 
+	('user1', 2, 1, '2023-01-05 12:00:00');
+INSERT INTO `utente` (`username`, `annunci_inseriti`, `annunci_venduti`) VALUES 
+	('user2', 2, 1),
+	('userg', 1, 0),
+	('GioAma', 2, 0),
+	('MarBia', 0, 0),
+	('MasFab', 0, 0);
 INSERT INTO `credenziali` (`username`, `password`, `ruolo`) VALUES
 	('user1',	SHA1('pass'),		'base'),
 	('user2',	SHA1('pass'),		'base'),
