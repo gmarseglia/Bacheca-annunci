@@ -489,7 +489,6 @@ CREATE PROCEDURE `insert_categoria` (IN var_nome VARCHAR(60), IN var_padre VARCH
 BEGIN
     INSERT INTO `categoria` VALUES (var_nome, var_padre);
 END!
-GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `base`!
 GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `gestore`!
 
 -- R0001

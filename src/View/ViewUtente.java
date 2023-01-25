@@ -2,7 +2,6 @@ package View;
 
 import Controller.BaseController;
 import Controller.DatabaseConnectionController;
-import Controller.GestoreController;
 import DAO.DBResult;
 import Model.*;
 import Utility.ScannerUtility;
@@ -129,7 +128,8 @@ public class ViewUtente {
             case MESSAGGI_CON_UTENTE -> visualizzareMessaggiConUtente();
             case INVIARE_MESSAGGIO -> inviareMessaggio();
             case VISUALIZZARE_CATEGORIE -> visualizzareCategorie();
-            case CREARE_CATEGORIA, CREARE_REPORT -> gestoreDispatch(operation);
+            case CREARE_CATEGORIA -> creareCategoria();
+            case CREARE_REPORT -> creareReport();
             case TERMINARE_APPLICAZIONE -> {
                 System.out.println("Chiusura della connessione con il database.");
                 String message = DatabaseConnectionController.closeConnection();
@@ -138,18 +138,6 @@ public class ViewUtente {
                 System.out.println("Uscita dall'applicazione.");
                 System.exit(0);
             }
-        }
-    }
-
-    protected static void gestoreDispatch(OPERATION operation) {
-        if (ActiveUser.getRole() != Role.GESTORE) {
-            System.out.println("Impossibile svolgere le operazioni con gli attuali privilegi.\n");
-            return;
-        }
-
-        switch (operation) {
-            case CREARE_CATEGORIA -> creareCategoria();
-            case CREARE_REPORT -> creareReport();
         }
     }
 
@@ -239,7 +227,7 @@ public class ViewUtente {
         System.out.print("Creazione del report... ");
 
         List<ReportEntry> reportEntries = new ArrayList<>();
-        DBResult dbResult = GestoreController.generareReport(reportEntries);
+        DBResult dbResult = BaseController.generareReport(reportEntries);
 
         printResult(dbResult, () -> {
             System.out.println("\nReport per utenti:");
@@ -795,7 +783,7 @@ public class ViewUtente {
 
         System.out.printf("Inserimento della categoria \"%s\"... ", nomeCategoria);
 
-        DBResult dbResult = GestoreController.creareCategoria(nomeCategoria, nomePadre);
+        DBResult dbResult = BaseController.creareCategoria(nomeCategoria, nomePadre);
 
         printResult(dbResult);
 

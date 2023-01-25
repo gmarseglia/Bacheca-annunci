@@ -6,12 +6,15 @@ import Model.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 
 @SuppressWarnings("SwitchStatementWithTooFewBranches")
 public class BaseController {
     protected static String getGenericSQLExceptionMessage(SQLException e) {
-        return e.getSQLState() + ", " + e.getMessage();
+        if (Objects.equals(e.getSQLState(), "42000"))
+            return String.format("L'utente non dispone dei permessi necessari, [%s]", e.getMessage());
+        else return e.getSQLState() + ", " + e.getMessage();
     }
 
     public static DBResult inserireAnnuncio(Annuncio annuncio) {
@@ -228,6 +231,33 @@ public class BaseController {
         DBResult dbResult = new DBResult(false);
         try {
             dbResult.setResult(DAO.selectAnnuncio(ActiveUser.getRole(), onlyAvailable, foundAnnunciList));
+        } catch (SQLException e) {
+            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+        }
+        return dbResult;
+    }
+
+    // G0000
+    public static DBResult creareCategoria(String nomeCategoria, String nomePadre) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.insertCategoria(ActiveUser.getRole(), nomeCategoria, nomePadre));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "23000" ->
+                        String.format("O esiste già una categoria con lo stesso nome OPPURE non esiste la categoria padre, [%s]", e.getMessage());
+                case "45010" -> String.format("La categoria non può essere padre di se stessa, [%s]", e.getMessage());
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
+    }
+
+    // R0001
+    public static DBResult generareReport(List<ReportEntry> reportEntryList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectReport(ActiveUser.getRole(), reportEntryList));
         } catch (SQLException e) {
             dbResult.setMessage(getGenericSQLExceptionMessage(e));
         }

@@ -18,7 +18,7 @@ INSERT INTO `utente` (`username`) VALUES
 INSERT INTO `credenziali` (`username`, `password`, `ruolo`) VALUES
 	('user1',	SHA1('pass'),		'base'),
 	('user2',	SHA1('pass'),		'base'),
-	('userg',	SHA1('gest'),		'gestore'),
+	('userg',	SHA1('pass'),		'gestore'),
 	('GioAma',	SHA1('gvnn'),		'base'),
 	('MarBia',	SHA1('mr'),		'gestore'),
 	('MasFab',	SHA1('mssm'),		'base');
