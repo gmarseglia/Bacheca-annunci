@@ -1,1 +1,0 @@
-/home/giuseppe/UNI/BD/Progetto/Scripts/restart-root.sh
