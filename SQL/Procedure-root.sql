@@ -454,4 +454,13 @@ END!
 GRANT EXECUTE ON PROCEDURE `select_categoria` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_categoria` TO `gestore`!
 
+-- G0000
+DROP PROCEDURE IF EXISTS `insert_categoria`!
+CREATE PROCEDURE `insert_categoria` (IN var_nome VARCHAR(60), IN var_padre VARCHAR(60))
+BEGIN
+    INSERT INTO `categoria` VALUES (var_nome, var_padre);
+END!
+GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `base`!
+GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `gestore`!
+
 DELIMITER ;

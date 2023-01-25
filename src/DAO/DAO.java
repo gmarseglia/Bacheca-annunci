@@ -328,19 +328,18 @@ public class DAO {
         return true;
     }
 
-    // G0000
+    //      G0000
     public static boolean insertCategoria(Role role, String nomeCategoria, String nomePadre) throws SQLException {
         openRoleConnection(role);
 
-        // FIXME
-        String update = "INSERT INTO `categoria` VALUES (?, ?)";
-        PreparedStatement ps = conn.prepareStatement(update);
+        String call = "{CALL `insert_categoria` (?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
 
-        ps.setString(1, nomeCategoria);
-        ps.setString(2, nomePadre);
-        ps.closeOnCompletion();
+        cs.setString(1, nomeCategoria);
+        cs.setString(2, nomePadre);
+        cs.closeOnCompletion();
 
-        ps.executeUpdate();
+        cs.executeUpdate();
 
         return true;
     }
