@@ -85,14 +85,14 @@ INSERT INTO `categoria` (`nome`, `padre`) VALUES
 DELETE FROM `annuncio`;
 ALTER TABLE `annuncio` AUTO_INCREMENT = 1;
 
-INSERT INTO `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`) VALUES
-	('user1', 'Abito lungo verde.', 100.00, 'Indumenti', '2023-01-01 12:00:00', '2023-01-06 22:00:00'),
-	('user1', 'Jeans.', 25.00, 'Pantaloni', '2023-01-01 12:10:00', '2023-01-01 12:10:00'),
-	('user2', 'Cargo corti verdi.', 15.99, 'Pantaloncini', '2023-01-01 09:00:00', '2023-01-07 12:00:00'),
-	('user2', 'Cargo corti blu.', 15.99, 'Pantaloncini', '2023-01-01 09:30:00', '2023-01-10 12:00:00'),
-	('userg', 'Tshirt rossa.', 5.99, 'Magliette', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
-	('GioAma', 'Gazebo blu.', 320.50, 'Articoli da esterno', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
-	('GioAma', 'Paletta carina.', 1.99, 'Giardinaggio', '2023-01-07 11:10:00', '2023-01-07 11:10:00');
+INSERT INTO `annuncio` (`inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`) VALUES
+	('user1', 'Abito lungo verde.', 'Indumenti', '2023-01-01 12:00:00', '2023-01-06 22:00:00'),
+	('user1', 'Jeans.', 'Pantaloni', '2023-01-01 12:10:00', '2023-01-01 12:10:00'),
+	('user2', 'Cargo corti verdi.', 'Pantaloncini', '2023-01-01 09:00:00', '2023-01-07 12:00:00'),
+	('user2', 'Cargo corti blu.', 'Pantaloncini', '2023-01-01 09:30:00', '2023-01-10 12:00:00'),
+	('userg', 'Tshirt rossa.', 'Magliette', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
+	('GioAma', 'Gazebo blu.', 'Articoli da esterno', '2023-01-07 11:10:00', '2023-01-07 11:10:00'),
+	('GioAma', 'Paletta carina.', 'Giardinaggio', '2023-01-07 11:10:00', '2023-01-07 11:10:00');
 
 
 -- (RE)INSERIMENTO DEI COMMENTI

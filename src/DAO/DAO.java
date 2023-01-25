@@ -347,19 +347,18 @@ public class DAO {
     public static boolean insertAnnuncio(Role role, Annuncio annuncio) throws SQLException {
         openRoleConnection(role);
 
-        String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?, ?)}";
+        String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
 
         cs.setString(1, annuncio.getInserzionista());
         cs.setString(2, annuncio.getDescrizione());
-        cs.setFloat(3, annuncio.getPrezzo());
-        cs.setString(4, annuncio.getCategoria());
-        cs.registerOutParameter(5, Types.INTEGER);
+        cs.setString(3, annuncio.getCategoria());
+        cs.registerOutParameter(4, Types.INTEGER);
         cs.closeOnCompletion();
 
         cs.execute();
 
-        annuncio.setNumero(cs.getLong(5));
+        annuncio.setNumero(cs.getLong(4));
 
         return true;
     }
@@ -372,26 +371,25 @@ public class DAO {
 
         cs.setLong(1, annuncio.getID());
         cs.closeOnCompletion();
+
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
-//            annuncio = BuilderAnnuncio.newFromResultSet(rs);
             annuncio.setNumero(rs.getLong(1));
             annuncio.setInserzionista(rs.getString(2));
             annuncio.setDescrizione(rs.getString(3));
-            annuncio.setPrezzo((rs.getFloat(4)));
-            annuncio.setCategoria(rs.getString(5));
-            annuncio.setInserito(rs.getTimestamp(6).toLocalDateTime());
-            annuncio.setModificato(rs.getTimestamp(7).toLocalDateTime());
-            annuncio.setVenduto((rs.getTimestamp(8) == null) ? null : rs.getTimestamp(8).toLocalDateTime());
+            annuncio.setCategoria(rs.getString(4));
+            annuncio.setInserito(rs.getTimestamp(5).toLocalDateTime());
+            annuncio.setModificato(rs.getTimestamp(6).toLocalDateTime());
+            annuncio.setVenduto((rs.getTimestamp(7) == null) ? null : rs.getTimestamp(7).toLocalDateTime());
 
             do {
-                if (rs.getString(9) != null) {
+                if (rs.getString(8) != null) {
                     Commento commento = new Commento(
-                            rs.getString(9),
+                            rs.getString(8),
                             annuncio.getID(),
-                            rs.getTimestamp(10).toLocalDateTime(),
-                            rs.getString(11)
+                            rs.getTimestamp(9).toLocalDateTime(),
+                            rs.getString(10)
                     );
                     commentoList.add(commento);
                 }
@@ -418,7 +416,7 @@ public class DAO {
     public static boolean selectAnnuncio(Role role, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String query = "SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`, `venduto` " +
+        String query = "SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto` " +
                 "FROM `annuncio` " +
                 "WHERE (`venduto` IS NULL OR NOT ?);";
         PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
