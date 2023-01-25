@@ -253,6 +253,15 @@ END !
 GRANT EXECUTE ON PROCEDURE `seguire_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `seguire_annuncio` TO `gestore`!
 
+-- A0301
+DROP PROCEDURE IF EXISTS `delete_segue`!
+CREATE PROCEDURE `delete_segue` (IN var_utente VARCHAR(30), IN var_annuncio INT UNSIGNED)
+BEGIN
+    DELETE FROM `segue` WHERE `utente`=var_utente AND `annuncio`=var_annuncio;
+END!
+GRANT EXECUTE ON PROCEDURE `delete_segue` TO `base`!
+GRANT EXECUTE ON PROCEDURE `delete_segue` TO `gestore`!
+
 -- A0400
 DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`!
 CREATE PROCEDURE `controllare_annunci_seguiti` (

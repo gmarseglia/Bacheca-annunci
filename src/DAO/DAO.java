@@ -516,18 +516,17 @@ public class DAO {
         return true;
     }
 
-    // A0301
+    //      A0301
     public static boolean deleteSegue(Role role, String utenteID, Long annuncioID) throws SQLException {
         openRoleConnection(role);
 
-        // FIXME
-        String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
-        PreparedStatement ps = conn.prepareStatement(update);
-        ps.setString(1, utenteID);
-        ps.setLong(2, annuncioID);
-        ps.closeOnCompletion();
+        String call = "{CALL `delete_segue` (?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setString(1, utenteID);
+        cs.setLong(2, annuncioID);
+        cs.closeOnCompletion();
 
-        if (ps.executeUpdate() == 0) {
+        if (cs.executeUpdate() == 0) {
             CustomSQLException e = new CustomSQLException();
             e.setSQLState("45005");
             e.setMessage("Annuncio non presente fra i seguiti");
