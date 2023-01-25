@@ -433,7 +433,6 @@ END!
 GRANT EXECUTE ON PROCEDURE `select_utenti_con_messaggi` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_utenti_con_messaggi` TO `gestore`!
 
-
 -- C0000
 DROP PROCEDURE IF EXISTS `scrivere_commento`!
 CREATE PROCEDURE `scrivere_commento` (in var_utente VARCHAR(30), in var_annuncio INT UNSIGNED, in var_testo VARCHAR(250))
@@ -483,5 +482,15 @@ BEGIN
 END!
 GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `base`!
 GRANT EXECUTE ON PROCEDURE `insert_categoria` TO `gestore`!
+
+-- R0001
+DROP PROCEDURE IF EXISTS `generate_report`!
+CREATE PROCEDURE `generate_report` ()
+BEGIN
+    SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) AS `percentuale`, `annunci_inseriti` FROM `utente`;
+    -- SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) AS `percentuale` FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`;
+GROUP BY `username`;
+END!
+GRANT EXECUTE ON PROCEDURE `generate_report` TO `gestore`!
 
 DELIMITER ;

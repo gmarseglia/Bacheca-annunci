@@ -580,21 +580,11 @@ public class DAO {
     public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) throws SQLException {
         openRoleConnection(role);
 
-        // FIXME
-        String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`, `annunci_inseriti`" +
-                " FROM `utente`;";
+        String call = "{CALL `generate_report`};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.closeOnCompletion();
 
-        /*
-        QUERY SENZA USARE ATTRIBUTI DI UTENTE
-        String query = "SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) as `percentuale`" +
-        "FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`" +
-        "GROUP BY `username`;";
-        */
-
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.closeOnCompletion();
-
-        ResultSet rs = ps.executeQuery();
+        ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
