@@ -162,12 +162,12 @@ BEGIN
 
             DROP TEMPORARY TABLE `temp_categoria_2`;
         END WHILE;
-        DROP TEMPORARY TABLE `temp_categoria`;
 
         SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
         FROM `annuncio` as `a`
         WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`) AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
 
+        DROP TEMPORARY TABLE `temp_categoria`;
     COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `base`!

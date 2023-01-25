@@ -291,7 +291,7 @@ public class ViewUtente {
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
             for (Annuncio annuncio : foundAnnunciList) {
-                System.out.println(annuncio);
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             }
         } else {
             System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
@@ -339,7 +339,7 @@ public class ViewUtente {
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
             for (Annuncio annuncio : foundAnnunciList) {
-                System.out.println(annuncio);
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
             }
         } else {
             System.out.printf("terminata con insuccesso (%s).\n", dbResult.getMessage());
