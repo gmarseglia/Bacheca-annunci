@@ -260,16 +260,13 @@ public class DAO {
     //      M0101
     public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) throws SQLException, RuntimeException {
         openRoleConnection(role);
-        // FIXME
-        String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
-                "UNION " +
-                "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
-        PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ps.setString(1, targetUtente);
-        ps.setString(2, targetUtente);
-        ps.closeOnCompletion();
 
-        ResultSet rs = ps.executeQuery();
+        String call = "{CALL `select_utenti_con_messaggi` (?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, targetUtente);
+        cs.closeOnCompletion();
+
+        ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
