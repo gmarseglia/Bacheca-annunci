@@ -243,7 +243,6 @@ public class ViewUtente {
         printResult(dbResult, () -> {
             System.out.println("\nReport per utenti:");
             for (ReportEntry reportEntry : reportEntries)
-                //TESTME: issue #33
                 System.out.println(reportEntry.toPrettyString());
         });
 
@@ -560,7 +559,6 @@ public class ViewUtente {
         printResult(dbResult, () -> {
             System.out.println("Messaggi:");
             for (MessaggioPrivato messaggioPrivato : messaggioPrivatoList)
-                //TESTME: issue #26
                 System.out.println(messaggioPrivato.toPrettyString(DATETIME_FORMAT));
         });
 
@@ -673,21 +671,18 @@ public class ViewUtente {
 
     private static void inserireAnnuncio() {
         String descrizione;
-        float prezzo;
         String categoria;
 
         Boolean confirmOp;
         do {
             descrizione = ScannerUtility.askText("Descrizione dell'annuncio", 5000);
-            prezzo = ScannerUtility.askFloat("Prezzo");
             categoria = ScannerUtility.askString("Categoria", 60);
 
             System.out.printf("""
                                                 
                     Descrizione: %s
-                    Prezzo: %.2f
                     Categoria: %s
-                    """, descrizione, prezzo, categoria);
+                    """, descrizione, categoria);
 
             confirmOp = null;
             do {
@@ -702,7 +697,7 @@ public class ViewUtente {
 
         } while (!confirmOp);
 
-        Annuncio targetAnnuncio = new Annuncio(ActiveUser.getUsername(), descrizione, prezzo, categoria, null);
+        Annuncio targetAnnuncio = new Annuncio(ActiveUser.getUsername(), descrizione, categoria, null);
 
         System.out.print("Inserimento annuncio... ");
         DBResult inserimentoResult = BaseController.inserireAnnuncio(targetAnnuncio);

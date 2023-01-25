@@ -69,7 +69,7 @@ BEGIN
 END !
 
 CREATE PROCEDURE `inserire_annuncio` (
-	in var_inserzionista VARCHAR(30), in var_descrizione TEXT, in var_prezzo NUMERIC(7, 2),
+	in var_inserzionista VARCHAR(30), in var_descrizione TEXT,
 	in var_categoria VARCHAR(60), out var_numero INT UNSIGNED )
 BEGIN
 	declare exit handler for sqlexception
@@ -81,8 +81,8 @@ BEGIN
 	set transaction isolation level read uncommitted; 
 	start transaction;
 
-		insert into `annuncio` (`inserzionista`, `descrizione`, `prezzo`, `categoria`)
-			values (var_inserzionista, var_descrizione, var_prezzo, var_categoria);
+		insert into `annuncio` (`inserzionista`, `descrizione`, `categoria`)
+			values (var_inserzionista, var_descrizione, var_categoria);
 
 		update `utente`
 			set `annunci_inseriti`=`annunci_inseriti`+1
@@ -142,7 +142,7 @@ BEGIN
 			SIGNAL SQLSTATE "45004" SET message_text="Annuncio non esistente";
 		END IF;
 
-		select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`prezzo`,
+		select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`,
 		`annuncio`.`categoria`, `annuncio`.`inserito`, `annuncio`.`modificato`, `annuncio`.`venduto`,
 		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
 		from `annuncio` left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
@@ -275,7 +275,7 @@ BEGIN
 
         SET start_timestamp = CURRENT_TIMESTAMP;
 
-        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`prezzo`,
+        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` ,
             `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
         FROM `utente` as `u`
             INNER JOIN `segue` as `s` ON `u`.`username`=`s`.`utente`
@@ -383,7 +383,7 @@ BEGIN
             DROP TEMPORARY TABLE `temp_categoria_2`;
         END WHILE;
 
-        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`prezzo`,
+        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` ,
             `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
         FROM `annuncio` as `a`
         WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`)
@@ -415,7 +415,7 @@ BEGIN
             SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
         END IF;
 
-        SELECT `numero`, `inserzionista`, `descrizione`, `prezzo`, `categoria`, `inserito`, `modificato`, `venduto`
+        SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto`
         FROM `annuncio`
         WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
 

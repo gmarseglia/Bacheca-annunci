@@ -20,11 +20,7 @@ public class BaseController {
             result.setResult(DAO.insertAnnuncio(ActiveUser.getRole(), annuncio));
         } catch (SQLException e) {
             switch (e.getSQLState()) {
-                case "22001" ->
-                        result.setMessage(String.format("Prezzo deve essere minore di 99999.99, [%s]", e.getMessage()));
                 case "23000" -> result.setMessage(String.format("Categoria non esistente, [%s].", e.getMessage()));
-                case "45011" ->
-                        result.setMessage(String.format("Il prezzo deve essere maggiore di 0, [%s]", e.getMessage()));
                 default -> result.setMessage(getGenericSQLExceptionMessage(e));
             }
         }
