@@ -241,8 +241,6 @@ public class DAO {
     public static boolean insertMessaggio(Role role, String usernameMittente, String usernameDestinatario, String testo) throws SQLException {
         openRoleConnection(role);
 
-        // FIXME
-        String updateQuery = "INSERT INTO `messaggio_privato` (`mittente`, `destinatario`, `testo`) VALUES (?, ?, ?);";
         String call = "{CALL `insert_messaggio` (?, ?, ?)};";
         CallableStatement cs = conn.prepareCall(call);
         cs.setString(1, usernameMittente);
