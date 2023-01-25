@@ -1,13 +1,9 @@
 use `bacheca_annunci`;
 
-DROP TRIGGER IF EXISTS `before_annuncio_update`;
-DROP TRIGGER IF EXISTS `before_messaggio_privato_insert`;
-DROP TRIGGER IF EXISTS `before_messaggio_privato_update`;
-DROP TRIGGER IF EXISTS `before_categoria_insert`;
-DROP TRIGGER IF EXISTS `before_categoria_update`;
 
 DELIMITER !
 
+DROP TRIGGER IF EXISTS `before_annuncio_update`;
 CREATE TRIGGER `before_annuncio_update`
 BEFORE UPDATE ON `annuncio` FOR EACH ROW
 BEGIN
@@ -16,6 +12,7 @@ BEGIN
     END IF;
 END!
 
+DROP TRIGGER IF EXISTS `before_messaggio_privato_insert`;
 CREATE TRIGGER `before_messaggio_privato_insert`
 BEFORE INSERT ON `messaggio_privato` FOR EACH ROW
 BEGIN
@@ -24,6 +21,7 @@ BEGIN
     END IF;
 END!
 
+DROP TRIGGER IF EXISTS `before_messaggio_privato_update`;
 CREATE TRIGGER `before_messaggio_privato_update`
 BEFORE UPDATE ON `messaggio_privato` FOR EACH ROW
 BEGIN
@@ -32,6 +30,7 @@ BEGIN
     END IF;
 END!
 
+DROP TRIGGER IF EXISTS `before_categoria_insert`;
 CREATE TRIGGER `before_categoria_insert`
 BEFORE INSERT ON `categoria` FOR EACH ROW
 BEGIN
@@ -40,6 +39,7 @@ BEGIN
     END IF;
 END!
 
+DROP TRIGGER IF EXISTS `before_categoria_update`;
 CREATE TRIGGER `before_categoria_update`
 BEFORE UPDATE ON `categoria` FOR EACH ROW
 BEGIN

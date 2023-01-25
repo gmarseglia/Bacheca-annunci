@@ -17,8 +17,8 @@ import java.util.List;
 public class ViewLogin {
 
     private enum MODE {
-        LOGIN,
-        REGISTRATION,
+        LOGIN,          //U0100
+        REGISTRATION,   //U0000 && U0001
         EXIT
     }
 

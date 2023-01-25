@@ -27,6 +27,7 @@ public class BaseController {
         return result;
     }
 
+    // C0000
     public static DBResult scrivereCommento(Long numero, String testo) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -55,6 +56,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // M0000
     public static DBResult scrivereMessaggioPrivato(String usernameDestinatario, String testo) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -70,6 +72,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // M0101
     public static DBResult visualizzareUtentiConMessaggi(List<String> utenteIDList) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -80,6 +83,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // M0100
     public static DBResult visualizzareMessaggi(String utenteID2, List<MessaggioPrivato> messaggioPrivatoList) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -94,6 +98,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // A0500
     public static DBResult vendereAnnuncio(Long annuncioID) {
         DBResult result = new DBResult(false);
         try {
@@ -110,6 +115,7 @@ public class BaseController {
         return result;
     }
 
+    // A0600
     public static DBResult dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -123,6 +129,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // A0300
     public static DBResult seguireAnnuncio(Long annuncioID) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -138,6 +145,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // A0301
     public static DBResult stopSeguireAnnuncio(Long annuncioID) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -151,6 +159,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // A0400
     public static DBResult controllareAnnunciSeguiti(List<Annuncio> annunciSegutiModificatiList) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -203,6 +212,7 @@ public class BaseController {
         return dbResult;
     }
 
+    // T0000
     public static DBResult visualizzareCategorie(List<Categoria> categoriaList) {
         DBResult dbResult = new DBResult(false);
         try {

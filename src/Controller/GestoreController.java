@@ -10,6 +10,7 @@ import java.util.List;
 
 public class GestoreController extends BaseController {
 
+    // G0000
     public static DBResult creareCategoria(String nomeCategoria, String nomePadre) {
         DBResult dbResult = new DBResult(false);
         try {
@@ -25,6 +26,7 @@ public class GestoreController extends BaseController {
         return dbResult;
     }
 
+    // R0001
     public static DBResult generareReport(List<ReportEntry> reportEntryList) {
         DBResult dbResult = new DBResult(false);
         try {

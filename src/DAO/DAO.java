@@ -58,6 +58,7 @@ public class DAO {
     }
 
     // LOGIN E REGISTRAZIONE
+    //      U0100
     public static Boolean selectCredenziali(Role role, Credenziali credenziali) throws SQLException {
         openRoleConnection(role);
 
@@ -88,6 +89,7 @@ public class DAO {
         return true;
     }
 
+    //      U0000
     public static boolean callRegistrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, Recapito recapitoPreferito) throws SQLException {
         // #1: connect
         openRoleConnection(ActiveUser.getRole());
@@ -133,10 +135,11 @@ public class DAO {
         return true;
     }
 
+    //      A0600
     public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{call `dettagli_utente`(?)}";
+        String call = "{CALL `dettagli_utente`(?)}";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, utente.getID());
 
@@ -198,8 +201,8 @@ public class DAO {
         return true;
     }
 
-
     // RECAPITO
+    //      U0001
     public static int[] insertBatchRecapito(List<Recapito> listOfRecapito) throws SQLException {
         int[] batchResult;
         try {
@@ -234,9 +237,11 @@ public class DAO {
     }
 
     // MESSAGGI PRIVATI
+    //      M0000
     public static boolean insertMessaggio(Role role, String usernameMittente, String usernameDestinatario, String testo) throws SQLException {
         openRoleConnection(role);
 
+        // FIXME
         String updateQuery = "INSERT INTO `messaggio_privato` " +
                 "(`mittente`, `destinatario`, `testo`) " +
                 "VALUES (?, ?, ?);";
@@ -255,8 +260,10 @@ public class DAO {
         return true;
     }
 
+    // M0101
     public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) throws SQLException, RuntimeException {
         openRoleConnection(role);
+        // FIXME
         String query = "SELECT `destinatario` FROM `messaggio_privato` WHERE `mittente`=? " +
                 "UNION " +
                 "SELECT `mittente` FROM `messaggio_privato` WHERE `destinatario`=?;";
@@ -276,8 +283,10 @@ public class DAO {
         return true;
     }
 
+    //      M0100
     public static boolean selectMessaggiTraUtenti(Role role, String utente1ID, String utente2ID, List<MessaggioPrivato> messaggioPrivatoList) throws SQLException {
         openRoleConnection(role);
+        // FIXME
         String query = "SELECT `mittente`, `destinatario`, `inviato`, `testo`" +
                 " FROM `messaggio_privato` " +
                 " WHERE (`mittente`=? AND `destinatario`=?) OR (`mittente`=? AND `destinatario`=?)" +
@@ -311,9 +320,11 @@ public class DAO {
     }
 
     // CATEGORIA
+    //      T0000
     public static boolean selectCategoria(Role role, List<Categoria> categoriaList) throws SQLException {
         openRoleConnection(role);
 
+        // FIXME
         String query = "SELECT `nome`,`padre` FROM `categoria`;";
         PreparedStatement ps = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         ps.closeOnCompletion();
@@ -329,9 +340,11 @@ public class DAO {
         return true;
     }
 
+    // G0000
     public static boolean insertCategoria(Role role, String nomeCategoria, String nomePadre) throws SQLException {
         openRoleConnection(role);
 
+        // FIXME
         String update = "INSERT INTO `categoria` VALUES (?, ?)";
         PreparedStatement ps = conn.prepareStatement(update);
 
@@ -344,10 +357,11 @@ public class DAO {
         return true;
     }
 
+    //      A0000
     public static boolean insertAnnuncio(Role role, Annuncio annuncio) throws SQLException {
         openRoleConnection(role);
 
-        String callQuery = "{call `inserire_annuncio`(?, ?, ?, ?)}";
+        String callQuery = "{CALL `inserire_annuncio`(?, ?, ?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
 
         cs.setString(1, annuncio.getInserzionista());
@@ -363,10 +377,11 @@ public class DAO {
         return true;
     }
 
+    //      A0100
     public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
         openRoleConnection(role);
 
-        String callQuery = "{call `dettagli_annuncio`(?)}";
+        String callQuery = "{CALL `dettagli_annuncio`(?)}";
         CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
         cs.setLong(1, annuncio.getID());
@@ -399,10 +414,11 @@ public class DAO {
         return true;
     }
 
+    //      A0500
     public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{call `vendere_annuncio`(?, ?)};";
+        String call = "{CALL `vendere_annuncio`(?, ?)};";
         CallableStatement cs = conn.prepareCall(call);
         cs.setLong(1, annuncioID);
         cs.setString(2, utenteID);
@@ -434,10 +450,11 @@ public class DAO {
         return true;
     }
 
+    //      A0202
     public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{call `select_annunci_by_inserzionista` (?, ?)};";
+        String call = "{CALL `select_annunci_by_inserzionista` (?, ?)};";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, inserzionistaID);
         cs.setBoolean(2, onlyAvailable);
@@ -454,9 +471,11 @@ public class DAO {
         return true;
     }
 
+    //      A0203
     public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
+        // FIXME
         String query = "SELECT * " +
                 "FROM `annuncio` " +
                 "WHERE MATCH(`descrizione`) AGAINST (? IN NATURAL LANGUAGE MODE)" +
@@ -477,6 +496,7 @@ public class DAO {
         return true;
     }
 
+    //      A0200
     public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
@@ -496,8 +516,9 @@ public class DAO {
 
         return true;
     }
-    // SEGUE
 
+    // SEGUE
+    //      A0300
     public static boolean insertSegue(Role role, Segue segue) throws SQLException {
         openRoleConnection(role);
 
@@ -512,9 +533,11 @@ public class DAO {
         return true;
     }
 
+    // A0301
     public static boolean deleteSegue(Role role, String utenteID, Long annuncioID) throws SQLException {
         openRoleConnection(role);
 
+        // FIXME
         String update = "DELETE FROM `segue` WHERE `utente`=? AND `annuncio`=?;";
         PreparedStatement ps = conn.prepareStatement(update);
         ps.setString(1, utenteID);
@@ -531,10 +554,11 @@ public class DAO {
         return true;
     }
 
+    // A0400
     public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList, boolean updateLastCheck, boolean deleteSold) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{call `controllare_annunci_seguiti` (?, ?, ?)};";
+        String call = "{CALL `controllare_annunci_seguiti` (?, ?, ?)};";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, utenteID);
         cs.setBoolean(2, updateLastCheck);
@@ -551,12 +575,13 @@ public class DAO {
 
         return true;
     }
-    // COMMENTO
 
+    // COMMENTO
+    //      C0000
     public static boolean insertCommento(Role role, String utente, Long numero, String testo) throws SQLException {
         openRoleConnection(role);
 
-        String callQuery = "{call `scrivere_commento`(?, ?, ?)}";
+        String callQuery = "{CALL `scrivere_commento`(?, ?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
         cs.setString(1, utente);
         cs.setLong(2, numero);
@@ -567,11 +592,13 @@ public class DAO {
 
         return true;
     }
-    // REPORT
 
+    // REPORT
+    //      R0001
     public static boolean selectReport(Role role, List<ReportEntry> reportEntryList) throws SQLException {
         openRoleConnection(role);
 
+        // FIXME
         String query = "SELECT `username`, COALESCE(`annunci_venduti` / `annunci_inseriti` * 100.0, 0.0) as `percentuale`, `annunci_inseriti`" +
                 " FROM `utente`;";
 

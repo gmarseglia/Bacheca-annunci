@@ -13,24 +13,24 @@ import java.util.List;
 public class ViewUtente {
 
     protected enum OPERATION {
-        INSERIRE_ANNUNCIO,              //A0000
-        DETTAGLI_ANNUNCIO,              //A0100
-        CERCARE_TUTTI_ANNUNCI,           //A0204
-        CERCARE_PER_CATEGORIA,          //A0200
-        CERCARE_PER_UTENTE,             //A0202
-        CERCARE_PER_DESCRIZIONE,        //A0203
-        SEGUIRE_ANNUNCIO,               //A0300
-        STOP_SEGUIRE_ANNUNCIO,          //A0301
-        CONTROLLARE_SEGUITI,  //A0400
-        VENDERE_ANNUNCIO,               //A0500
-        DETTAGLI_UTENTE,         //A0600
-        INVIARE_MESSAGGIO,              //M0000
-        MESSAGGI_CON_UTENTE,            //M0100
-        VISUALIZZARE_UTENTI_CON_MESSAGGI,              //M0101
-        SCRIVERE_COMMENTO,              //C0000
-        VISUALIZZARE_CATEGORIE,         //T0000
-        CREARE_CATEGORIA,               //G0000
-        CREARE_REPORT,                  //R0001
+        INSERIRE_ANNUNCIO,                  //A0000
+        DETTAGLI_ANNUNCIO,                  //A0100
+        CERCARE_PER_CATEGORIA,              //A0200
+        CERCARE_PER_UTENTE,                 //A0202
+        CERCARE_PER_DESCRIZIONE,            //A0203
+        CERCARE_TUTTI_ANNUNCI,              //A0204
+        SEGUIRE_ANNUNCIO,                   //A0300
+        STOP_SEGUIRE_ANNUNCIO,              //A0301
+        CONTROLLARE_SEGUITI,                //A0400
+        VENDERE_ANNUNCIO,                   //A0500
+        DETTAGLI_UTENTE,                    //A0600
+        INVIARE_MESSAGGIO,                  //M0000
+        MESSAGGI_CON_UTENTE,                //M0100
+        VISUALIZZARE_UTENTI_CON_MESSAGGI,   //M0101
+        SCRIVERE_COMMENTO,                  //C0000
+        VISUALIZZARE_CATEGORIE,             //T0000
+        CREARE_CATEGORIA,                   //G0000
+        CREARE_REPORT,                      //R0001 TODO
         LOGOUT,
         TERMINARE_APPLICAZIONE;
 
@@ -196,7 +196,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (F)
+    // T0000
     private static void visualizzareCategorie() {
         Boolean confirmOp = null;
         do {
@@ -223,6 +223,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // R0001
     private static void creareReport() {
         Boolean confirmOp = null;
         do {
@@ -249,6 +250,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // A0203
     private static void cercaPerDescrizione() {
         String descrizione;
         Boolean onlyAvailable;
@@ -346,6 +348,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // A0202
     private static void cercaPerUtente() {
         String inserzionistaID;
         Boolean onlyAvailable;
@@ -394,7 +397,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (9)
+    // A0400
     private static void controllareSeguiti() {
         Boolean confirmOp = null;
         do {
@@ -422,7 +425,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (8)
+    // A0301
     private static void stopSeguireAnnuncio() {
         Long numero;
 
@@ -437,7 +440,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (7)
+    // A0300
     private static void seguireAnnuncio() {
         Long numero;
 
@@ -454,7 +457,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (A)
+    // A0600
     private static void dettagliUtente() {
         Boolean confirmOp;
         String targetUsername;
@@ -498,6 +501,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // A0500
     private static void vendereAnnuncio() {
         Long numero;
         Boolean confirmOp;
@@ -530,7 +534,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (D)
+    // M0100
     private static void visualizzareMessaggiConUtente() {
         String targetUsername;
         Boolean confirmOp;
@@ -565,7 +569,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (C)
+    // M0101
     private static void visualizzareUtentiConMessaggi() {
         Boolean confirmOp = null;
         do {
@@ -592,7 +596,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (E)
+    // M0000
     private static void inviareMessaggio() {
         String destinatario;
         String testo;
@@ -631,6 +635,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // A0100
     private static void dettagliAnnuncio() {
         Long numero;
         Boolean confirmOp;
@@ -711,7 +716,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // (B)
+    // C0000
     private static void scrivereCommento() {
         Long numero;
         String testo;
@@ -748,6 +753,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // G0000
     private static void creareCategoria() {
         String nomeCategoria, nomePadre;
 

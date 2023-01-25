@@ -1,30 +1,19 @@
--- Procedure DEVELOP
-
 USE `bacheca_annunci`;
-
-DROP PROCEDURE IF EXISTS `login`;
-DROP PROCEDURE IF EXISTS `registrazione_utente`;
-DROP PROCEDURE IF EXISTS `inserire_recapito`;
-DROP PROCEDURE IF EXISTS `inserire_annuncio`;
-DROP PROCEDURE IF EXISTS `dettagli_annuncio`;
-DROP PROCEDURE IF EXISTS `scrivere_commento`;
-DROP PROCEDURE IF EXISTS `vendere_annuncio`;
-DROP PROCEDURE IF EXISTS `dettagli_utente`;
-DROP PROCEDURE IF EXISTS `seguire_annuncio`;
-DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`;
-DROP PROCEDURE IF EXISTS `get_all_child_categories`;
-DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`;
-DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`;
 
 DELIMITER !
 
+-- U0100
+DROP PROCEDURE IF EXISTS `login`!
 CREATE PROCEDURE `login` (IN var_username VARCHAR(30), IN var_password VARCHAR(30))
 BEGIN
     SELECT `ruolo`
     FROM `credenziali`
 	WHERE `username`=var_username AND `password`=SHA1(var_password);
-END !
+END!
+GRANT EXECUTE ON PROCEDURE `login` TO `registratore`!
 
+-- U0000
+DROP PROCEDURE IF EXISTS `registrazione_utente`!
 CREATE PROCEDURE `registrazione_utente` (
     in var_username VARCHAR(30), in var_password VARCHAR(30), in var_ruolo ENUM('base', 'gestore'),
     in var_codice_fiscale CHAR(16), in var_nome VARCHAR(100), in var_cognome VARCHAR(100),
@@ -61,16 +50,20 @@ BEGIN
 			values (var_codice_fiscale, var_valore_recapito_preferito);
 	commit;
 END!
+GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`!
 
+-- U0001
+DROP PROCEDURE IF EXISTS `inserire_recapito`!
 CREATE PROCEDURE `inserire_recapito` (IN var_valore VARCHAR(60), IN var_anagrafica CHAR(16), IN var_tipo ENUM('telefono', 'cellulare', 'email'))
 BEGIN
     INSERT IGNORE INTO `recapito` (`valore`, `anagrafica`, `tipo`)
     VALUES (var_valore, var_anagrafica, var_tipo);
-END !
+END!
+GRANT EXECUTE ON PROCEDURE `inserire_recapito` TO `registratore`!
 
-CREATE PROCEDURE `inserire_annuncio` (
-	in var_inserzionista VARCHAR(30), in var_descrizione TEXT,
-	in var_categoria VARCHAR(60), out var_numero INT UNSIGNED )
+-- A0000
+DROP PROCEDURE IF EXISTS `inserire_annuncio`!
+CREATE PROCEDURE `inserire_annuncio` (in var_inserzionista VARCHAR(30), in var_descrizione TEXT, in var_categoria VARCHAR(60), out var_numero INT UNSIGNED)
 BEGIN
 	declare exit handler for sqlexception
     begin
@@ -91,38 +84,12 @@ BEGIN
 		set var_numero = last_insert_id();
 	commit;
 END!
+GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`!
+GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`!
 
-CREATE PROCEDURE `scrivere_commento` (
-	in var_utente VARCHAR(30), in var_annuncio INT UNSIGNED, in var_testo VARCHAR(250))
-BEGIN
-	declare counter INT;
-	declare exit handler for sqlexception
-    begin
-    	rollback;
-    	resignal;
-    end;
-
-	set transaction isolation level read uncommitted; 
-	start transaction;
-	
-		select count(`numero`) into counter 
-			from `annuncio` 
-			where `numero`=var_annuncio and `venduto` is not null;
-
-		if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
-		end if;
-
-		insert into `commento` (`utente`, `annuncio`, `testo`)
-			values (var_utente, var_annuncio, var_testo);
-
-		update `annuncio`
-			set `modificato`=CURRENT_TIMESTAMP
-			where `numero`=var_annuncio;
-	commit;
-END!
-
-CREATE PROCEDURE `dettagli_annuncio` (
-	in var_annuncio_id INT UNSIGNED)
+-- A0100
+DROP PROCEDURE IF EXISTS `dettagli_annuncio`!
+CREATE PROCEDURE `dettagli_annuncio` (in var_annuncio_id INT UNSIGNED)
 BEGIN
 	DECLARE counter INT;
 	declare exit handler for sqlexception
@@ -138,7 +105,7 @@ BEGIN
 		FROM `annuncio`
 		WHERE `numero`=var_annuncio_id;
 
-		IF (COUNTER <> 1) THEN
+		IF (counter <> 1) THEN
 			SIGNAL SQLSTATE "45004" SET message_text="Annuncio non esistente";
 		END IF;
 
@@ -151,81 +118,96 @@ BEGIN
 
 	commit;
 END!
+GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`!
+GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `gestore`!
 
-CREATE PROCEDURE `vendere_annuncio` (
-	in var_annuncio_id INT UNSIGNED, in var_utente_id VARCHAR(30))
+-- A0200
+DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`!
+CREATE PROCEDURE `select_annunci_categorie_figlie` (IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean)
 BEGIN
-	declare counter INT;
+    DECLARE counter INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    START TRANSACTION;
 
-	declare exit handler for sqlexception
-	begin
-		rollback;
-		resignal;
-	end;
+    	SELECT COUNT(*) INTO counter
+    	FROM `categoria`
+    	WHERE `nome`=var_categoria_id;
 
-	start transaction;
+    	IF (counter <> 1) THEN
+    		SIGNAL SQLSTATE "45003" SET message_text="ategoria non esistente";
+		END IF;
 
-	select count(`numero`) into counter 
-		from `annuncio` 
-		where `numero`=var_annuncio_id and `venduto` is not null;
+        CREATE TEMPORARY TABLE `temp_categoria`
+        SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
 
-	if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
-	end if;
+        WHILE counter > 0 DO
+            CREATE TEMPORARY TABLE `temp_categoria_2` SELECT * FROM `temp_categoria`;
+            SELECT count(*) INTO counter
+            FROM `categoria`
+            WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_2`);
 
-	select count(`numero`) into counter
-		from `annuncio`
-		where `numero`=var_annuncio_id AND `inserzionista`=var_utente_id;
+            IF (counter > 0) THEN
+                CREATE TEMPORARY TABLE `temp_categoria_3` SELECT * FROM `temp_categoria`;
+                INSERT INTO `temp_categoria`
+                SELECT *
+                FROM `categoria`
+                WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria_2`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_3`);
+                DROP TEMPORARY TABLE `temp_categoria_3`;
+            END IF;
 
-	IF (counter<>1) THEN
-		SIGNAL SQLSTATE "45002" SET message_text="Utente non è inserzionista";
-	END IF;
+            DROP TEMPORARY TABLE `temp_categoria_2`;
+        END WHILE;
+        DROP TEMPORARY TABLE `temp_categoria`;
 
-	update `annuncio`
-		set `venduto`=CURRENT_TIMESTAMP
-		where `numero`=var_annuncio_id;
+        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
+        FROM `annuncio` as `a`
+        WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`) AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
 
-	update `utente`
-		set `annunci_venduti`=`annunci_venduti`+1
-		where `username`=var_utente_id;
-
-	commit;
+    COMMIT;
 END!
+GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `gestore`!
 
-CREATE PROCEDURE `dettagli_utente` (in var_utente_id VARCHAR(30))
+-- A0202
+DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`!
+CREATE PROCEDURE `select_annunci_by_inserzionista` (IN var_inserzionista_id VARCHAR(30), IN var_solo_disponibili boolean)
 BEGIN
-	declare exit handler for sqlexception
-    begin
-    	rollback;
-    	resignal;
-    end;
+    DECLARE counter INT;
 
-	set transaction isolation level read committed;
-	start transaction;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-		select `u`.`annunci_inseriti`, `u`.`annunci_venduti`,
-			`a`.`codice_fiscale`, `a`.`nome` ,`a`.`cognome`, `a`.`sesso`, `a`.`data_nascita`, `a`.`comune_nascita`, `a`.`indirizzo_residenza`, `a`.`indirizzo_fatturazione`,
-			`r`.`valore`, `r`.`tipo`
-		from `utente` as `u`
-			inner join `anagrafica` as `a` on `u`.`username` = `a`.`utente`
-			inner join `recapito_preferito` as `rp` on `a`.`codice_fiscale` = `rp`.`anagrafica`
-			inner join `recapito` as `r` on `rp`.`recapito` = `r`.`valore`
-		where `username`=var_utente_id;
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    START TRANSACTION;
 
-		select `r`.`valore`, `r`.`tipo`
-		from `recapito` as `r`
-			inner join `anagrafica` as a on `r`.`anagrafica` = `a`.`codice_fiscale`
-		where `a`.`utente`=var_utente_id and `r`.`valore` not in (
-			select `recapito`
-			from `recapito_preferito` as `rp`
-				inner join `anagrafica` as `a` on `rp`.`anagrafica` = `a`.`codice_fiscale`
-			where `a`.`utente`=var_utente_id);
+        SELECT COUNT(*) INTO counter
+        FROM `utente`
+        WHERE `username`=var_inserzionista_id;
 
-	commit;
+        IF (counter <> 1) THEN
+            SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
+        END IF;
+
+        SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto`
+        FROM `annuncio`
+        WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
+
+    COMMIT;
 END!
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`!
 
-CREATE PROCEDURE `seguire_annuncio` (
-    IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED
-)
+-- A0300
+DROP PROCEDURE IF EXISTS `seguire_annuncio`!
+CREATE PROCEDURE `seguire_annuncio` (IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED)
 BEGIN
     DECLARE counter_totale INT;
     DECLARE counter_venduto INT;
@@ -257,7 +239,11 @@ BEGIN
 
     COMMIT;
 END !
+GRANT EXECUTE ON PROCEDURE `seguire_annuncio` TO `base`!
+GRANT EXECUTE ON PROCEDURE `seguire_annuncio` TO `gestore`!
 
+-- A0400
+DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`!
 CREATE PROCEDURE `controllare_annunci_seguiti` (
     IN var_utente_id VARCHAR (30),
     IN var_aggiornare_contr BOOLEAN, IN var_eliminare_venduti BOOLEAN
@@ -295,157 +281,118 @@ BEGIN
         END IF;
 
     COMMIT;
-END !
+END!
+GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `base`!
+GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `gestore`!
 
-CREATE PROCEDURE `get_all_child_categories` (
-    IN var_categoria_id VARCHAR(60)
-)
+-- A0500
+DROP PROCEDURE IF EXISTS `vendere_annuncio`!
+CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED, in var_utente_id VARCHAR(30))
 BEGIN
-    DECLARE counter INT DEFAULT 1;
+	declare counter INT;
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
+	declare exit handler for sqlexception
+	begin
+		rollback;
+		resignal;
+	end;
 
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    START TRANSACTION;
+	start transaction;
 
-        CREATE TEMPORARY TABLE `temp_categoria`
-        SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
+	select count(`numero`) into counter
+		from `annuncio`
+		where `numero`=var_annuncio_id and `venduto` is not null;
 
-        WHILE counter > 0 DO
-            CREATE TEMPORARY TABLE `temp_categoria_2` SELECT * FROM `temp_categoria`;
-            SELECT count(*) INTO counter
-            FROM `categoria`
-            WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_2`);
+	if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
+	end if;
 
-            IF (counter > 0) THEN
-                CREATE TEMPORARY TABLE `temp_categoria_3` SELECT * FROM `temp_categoria`;
-                INSERT INTO `temp_categoria`
-                SELECT *
-                FROM `categoria`
-                WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria_2`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_3`);
-                DROP TEMPORARY TABLE `temp_categoria_3`;
-            END IF;
+	select count(`numero`) into counter
+		from `annuncio`
+		where `numero`=var_annuncio_id AND `inserzionista`=var_utente_id;
 
-            DROP TEMPORARY TABLE `temp_categoria_2`;
-        END WHILE;
+	IF (counter<>1) THEN
+		SIGNAL SQLSTATE "45002" SET message_text="Utente non è inserzionista";
+	END IF;
 
-        SELECT *
-        FROM `temp_categoria`;
+	update `annuncio`
+		set `venduto`=CURRENT_TIMESTAMP
+		where `numero`=var_annuncio_id;
 
-    COMMIT;
-END !
+	update `utente`
+		set `annunci_venduti`=`annunci_venduti`+1
+		where `username`=var_utente_id;
 
-CREATE PROCEDURE `select_annunci_categorie_figlie` (
-    IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean
-)
+	commit;
+END!
+GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `base`!
+GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`!
+
+-- A0600
+DROP PROCEDURE IF EXISTS `dettagli_utente`!
+CREATE PROCEDURE `dettagli_utente` (in var_utente_id VARCHAR(30))
 BEGIN
-    DECLARE counter INT;
+	declare exit handler for sqlexception
+    begin
+    	rollback;
+    	resignal;
+    end;
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
+	set transaction isolation level read committed;
+	start transaction;
 
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    START TRANSACTION;
+		select `u`.`annunci_inseriti`, `u`.`annunci_venduti`,
+			`a`.`codice_fiscale`, `a`.`nome` ,`a`.`cognome`, `a`.`sesso`, `a`.`data_nascita`, `a`.`comune_nascita`, `a`.`indirizzo_residenza`, `a`.`indirizzo_fatturazione`,
+			`r`.`valore`, `r`.`tipo`
+		from `utente` as `u`
+			inner join `anagrafica` as `a` on `u`.`username` = `a`.`utente`
+			inner join `recapito_preferito` as `rp` on `a`.`codice_fiscale` = `rp`.`anagrafica`
+			inner join `recapito` as `r` on `rp`.`recapito` = `r`.`valore`
+		where `username`=var_utente_id;
 
-    	SELECT COUNT(*) INTO counter
-    	FROM `categoria`
-    	WHERE `nome`=var_categoria_id;
+		select `r`.`valore`, `r`.`tipo`
+		from `recapito` as `r`
+			inner join `anagrafica` as a on `r`.`anagrafica` = `a`.`codice_fiscale`
+		where `a`.`utente`=var_utente_id and `r`.`valore` not in (
+			select `recapito`
+			from `recapito_preferito` as `rp`
+				inner join `anagrafica` as `a` on `rp`.`anagrafica` = `a`.`codice_fiscale`
+			where `a`.`utente`=var_utente_id);
 
-    	IF (counter <> 1) THEN
-    		SIGNAL SQLSTATE "45003" SET message_text="ategoria non esistente";
-		END IF;	
+	commit;
+END!
+GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `base`!
+GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `gestore`!
 
-        CREATE TEMPORARY TABLE `temp_categoria`
-        SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
-
-        WHILE counter > 0 DO
-            CREATE TEMPORARY TABLE `temp_categoria_2` SELECT * FROM `temp_categoria`;
-            SELECT count(*) INTO counter
-            FROM `categoria`
-            WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_2`);
-
-            IF (counter > 0) THEN
-                CREATE TEMPORARY TABLE `temp_categoria_3` SELECT * FROM `temp_categoria`;
-                INSERT INTO `temp_categoria`
-                SELECT *
-                FROM `categoria`
-                WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria_2`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_3`);
-                DROP TEMPORARY TABLE `temp_categoria_3`;
-            END IF;
-
-            DROP TEMPORARY TABLE `temp_categoria_2`;
-        END WHILE;
-
-        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` ,
-            `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
-        FROM `annuncio` as `a`
-        WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`)
-            AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
-
-    COMMIT;
-END !
-
-CREATE PROCEDURE `select_annunci_by_inserzionista` (
-    IN var_inserzionista_id VARCHAR(30), IN var_solo_disponibili boolean
-)
+-- C0000
+DROP PROCEDURE IF EXISTS `scrivere_commento`!
+CREATE PROCEDURE `scrivere_commento` (in var_utente VARCHAR(30), in var_annuncio INT UNSIGNED, in var_testo VARCHAR(250))
 BEGIN
-    DECLARE counter INT;
+	declare counter INT;
+	declare exit handler for sqlexception
+    begin
+    	rollback;
+    	resignal;
+    end;
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
+	set transaction isolation level read uncommitted;
+	start transaction;
 
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    START TRANSACTION;
+		select count(`numero`) into counter
+			from `annuncio`
+			where `numero`=var_annuncio and `venduto` is not null;
 
-        SELECT COUNT(*) INTO counter
-        FROM `utente`
-        WHERE `username`=var_inserzionista_id;
+		if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
+		end if;
 
-        IF (counter <> 1) THEN
-            SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
-        END IF;
+		insert into `commento` (`utente`, `annuncio`, `testo`)
+			values (var_utente, var_annuncio, var_testo);
 
-        SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto`
-        FROM `annuncio`
-        WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
-
-    COMMIT;
-END !
+		update `annuncio`
+			set `modificato`=CURRENT_TIMESTAMP
+			where `numero`=var_annuncio;
+	commit;
+END!
+GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`!
+GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `gestore`!
 
 DELIMITER ;
-
--- GRANT SU PROCEDURE ------------------------------------------------------------------------------------------------------
-
-GRANT EXECUTE ON PROCEDURE `login` TO `registratore`;
-GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`;
-GRANT EXECUTE ON PROCEDURE `inserire_recapito` TO `registratore`;
-
-GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`;
-GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`;
-GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`;
-GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `base`;
-GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `base`;
-GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `seguire_annuncio` TO `base`;
-GRANT EXECUTE ON PROCEDURE `seguire_annuncio` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `base`;
-GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `get_all_child_categories` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `base`;
-GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `gestore`;
-GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `base`;
-GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`;
