@@ -13,65 +13,72 @@ import java.util.Objects;
 @SuppressWarnings("SwitchStatementWithTooFewBranches")
 public class ViewController {
     protected static String getGenericSQLExceptionMessage(SQLException e) {
-        if (Objects.equals(e.getSQLState(), "42000"))
-            return String.format("L'utente non dispone dei permessi necessari, [%s]", e.getMessage());
-        else return e.getSQLState() + ", " + e.getMessage();
+        return getExceptionMessage(null, e);
     }
 
-    public static DBResultBatch registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, List<Recapito> recapitoList) {
-        DBResult registrationResult = new DBResult(false);
+    protected static String getExceptionMessage(String customMessage, SQLException e) {
+        String message;
+        if (customMessage != null) {
+            message = customMessage;
+        } else if (Objects.equals(e.getSQLState(), "42000")) {
+            message = "L'utente non dispone dei permessi necessari";
+        } else {
+            message = e.getMessage();
+        }
 
+        return String.format("%s, [%s]", message, e.getSQLState());
+    }
+
+
+    public static DBResultBatch registrazioneUtente(Utente utente, Credenziali credenziali, Anagrafica anagrafica, List<Recapito> recapitoList) {
+        DBResult registrationDbResult = new DBResult(false);
         try {
-            registrationResult.setResult(DAO.callRegistrazioneUtente(utente, credenziali, anagrafica, recapitoList.get(0)));
+            registrationDbResult.setResult(DAO.callRegistrazioneUtente(utente, credenziali, anagrafica, recapitoList.get(0)));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("23000")) {
-                registrationResult.setMessage("Username, Codice Fiscale o Recapito Preferito già registrati, " + e.getMessage());
-            } else {
-                registrationResult.setMessage(e.getMessage() + ", " + e.getSQLState());
-            }
+            registrationDbResult.setMessage(switch (e.getSQLState()) {
+                case "23000" -> getExceptionMessage("Username, codice fiscale o recapito preferito già registrati", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
 
         DBResultBatch finalResult = new DBResultBatch(false);
-
         try {
             finalResult.setBatchResult(DAO.insertBatchRecapito(recapitoList.subList(1, recapitoList.size())));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("23000")) {
-                finalResult.setBatchMessage("Recapito già registrato, " + e.getMessage());
-            } else {
-                finalResult.setBatchMessage(e.getMessage() + ", " + e.getSQLState());
-            }
+            finalResult.setBatchMessage(switch (e.getSQLState()) {
+                case "23000" -> getExceptionMessage("Recapito già registrato", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
-        finalResult.setExtraResult(registrationResult.getResult());
-        finalResult.setExtraMessage(registrationResult.getMessage());
+        finalResult.setExtraResult(registrationDbResult.getResult());
+        finalResult.setExtraMessage(registrationDbResult.getMessage());
         return finalResult;
     }
 
     public static DBResult login(Credenziali credenziali) {
-        DBResult result = new DBResult(false);
+        DBResult dbResult = new DBResult(false);
         try {
-            result.setResult(DAO.selectCredenziali(ActiveUser.getRole(), credenziali));
+            dbResult.setResult(DAO.selectCredenziali(ActiveUser.getRole(), credenziali));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("S1000")) {
-                result.setMessage("Credenziali di accesso non valide, " + e.getMessage());
-            } else {
-                result.setMessage(e.getMessage() + ", " + e.getSQLState());
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "S1000" -> getExceptionMessage("Credenziali di accesso non valide", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
-        return result;
+        return dbResult;
     }
 
     public static DBResult inserireAnnuncio(Annuncio annuncio) {
-        DBResult result = new DBResult(false);
+        DBResult dbResult = new DBResult(false);
         try {
-            result.setResult(DAO.insertAnnuncio(ActiveUser.getRole(), annuncio));
+            dbResult.setResult(DAO.insertAnnuncio(ActiveUser.getRole(), annuncio));
         } catch (SQLException e) {
-            switch (e.getSQLState()) {
-                case "23000" -> result.setMessage(String.format("Categoria non esistente, [%s].", e.getMessage()));
-                default -> result.setMessage(getGenericSQLExceptionMessage(e));
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "23000" -> getExceptionMessage("Categoria o inserzionista non esistente", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
-        return result;
+        return dbResult;
     }
 
     // C0000
@@ -81,8 +88,8 @@ public class ViewController {
             dbResult.setResult(DAO.insertCommento(ActiveUser.getRole(), ActiveUser.getUsername(), numero, testo));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
-                case "45001" -> String.format("L'annuncio non è più disponibile [%s]", e.getMessage());
-                case "23000" -> String.format("L'annuncio non esiste [%s]", e.getMessage());
+                case "23000" -> getExceptionMessage("L'annuncio non esiste", e);
+                case "45001" -> getExceptionMessage("L'annuncio non è più disponibile", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -94,11 +101,10 @@ public class ViewController {
         try {
             dbResult.setResult(DAO.getDettagliAnnuncio(ActiveUser.getRole(), annuncio, commentoList));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("45004")) {
-                dbResult.setMessage(String.format("L'annuncio cercato non esiste, [%s]", e.getMessage()));
-            } else {
-                dbResult.setMessage(getGenericSQLExceptionMessage(e));
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45004" -> getExceptionMessage("L'annuncio cercato non esiste", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
@@ -111,8 +117,8 @@ public class ViewController {
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45006", "23000" ->
-                        String.format("Il destinatario \"%s\" non esiste [%s]", usernameDestinatario, e.getMessage());
-                case "45009" -> String.format("Il destinatario deve essere diverso dal mittente [%s]", e.getMessage());
+                        getExceptionMessage(String.format("Il destinatario \"%s\" non esiste", usernameDestinatario), e);
+                case "45009" -> getExceptionMessage("Il destinatario deve essere diverso dal mittente", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -125,7 +131,9 @@ public class ViewController {
         try {
             dbResult.setResult(DAO.selectUtentiConMessaggi(ActiveUser.getRole(), ActiveUser.getUsername(), utenteIDList));
         } catch (SQLException e) {
-            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
@@ -138,7 +146,7 @@ public class ViewController {
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45008" ->
-                        String.format("Non sono presenti messaggi con l'utente \"%s\" [%s]", utenteID2, e.getMessage());
+                        getExceptionMessage(String.format("Non sono presenti messaggi con l'utente \"%s\"", utenteID2), e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -147,19 +155,17 @@ public class ViewController {
 
     // A0500
     public static DBResult vendereAnnuncio(Long annuncioID) {
-        DBResult result = new DBResult(false);
+        DBResult dbResult = new DBResult(false);
         try {
-            result.setResult(DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID, ActiveUser.getUsername()));
+            dbResult.setResult(DAO.updateAnnuncioVendere(ActiveUser.getRole(), annuncioID, ActiveUser.getUsername()));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("45001")) {
-                result.setMessage(String.format("Annuncio già venduto, [%s].", e.getMessage()));
-            } else if (e.getSQLState().equals("45002")) {
-                result.setMessage(String.format("Utente attivo non è l'inserzionista dell'annuncio, [%s].", e.getMessage()));
-            } else {
-                result.setMessage(getGenericSQLExceptionMessage(e));
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45001" -> getExceptionMessage("\"Annuncio già venduto", e);
+                case "45002" -> getExceptionMessage("Utente attivo non è l'inserzionista dell'annuncio", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
-        return result;
+        return dbResult;
     }
 
     // A0600
@@ -168,10 +174,10 @@ public class ViewController {
         try {
             dbResult.setResult(DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList));
         } catch (SQLException e) {
-            switch (e.getSQLState()) {
-                case "45006" -> dbResult.setMessage(String.format("Username non registrato [%s]", e.getMessage()));
-                default -> dbResult.setMessage(getGenericSQLExceptionMessage(e));
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45006" -> getExceptionMessage("Utente non trovato", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
@@ -183,9 +189,9 @@ public class ViewController {
             dbResult.setResult(DAO.insertSegue(ActiveUser.getRole(), new Segue(ActiveUser.getUsername(), annuncioID)));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
-                case "23000" -> String.format("L'annuncio è già presente fra i \"seguiti\" [%s]", e.getMessage());
-                case "45001" -> String.format("L'annuncio non è più disponibile [%s]", e.getMessage());
-                case "45004" -> String.format("L'annuncio non è esistente [%s]", e.getMessage());
+                case "23000" -> getExceptionMessage("L'annuncio è già presente fra i \"seguiti\"", e);
+                case "45001" -> getExceptionMessage("L'annuncio non è più disponibile", e);
+                case "45004" -> getExceptionMessage("L'annuncio non è esistente", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -199,7 +205,7 @@ public class ViewController {
             dbResult.setResult(DAO.deleteSegue(ActiveUser.getRole(), ActiveUser.getUsername(), annuncioID));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
-                case "45005" -> String.format("L'annuncio non è presente fra i seguiti [%s]", e.getMessage());
+                case "45005" -> getExceptionMessage("L'annuncio non è presente fra i seguiti", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -219,42 +225,45 @@ public class ViewController {
         return dbResult;
     }
 
-    public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, Boolean onlyAvailable, List<Annuncio> annuncioList) {
+    public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, Boolean
+            onlyAvailable, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
         try {
             dbResult.setResult(DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, onlyAvailable != null && onlyAvailable, annuncioList));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("45002")) {
-                dbResult.setMessage(String.format("Utente non esistente [%s]", e.getMessage()));
-            } else {
-                dbResult.setMessage(getGenericSQLExceptionMessage(e));
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45002" -> getExceptionMessage("Utente non esistente", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
 
-    public static DBResult cercareAnnunciPerCategoria(String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) {
+    public static DBResult cercareAnnunciPerCategoria(String categoriaID, Boolean
+            onlyAvailable, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
 
         try {
             dbResult.setResult(DAO.selectAnnuncioByCategoria(ActiveUser.getRole(), categoriaID, onlyAvailable, annuncioList));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("45003")) {
-                dbResult.setMessage(String.format("Categoria non esistente [%s]", e.getMessage()));
-            } else {
-                dbResult.setMessage(getGenericSQLExceptionMessage(e));
-            }
+            dbResult.setMessage(switch (e.getSQLState()) {
+                case "45003" -> getExceptionMessage("Categoria non esistente", e);
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
 
         return dbResult;
     }
 
-    public static DBResult cercareAnnunciPerDescrizione(String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) {
+    public static DBResult cercareAnnunciPerDescrizione(String descrizione, Boolean
+            onlyAvailable, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
         try {
             dbResult.setResult(DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, onlyAvailable, annuncioList));
         } catch (SQLException e) {
-            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
@@ -265,7 +274,9 @@ public class ViewController {
         try {
             dbResult.setResult(DAO.selectCategoria(ActiveUser.getRole(), categoriaList));
         } catch (SQLException e) {
-            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
@@ -276,7 +287,9 @@ public class ViewController {
         try {
             dbResult.setResult(DAO.selectAnnuncio(ActiveUser.getRole(), onlyAvailable, foundAnnunciList));
         } catch (SQLException e) {
-            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
@@ -289,8 +302,8 @@ public class ViewController {
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "23000" ->
-                        String.format("O esiste già una categoria con lo stesso nome OPPURE non esiste la categoria padre, [%s]", e.getMessage());
-                case "45010" -> String.format("La categoria non può essere padre di se stessa, [%s]", e.getMessage());
+                        getExceptionMessage("O esiste già una categoria con lo stesso nome OPPURE non esiste la categoria padre", e);
+                case "45010" -> getExceptionMessage("La categoria non può essere padre di se stessa", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
@@ -303,7 +316,9 @@ public class ViewController {
         try {
             dbResult.setResult(DAO.selectReport(ActiveUser.getRole(), reportEntryList));
         } catch (SQLException e) {
-            dbResult.setMessage(getGenericSQLExceptionMessage(e));
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
         }
         return dbResult;
     }
