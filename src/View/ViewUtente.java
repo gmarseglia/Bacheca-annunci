@@ -1,6 +1,6 @@
 package View;
 
-import Controller.BaseController;
+import Controller.ViewController;
 import Controller.DatabaseConnectionController;
 import DAO.DBResult;
 import Model.*;
@@ -173,7 +173,7 @@ public class ViewUtente {
 
         System.out.print("Ricerca degli annunci... ");
 
-        DBResult dbResult = BaseController.cercareAnnunci(onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunci(onlyAvailable, foundAnnunciList);
 
         printResult(dbResult, () -> {
             for (Annuncio annuncio : foundAnnunciList) {
@@ -200,7 +200,7 @@ public class ViewUtente {
         System.out.print("Ricerca delle categorie... ");
 
         List<Categoria> categoriaList = new ArrayList<>();
-        DBResult dbResult = BaseController.visualizzareCategorie(categoriaList);
+        DBResult dbResult = ViewController.visualizzareCategorie(categoriaList);
 
         printResult(dbResult, () -> {
             System.out.println("Lista delle categorie:");
@@ -227,7 +227,7 @@ public class ViewUtente {
         System.out.print("Creazione del report... ");
 
         List<ReportEntry> reportEntries = new ArrayList<>();
-        DBResult dbResult = BaseController.generareReport(reportEntries);
+        DBResult dbResult = ViewController.generareReport(reportEntries);
 
         printResult(dbResult, () -> {
             System.out.println("\nReport per utenti:");
@@ -274,7 +274,7 @@ public class ViewUtente {
 
         System.out.print("\nRicerca degli annunci per descrizione... ");
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = BaseController.cercareAnnunciPerDescrizione(descrizione, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerDescrizione(descrizione, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -322,7 +322,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci della categoria \"%s\" e delle categorie figlie... ", categoriaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = BaseController.cercareAnnunciPerCategoria(categoriaID, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerCategoria(categoriaID, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -371,7 +371,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci di \"%s\"... ", inserzionistaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = BaseController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\nLista degli annunci:\n\n");
@@ -402,7 +402,7 @@ public class ViewUtente {
 
         System.out.print("Ricerca degli annunci \"seguiti\" modificati... ");
 
-        DBResult dbResult = BaseController.controllareAnnunciSeguiti(foundAnnunciList);
+        DBResult dbResult = ViewController.controllareAnnunciSeguiti(foundAnnunciList);
 
         printResult(dbResult, () -> {
             for (Annuncio annuncio : foundAnnunciList) {
@@ -421,7 +421,7 @@ public class ViewUtente {
 
         System.out.printf("Rimozione dell'annuncio %s dai \"seguiti\"... ", numero);
 
-        DBResult dbResult = BaseController.stopSeguireAnnuncio(numero);
+        DBResult dbResult = ViewController.stopSeguireAnnuncio(numero);
 
         printResult(dbResult);
 
@@ -438,7 +438,7 @@ public class ViewUtente {
 
         System.out.printf("Aggiunta dell'annuncio %s ai \"seguiti\"... ", numero);
 
-        DBResult dbResult = BaseController.seguireAnnuncio(numero);
+        DBResult dbResult = ViewController.seguireAnnuncio(numero);
 
         printResult(dbResult);
 
@@ -471,7 +471,7 @@ public class ViewUtente {
         Utente targetUtente = new Utente(targetUsername);
         Anagrafica anagrafica = new Anagrafica();
         List<Recapito> recapitoList = new ArrayList<>();
-        DBResult dbResult = BaseController.dettagliUtente(targetUtente, anagrafica, recapitoList);
+        DBResult dbResult = ViewController.dettagliUtente(targetUtente, anagrafica, recapitoList);
 
         printResult(dbResult, () -> {
             System.out.println("\nDati di " + targetUsername + ":");
@@ -512,7 +512,7 @@ public class ViewUtente {
 
         System.out.printf("Vendita dell'annuncio %d... ", numero);
 
-        DBResult dbResult = BaseController.vendereAnnuncio(numero);
+        DBResult dbResult = ViewController.vendereAnnuncio(numero);
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
         } else {
@@ -546,7 +546,7 @@ public class ViewUtente {
         System.out.printf("Ricerca dei messaggi scambiati con \"%s\"... ", targetUsername);
 
         List<MessaggioPrivato> messaggioPrivatoList = new ArrayList<>();
-        DBResult dbResult = BaseController.visualizzareMessaggi(targetUsername, messaggioPrivatoList);
+        DBResult dbResult = ViewController.visualizzareMessaggi(targetUsername, messaggioPrivatoList);
 
         printResult(dbResult, () -> {
             System.out.println("Messaggi:");
@@ -574,7 +574,7 @@ public class ViewUtente {
 
         System.out.println("Ricerca degli utenti con messaggi scambiati... ");
 
-        DBResult dbResult = BaseController.visualizzareUtentiConMessaggi(usernameList);
+        DBResult dbResult = ViewController.visualizzareUtentiConMessaggi(usernameList);
 
         printResult(dbResult, () -> {
             System.out.println("Utenti con messaggi scambiati:");
@@ -616,7 +616,7 @@ public class ViewUtente {
 
         System.out.print("Invio del messaggio... ");
 
-        DBResult dbResult = BaseController.scrivereMessaggioPrivato(destinatario, testo);
+        DBResult dbResult = ViewController.scrivereMessaggioPrivato(destinatario, testo);
 
         printResult(dbResult);
 
@@ -649,7 +649,7 @@ public class ViewUtente {
         List<Commento> commentoList = new ArrayList<>();
 
         System.out.printf("\nRicerca dei dettagli dell'annuncio %s... ", numero);
-        DBResult dbResult = BaseController.dettagliAnnuncio(annuncio, commentoList);
+        DBResult dbResult = ViewController.dettagliAnnuncio(annuncio, commentoList);
         if (dbResult.getResult()) {
             System.out.println("terminata con successo.");
             System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
@@ -693,7 +693,7 @@ public class ViewUtente {
         Annuncio targetAnnuncio = new Annuncio(ActiveUser.getUsername(), descrizione, categoria, null);
 
         System.out.print("Inserimento annuncio... ");
-        DBResult inserimentoResult = BaseController.inserireAnnuncio(targetAnnuncio);
+        DBResult inserimentoResult = ViewController.inserireAnnuncio(targetAnnuncio);
 
         if (inserimentoResult.getResult()) {
             System.out.printf("terminato con successo con numero %d.\n", targetAnnuncio.getID());
@@ -734,7 +734,7 @@ public class ViewUtente {
 
         System.out.print("Inserimento del commento... ");
 
-        DBResult dbResult = BaseController.scrivereCommento(numero, testo);
+        DBResult dbResult = ViewController.scrivereCommento(numero, testo);
 
         printResult(dbResult);
 
@@ -783,7 +783,7 @@ public class ViewUtente {
 
         System.out.printf("Inserimento della categoria \"%s\"... ", nomeCategoria);
 
-        DBResult dbResult = BaseController.creareCategoria(nomeCategoria, nomePadre);
+        DBResult dbResult = ViewController.creareCategoria(nomeCategoria, nomePadre);
 
         printResult(dbResult);
 

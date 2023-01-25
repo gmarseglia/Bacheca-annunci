@@ -2,17 +2,17 @@ package DAO;
 
 import java.util.Arrays;
 
-public class BatchResult {
+public class DBResultBatch {
     private int[] batchResult;
     private String batchMessage;
     private Boolean extraResult;
     private String extraMessage;
 
-    public BatchResult(int[] batchResult) {
+    public DBResultBatch(int[] batchResult) {
         this.batchResult = batchResult;
     }
 
-    public BatchResult(boolean extraResult) {
+    public DBResultBatch(boolean extraResult) {
         this.extraResult = extraResult;
     }
 

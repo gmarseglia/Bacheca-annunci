@@ -1,9 +1,9 @@
 package View;
 
 
+import Controller.ViewController;
 import Controller.DatabaseConnectionController;
-import Controller.RegistrationController;
-import DAO.BatchResult;
+import DAO.DBResultBatch;
 import DAO.DBResult;
 import Model.*;
 import Model.Exception.InputInterruptedRuntimeException;
@@ -66,7 +66,7 @@ public class ViewLogin {
 
         System.out.printf("Login di '%s'... ", credenziali.getUsername());
 
-        DBResult loginResult = RegistrationController.login(credenziali);
+        DBResult loginResult = ViewController.login(credenziali);
 
         if (loginResult.getResult()) {
             ActiveUser.setRole(credenziali.getRole());
@@ -284,8 +284,8 @@ public class ViewLogin {
 
         System.out.printf("\nRegistrazione di %s... ", username);
 
-        BatchResult registrationResult;
-        registrationResult = RegistrationController.registrazioneUtente(utente, credenziali, anagrafica, recapitoList);
+        DBResultBatch registrationResult;
+        registrationResult = ViewController.registrazioneUtente(utente, credenziali, anagrafica, recapitoList);
 
         if (registrationResult.getExtraResult()) {
             System.out.println("conclusa con successo.");
