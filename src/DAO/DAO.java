@@ -260,7 +260,7 @@ public class DAO {
         return true;
     }
 
-    // M0101
+    //      M0101
     public static boolean selectUtentiConMessaggi(Role role, String targetUtente, List<String> utenteIDList) throws SQLException, RuntimeException {
         openRoleConnection(role);
         // FIXME

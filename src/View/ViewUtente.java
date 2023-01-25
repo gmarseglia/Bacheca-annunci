@@ -30,7 +30,7 @@ public class ViewUtente {
         SCRIVERE_COMMENTO,                  //C0000
         VISUALIZZARE_CATEGORIE,             //T0000
         CREARE_CATEGORIA,                   //G0000
-        CREARE_REPORT,                      //R0001 TODO
+        CREARE_REPORT,                      //R0001
         LOGOUT,
         TERMINARE_APPLICAZIONE;
 
