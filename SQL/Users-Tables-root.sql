@@ -141,37 +141,37 @@ CREATE TABLE commento (
 -- GRANT PRIVILEGES -----------------------------------------------------------------------------------
 
 -- Grant to base
-GRANT UPDATE, SELECT ON `utente` TO 'base';
-GRANT SELECT ON `anagrafica` TO 'base';
-GRANT SELECT ON `recapito` TO 'base';
-GRANT SELECT ON `recapito_preferito` TO 'base';
-GRANT INSERT, SELECT ON `messaggio_privato` TO 'base';
-GRANT SELECT ON `categoria` TO 'base';
-GRANT INSERT, UPDATE, SELECT ON `annuncio` TO 'base';
-GRANT INSERT, UPDATE, SELECT, DELETE ON `annuncio_disponibile` TO 'base';
-GRANT INSERT, UPDATE, SELECT ON `annuncio_venduto` TO 'base';
-GRANT INSERT, UPDATE, SELECT, DELETE ON `segue` TO `base`;
-GRANT INSERT, SELECT ON `commento` TO 'base';
+GRANT UPDATE, SELECT ON utente TO 'base';
+GRANT SELECT ON anagrafica TO 'base';
+GRANT SELECT ON recapito TO 'base';
+GRANT SELECT ON recapito_preferito TO 'base';
+GRANT INSERT, SELECT ON messaggio_privato TO 'base';
+GRANT SELECT ON categoria TO 'base';
+GRANT INSERT, UPDATE, SELECT ON annuncio TO 'base';
+GRANT INSERT, UPDATE, SELECT, DELETE ON annuncio_disponibile TO 'base';
+GRANT INSERT, UPDATE, SELECT ON annuncio_venduto TO 'base';
+GRANT INSERT, UPDATE, SELECT, DELETE ON segue TO base;
+GRANT INSERT, SELECT ON commento TO 'base';
 
 -- Grant to gestore
-GRANT UPDATE, SELECT ON `utente` TO 'base';
-GRANT SELECT ON `anagrafica` TO 'base';
-GRANT SELECT ON `recapito` TO 'base';
-GRANT SELECT ON `recapito_preferito` TO 'base';
-GRANT INSERT, SELECT ON `messaggio_privato` TO 'base';
-GRANT INSERT, SELECT ON `categoria` TO 'base';
-GRANT INSERT, UPDATE, SELECT ON `annuncio` TO 'base';
-GRANT INSERT, UPDATE, SELECT, DELETE ON `annuncio_disponibile` TO 'base';
-GRANT INSERT, UPDATE, SELECT ON `annuncio_venduto` TO 'base';
-GRANT INSERT, UPDATE, SELECT, DELETE ON `segue` TO `base`;
-GRANT INSERT, SELECT ON `commento` TO 'base';
+GRANT UPDATE, SELECT ON utente TO 'base';
+GRANT SELECT ON anagrafica TO 'base';
+GRANT SELECT ON recapito TO 'base';
+GRANT SELECT ON recapito_preferito TO 'base';
+GRANT INSERT, SELECT ON messaggio_privato TO 'base';
+GRANT INSERT, SELECT ON categoria TO 'base';
+GRANT INSERT, UPDATE, SELECT ON annuncio TO 'base';
+GRANT INSERT, UPDATE, SELECT, DELETE ON annuncio_disponibile TO 'base';
+GRANT INSERT, UPDATE, SELECT ON annuncio_venduto TO 'base';
+GRANT INSERT, UPDATE, SELECT, DELETE ON segue TO base;
+GRANT INSERT, SELECT ON commento TO 'base';
 
 -- Grant to registratore
-GRANT INSERT ON `utente` TO 'registratore';
-GRANT INSERT,SELECT ON `credenziali` TO 'registratore';
-GRANT INSERT ON `anagrafica` TO 'registratore';
-GRANT INSERT ON `recapito` TO 'registratore';
-GRANT INSERT ON `recapito_preferito` TO 'registratore';
+GRANT INSERT ON utente TO 'registratore';
+GRANT INSERT,SELECT ON credenziali TO 'registratore';
+GRANT INSERT ON anagrafica TO 'registratore';
+GRANT INSERT ON recapito TO 'registratore';
+GRANT INSERT ON recapito_preferito TO 'registratore';
 
 
 -- Show result
@@ -180,17 +180,14 @@ SHOW TABLES;
 
 -- RECREATE INDEXES ------------------------------------------------------------------------------------
 
--- CREATE INDEX By_categoria
--- 	ON `annuncio_disponibile(categoria)`;
+CREATE INDEX by_categoria
+	ON annuncio(categoria);
 
--- CREATE INDEX By_inserzionista
--- 	ON `annuncio_disponibile(inserzionista)`;
+CREATE INDEX by_inserzionista
+	ON annuncio(inserzionista);
 
--- CREATE FULLTEXT INDEX By_descrizione
--- 	ON `annuncio_disponibile(descrizione)`;
+CREATE FULLTEXT INDEX by_descrizione
+	ON annuncio(descrizione);
 
--- CREATE UNIQUE INDEX By_utente
--- 	ON `anagrafica(utente)`;
-
--- CREATE INDEX By_anagrafica
--- 	ON `recapito(anagrafica)`;
+CREATE INDEX by_anagrafica
+	ON recapito(anagrafica);
