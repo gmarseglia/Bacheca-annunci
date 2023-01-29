@@ -255,11 +255,10 @@ public class ViewController {
         return dbResult;
     }
 
-    public static DBResult cercareAnnunciPerDescrizione(String descrizione, Boolean
-            onlyAvailable, List<Annuncio> annuncioList) {
+    public static DBResult cercareAnnunciPerDescrizione(String descrizione, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, onlyAvailable, annuncioList));
+            dbResult.setResult(DAO.selectAnnuncioByDescrizione(ActiveUser.getRole(), descrizione, annuncioList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 default -> getGenericSQLExceptionMessage(e);

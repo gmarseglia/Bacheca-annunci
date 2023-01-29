@@ -241,25 +241,17 @@ public class ViewUtente {
     // A0203
     private static void cercaPerDescrizione() {
         String descrizione;
-        Boolean onlyAvailable;
         Boolean confirmOp;
 
         do {
             confirmOp = null;
             descrizione = ScannerUtility.askText("Testo nella descrizione", 5000);
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
+
             System.out.printf("""
                                         
-                    Trovare tutti gli annunci la cui descrizione contiene:
+                    Trovare tutti gli annunci disponibili la cui descrizione contiene:
                     "%s"
-                    Filtrare per solo disponibili: %s.
-                    """, descrizione, onlyAvailable ? "Vero" : "Falso");
+                    """, descrizione);
 
             do {
                 switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
@@ -274,7 +266,7 @@ public class ViewUtente {
 
         System.out.print("\nRicerca degli annunci per descrizione... ");
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = ViewController.cercareAnnunciPerDescrizione(descrizione, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerDescrizione(descrizione, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
