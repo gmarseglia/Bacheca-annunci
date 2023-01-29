@@ -186,9 +186,10 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_by_descrizione` TO `gestore`!
 
 -- A0204
 DROP PROCEDURE IF EXISTS `select_annunci_without_clauses`!
-CREATE PROCEDURE `select_annunci_without_clauses` (IN var_only_available BOOLEAN)
+CREATE PROCEDURE `select_annunci_without_clauses` ()
 BEGIN
-    SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto` FROM `annuncio` WHERE (`venduto` IS NULL OR NOT var_only_available);
+    SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`
+    FROM `annuncio` INNER JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`;
 END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `gestore`!

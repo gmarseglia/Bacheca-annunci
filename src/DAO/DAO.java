@@ -471,19 +471,18 @@ public class DAO {
     }
 
     //      A0204
-    public static boolean selectAnnuncio(Role role, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncio(Role role, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_without_clauses`(?)};";
+        String call = "{CALL `select_annunci_without_clauses`()};";
         PreparedStatement cs = conn.prepareStatement(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        cs.setBoolean(1, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
-                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
             } while (rs.next());
         }
 

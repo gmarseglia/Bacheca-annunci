@@ -144,21 +144,11 @@ public class ViewUtente {
     // A0204
     private static void cercareAnnunci() {
         Boolean confirmOp = null;
-        Boolean onlyAvailable;
         do {
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
-
-            System.out.printf("""
+            System.out.print("""
                                         
-                    Trovare tutti gli annunci.
-                    Filtrare per solo disponibili: %s.
-                    """, onlyAvailable ? "Vero" : "Falso");
+                    Trovare tutti gli annunci disponibili.
+                    """);
 
             switch (ScannerUtility.askFirstChar("Procedere? (S)i, (N)o o (A)nnulla")) {
                 case "s", "S" -> confirmOp = true;
@@ -173,7 +163,7 @@ public class ViewUtente {
 
         System.out.print("Ricerca degli annunci... ");
 
-        DBResult dbResult = ViewController.cercareAnnunci(onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunci(foundAnnunciList);
 
         printResult(dbResult, () -> {
             for (Annuncio annuncio : foundAnnunciList) {

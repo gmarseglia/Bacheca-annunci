@@ -281,10 +281,10 @@ public class ViewController {
     }
 
     // A0204
-    public static DBResult cercareAnnunci(Boolean onlyAvailable, List<Annuncio> foundAnnunciList) {
+    public static DBResult cercareAnnunci(List<Annuncio> foundAnnunciList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectAnnuncio(ActiveUser.getRole(), onlyAvailable, foundAnnunciList));
+            dbResult.setResult(DAO.selectAnnuncio(ActiveUser.getRole(), foundAnnunciList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 default -> getGenericSQLExceptionMessage(e);
