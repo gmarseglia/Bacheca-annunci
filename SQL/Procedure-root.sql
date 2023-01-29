@@ -65,24 +65,28 @@ GRANT EXECUTE ON PROCEDURE `inserire_recapito` TO `registratore`!
 DROP PROCEDURE IF EXISTS `inserire_annuncio`!
 CREATE PROCEDURE `inserire_annuncio` (in var_inserzionista VARCHAR(30), in var_descrizione TEXT, in var_categoria VARCHAR(60), out var_numero INT UNSIGNED)
 BEGIN
-	declare exit handler for sqlexception
+    declare exit handler for sqlexception
     begin
-    	rollback;
-    	resignal;
+        rollback;
+        resignal;
     end;
 
-	set transaction isolation level read uncommitted; 
-	start transaction;
+    set transaction isolation level read uncommitted;
+    start transaction;
 
-		insert into `annuncio` (`inserzionista`, `descrizione`, `categoria`)
-			values (var_inserzionista, var_descrizione, var_categoria);
+        INSERT INTO `annuncio` (`descrizione`, `categoria`, `inserzionista`) VALUES
+            (var_descrizione, var_categoria, var_inserzionista);
 
-		update `utente`
-			set `annunci_inseriti`=`annunci_inseriti`+1
-			where `username`=var_inserzionista;
+        SET var_numero = LAST_INSERT_ID();
 
-		set var_numero = last_insert_id();
-	commit;
+        INSERT INTO `annuncio_disponibile` (`annuncio`) VALUES
+            (var_numero);
+
+        update `utente`
+            set `annunci_inseriti`=`annunci_inseriti`+1
+            where `username`=var_inserzionista;
+
+    commit;
 END!
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`!

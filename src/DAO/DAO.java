@@ -351,7 +351,7 @@ public class DAO {
         String callQuery = "{CALL `inserire_annuncio`(?, ?, ?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
 
-        cs.setString(1, annuncio.getInserzionista());
+        cs.setString(1, ActiveUser.getUsername());
         cs.setString(2, annuncio.getDescrizione());
         cs.setString(3, annuncio.getCategoria());
         cs.registerOutParameter(4, Types.INTEGER);
@@ -359,6 +359,7 @@ public class DAO {
 
         cs.execute();
 
+        annuncio.setInserzionista(ActiveUser.getUsername());
         annuncio.setNumero(cs.getLong(4));
 
         return true;

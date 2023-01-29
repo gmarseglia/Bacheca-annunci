@@ -662,6 +662,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // A0000
     private static void inserireAnnuncio() {
         String descrizione;
         String categoria;
