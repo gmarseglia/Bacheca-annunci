@@ -93,34 +93,19 @@ GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`!
 
 -- A0100
 DROP PROCEDURE IF EXISTS `dettagli_annuncio`!
-CREATE PROCEDURE `dettagli_annuncio` (in var_annuncio_id INT UNSIGNED)
+CREATE PROCEDURE `dettagli_annuncio` (in var_utente VARCHAR(30), in var_annuncio_id INT UNSIGNED)
 BEGIN
-	DECLARE counter INT;
-	declare exit handler for sqlexception
-	begin
-		rollback;
-		resignal;
-	end;
 
-	set transaction isolation level read committed;
-	start transaction;
+    select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`categoria`, `annuncio`.`inserito`,
+    `annuncio_disponibile`.`modificato`, `annuncio_venduto`.`venduto`,
+    `commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
+    from `annuncio`
+    left join `annuncio_disponibile` on `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
+    left join `annuncio_venduto` on `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
+    left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
+    where `annuncio`.`numero`=var_annuncio_id AND (`annuncio_disponibile`.`annuncio` OR `annuncio`.`inserzionista`=var_utente)
+    ORDER BY `commento`.`scritto` ASC;
 
-		SELECT COUNT(*) INTO counter
-		FROM `annuncio`
-		WHERE `numero`=var_annuncio_id;
-
-		IF (counter <> 1) THEN
-			SIGNAL SQLSTATE "45004" SET message_text="Annuncio non esistente";
-		END IF;
-
-		select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`,
-		`annuncio`.`categoria`, `annuncio`.`inserito`, `annuncio`.`modificato`, `annuncio`.`venduto`,
-		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
-		from `annuncio` left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
-		where `annuncio`.`numero`=var_annuncio_id
-		ORDER BY `commento`.`scritto` ASC;
-
-	commit;
 END!
 GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `gestore`!

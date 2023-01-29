@@ -366,13 +366,14 @@ public class DAO {
     }
 
     //      A0100
-    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
+    public static boolean getDettagliAnnuncio(Role role, String utenteRichiesta, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
         openRoleConnection(role);
 
-        String callQuery = "{CALL `dettagli_annuncio`(?)}";
+        String callQuery = "{CALL `dettagli_annuncio`(?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-        cs.setLong(1, annuncio.getID());
+        cs.setString(1, utenteRichiesta);
+        cs.setLong(2, annuncio.getID());
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
@@ -383,7 +384,7 @@ public class DAO {
             annuncio.setDescrizione(rs.getString(3));
             annuncio.setCategoria(rs.getString(4));
             annuncio.setInserito(rs.getTimestamp(5).toLocalDateTime());
-            annuncio.setModificato(rs.getTimestamp(6).toLocalDateTime());
+            annuncio.setModificato((rs.getTimestamp(6) == null) ? null : rs.getTimestamp(6).toLocalDateTime());
             annuncio.setVenduto((rs.getTimestamp(7) == null) ? null : rs.getTimestamp(7).toLocalDateTime());
 
             do {
@@ -397,6 +398,11 @@ public class DAO {
                     commentoList.add(commento);
                 }
             } while (rs.next());
+        } else {
+            CustomSQLException e = new  CustomSQLException();
+            e.setMessage("Annuncio non disponibile o non esistente");
+            e.setSQLState("45011");
+            throw e;
         }
 
         return true;

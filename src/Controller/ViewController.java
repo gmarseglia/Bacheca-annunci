@@ -99,10 +99,11 @@ public class ViewController {
     public static DBResult dettagliAnnuncio(Annuncio annuncio, List<Commento> commentoList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.getDettagliAnnuncio(ActiveUser.getRole(), annuncio, commentoList));
+            dbResult.setResult(DAO.getDettagliAnnuncio(ActiveUser.getRole(), ActiveUser.getUsername(), annuncio, commentoList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45004" -> getExceptionMessage("L'annuncio cercato non esiste", e);
+                case "45011" -> getExceptionMessage("L'annuncio cercato non è disponibile o non è esistente", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
