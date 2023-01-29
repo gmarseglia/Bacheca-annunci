@@ -163,33 +163,13 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `gestore`!
 
 -- A0202
+-- A0202
 DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`!
-CREATE PROCEDURE `select_annunci_by_inserzionista` (IN var_inserzionista_id VARCHAR(30), IN var_solo_disponibili boolean)
+CREATE PROCEDURE `select_annunci_by_inserzionista` (IN var_inserzionista_id VARCHAR(30))
 BEGIN
-    DECLARE counter INT;
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
-
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    START TRANSACTION;
-
-        SELECT COUNT(*) INTO counter
-        FROM `utente`
-        WHERE `username`=var_inserzionista_id;
-
-        IF (counter <> 1) THEN
-            SIGNAL SQLSTATE "45002" SET message_text="Utente non esistente";
-        END IF;
-
-        SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto`
-        FROM `annuncio`
-        WHERE `inserzionista`=var_inserzionista_id AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
-
-    COMMIT;
+        SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`
+        FROM `annuncio` INNER JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
+        WHERE `inserzionista`=var_inserzionista_id;
 END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`!

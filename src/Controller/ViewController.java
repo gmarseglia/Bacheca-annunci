@@ -226,11 +226,10 @@ public class ViewController {
         return dbResult;
     }
 
-    public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, Boolean
-            onlyAvailable, List<Annuncio> annuncioList) {
+    public static DBResult cercareAnnunciPerInserzionista(String inserzionistaID, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, onlyAvailable != null && onlyAvailable, annuncioList));
+            dbResult.setResult(DAO.selectAnnuncioByInserzionista(ActiveUser.getRole(), inserzionistaID, annuncioList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45002" -> getExceptionMessage("Utente non esistente", e);

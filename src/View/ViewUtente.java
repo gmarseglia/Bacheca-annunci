@@ -339,24 +339,16 @@ public class ViewUtente {
     // A0202
     private static void cercaPerUtente() {
         String inserzionistaID;
-        Boolean onlyAvailable;
         Boolean confirmOp;
 
         do {
             confirmOp = null;
             inserzionistaID = ScannerUtility.askString("Username", 30);
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
+
             System.out.printf("""
                                         
-                    Trovare tutti gli annunci di %s
-                    Filtrare per solo disponibili: %s.
-                    """, inserzionistaID, onlyAvailable ? "Vero" : "Falso");
+                    Trovare tutti gli annunci disponibili di %s.
+                    """, inserzionistaID);
 
             do {
                 switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
@@ -371,7 +363,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci di \"%s\"... ", inserzionistaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = ViewController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerInserzionista(inserzionistaID, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\nLista degli annunci:\n\n");

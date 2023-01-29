@@ -399,7 +399,7 @@ public class DAO {
                 }
             } while (rs.next());
         } else {
-            CustomSQLException e = new  CustomSQLException();
+            CustomSQLException e = new CustomSQLException();
             e.setMessage("Annuncio non disponibile o non esistente");
             e.setSQLState("45011");
             throw e;
@@ -408,20 +408,6 @@ public class DAO {
         return true;
     }
 
-    //      A0500
-    public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
-        openRoleConnection(role);
-
-        String call = "{CALL `vendere_annuncio`(?, ?)};";
-        CallableStatement cs = conn.prepareCall(call);
-        cs.setLong(1, annuncioID);
-        cs.setString(2, utenteID);
-        cs.closeOnCompletion();
-
-        cs.executeUpdate();
-
-        return true;
-    }
 
     //      A0200
     public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
@@ -445,20 +431,19 @@ public class DAO {
     }
 
     //      A0202
-    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_by_inserzionista` (?, ?)};";
+        String call = "{CALL `select_annunci_by_inserzionista` (?)};";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, inserzionistaID);
-        cs.setBoolean(2, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
-                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
             } while (rs.next());
         }
 
@@ -560,6 +545,21 @@ public class DAO {
                 annunciSeguitiModificatiList.add(BuilderAnnuncio.newFromResultSet(rs));
             } while (rs.next());
         }
+
+        return true;
+    }
+
+    //      A0500
+    public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
+        openRoleConnection(role);
+
+        String call = "{CALL `vendere_annuncio`(?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setLong(1, annuncioID);
+        cs.setString(2, utenteID);
+        cs.closeOnCompletion();
+
+        cs.executeUpdate();
 
         return true;
     }
