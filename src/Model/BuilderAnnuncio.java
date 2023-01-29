@@ -23,7 +23,7 @@ public class BuilderAnnuncio {
                 rs.getString(3),
                 rs.getString(4),
                 rs.getTimestamp(5).toLocalDateTime(),
-                rs.getTimestamp(6).toLocalDateTime(),
+                (rs.getTimestamp(6) == null) ? null : rs.getTimestamp(6).toLocalDateTime(),
                 (rs.getTimestamp(7) == null) ? null : rs.getTimestamp(7).toLocalDateTime()
         );
     }

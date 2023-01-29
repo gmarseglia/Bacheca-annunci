@@ -2,6 +2,8 @@ USE `bacheca_annunci`;
 
 DELIMITER !
 
+START TRANSACTION!
+
 -- U0100
 DROP PROCEDURE IF EXISTS `login`!
 CREATE PROCEDURE `login` (IN var_username VARCHAR(30), IN var_password VARCHAR(30))
@@ -193,6 +195,19 @@ BEGIN
 END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `gestore`!
+
+-- A0205
+DROP PROCEDURE IF EXISTS `select_annunci_inseriti`!
+CREATE PROCEDURE `select_annunci_inseriti` (IN var_inserzionista_id VARCHAR(30))
+BEGIN
+        SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto`
+        FROM `annuncio`
+        LEFT JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
+        LEFT JOIN `annuncio_venduto` ON `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
+        WHERE `inserzionista`=var_inserzionista_id;
+END!
+GRANT EXECUTE ON PROCEDURE `select_annunci_inseriti` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_annunci_inseriti` TO `gestore`!
 
 -- A0300
 DROP PROCEDURE IF EXISTS `seguire_annuncio`!
@@ -469,5 +484,7 @@ BEGIN
     -- SELECT `username`, COALESCE(count(`venduto`) / count(*) * 100.0, 0) AS `percentuale` FROM `utente` LEFT JOIN `annuncio` ON `utente`.`username`=`annuncio`.`inserzionista`;
 END!
 GRANT EXECUTE ON PROCEDURE `generate_report` TO `gestore`!
+
+COMMIT!
 
 DELIMITER ;

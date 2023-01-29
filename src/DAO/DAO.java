@@ -475,7 +475,7 @@ public class DAO {
         openRoleConnection(role);
 
         String call = "{CALL `select_annunci_without_clauses`()};";
-        PreparedStatement cs = conn.prepareStatement(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
@@ -483,6 +483,26 @@ public class DAO {
         if (rs.first()) {
             do {
                 annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
+            } while (rs.next());
+        }
+
+        return true;
+    }
+
+    //      A0205
+    public static boolean selectInserti(Role role, String username, List<Annuncio> annuncioList) throws SQLException{
+        openRoleConnection(role);
+
+        String call = "{CALL `select_annunci_inseriti`(?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, username);
+        cs.closeOnCompletion();
+
+        ResultSet rs = cs.executeQuery();
+
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
             } while (rs.next());
         }
 

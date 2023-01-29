@@ -18,6 +18,7 @@ public class ViewUtente {
         CERCARE_PER_UTENTE,                 //A0202
         CERCARE_PER_DESCRIZIONE,            //A0203
         CERCARE_TUTTI_ANNUNCI,              //A0204
+        CERCARE_INSERITI,                   //A0205
         SEGUIRE_ANNUNCIO,                   //A0300
         STOP_SEGUIRE_ANNUNCIO,              //A0301
         CONTROLLARE_SEGUITI,                //A0400
@@ -42,18 +43,19 @@ public class ViewUtente {
                 case "3" -> CERCARE_PER_UTENTE;
                 case "4" -> CERCARE_PER_CATEGORIA;
                 case "5" -> CERCARE_PER_DESCRIZIONE;
-                case "6" -> DETTAGLI_ANNUNCIO;
-                case "7" -> SEGUIRE_ANNUNCIO;
-                case "8" -> STOP_SEGUIRE_ANNUNCIO;
-                case "9" -> CONTROLLARE_SEGUITI;
-                case "a", "A" -> DETTAGLI_UTENTE;
-                case "b", "B" -> SCRIVERE_COMMENTO;
-                case "c", "C" -> VISUALIZZARE_UTENTI_CON_MESSAGGI;
-                case "d", "D" -> MESSAGGI_CON_UTENTE;
-                case "e", "E" -> INVIARE_MESSAGGIO;
-                case "f", "F" -> VISUALIZZARE_CATEGORIE;
-                case "g", "G" -> CREARE_CATEGORIA;
-                case "h", "H" -> CREARE_REPORT;
+                case "6" -> CERCARE_INSERITI;
+                case "7" -> DETTAGLI_ANNUNCIO;
+                case "8" -> SEGUIRE_ANNUNCIO;
+                case "9" -> STOP_SEGUIRE_ANNUNCIO;
+                case "a", "A" -> CONTROLLARE_SEGUITI;
+                case "b", "B" -> DETTAGLI_UTENTE;
+                case "c", "C" -> SCRIVERE_COMMENTO;
+                case "d", "D" -> VISUALIZZARE_UTENTI_CON_MESSAGGI;
+                case "e", "E" -> MESSAGGI_CON_UTENTE;
+                case "f", "F" -> INVIARE_MESSAGGIO;
+                case "g", "G" -> VISUALIZZARE_CATEGORIE;
+                case "h", "H" -> CREARE_CATEGORIA;
+                case "i", "I" -> CREARE_REPORT;
                 case "l", "L" -> LOGOUT;
                 case "u", "U" -> TERMINARE_APPLICAZIONE;
                 default -> null;
@@ -69,18 +71,19 @@ public class ViewUtente {
             (3) [CERCARE per UTENTE] gli annunci.
             (4) [CERCARE per CATEGORIA] gli annunci.
             (5) [CERCARE per DESCRIZIONE] gli annunci disponibili.
-            (6) Visualizzare i [DETTAGLI di un ANNUNCIO].
-            (7) [AGGIUNGERE ai "SEGUITI"] un annuncio disponibile .
-            (8) [RIMUOVERE dai "SEGUITI"] un annuncio.
-            (9) [CONTROLLARE fra i "SEGUITI"] quali annunci hanno subito modifiche.
-            (A) Visualizzare i [DETTAGLI di un UTENTE].
-            (B) [SCRIVERE un COMMENTO] sotto un annuncio disponibile.
-            (C) Visualizzare utenti con cui sono stati [SCAMBIATI MESSAGGI PRIVATI].
-            (D) Visualizzare tutti i [MESSAGGI PRIVATI scambiati CON un UTENTE].
-            (E) [INVIARE un MESSAGGIO PRIVATO] ad un utente.
-            (F) [VISUALIZZARE le CATEGORIE].
-            (G) [CREARE una CATEGORIA].
-            (H) [GENERARE REPORT] sulla percentuale di vendita degli utenti.
+            (6) [CERCARE gli annunci INSERITI].
+            (7) Visualizzare i [DETTAGLI di un ANNUNCIO].
+            (8) [AGGIUNGERE ai "SEGUITI"] un annuncio disponibile .
+            (9) [RIMUOVERE dai "SEGUITI"] un annuncio.
+            (A) [CONTROLLARE fra i "SEGUITI"] quali annunci hanno subito modifiche.
+            (B) Visualizzare i [DETTAGLI di un UTENTE].
+            (C) [SCRIVERE un COMMENTO] sotto un annuncio disponibile.
+            (D) Visualizzare utenti con cui sono stati [SCAMBIATI MESSAGGI PRIVATI].
+            (E) Visualizzare tutti i [MESSAGGI PRIVATI scambiati CON un UTENTE].
+            (F) [INVIARE un MESSAGGIO PRIVATO] ad un utente.
+            (G) [VISUALIZZARE le CATEGORIE].
+            (H) [CREARE una CATEGORIA].
+            (I) [GENERARE REPORT] sulla percentuale di vendita degli utenti.
             (L) [LOGOUT].
             (U) [USCIRE] dall'applicazione.
             """;
@@ -118,6 +121,7 @@ public class ViewUtente {
             case CERCARE_PER_UTENTE -> cercaPerUtente();
             case CERCARE_PER_CATEGORIA -> cercaPerCategoria();
             case CERCARE_PER_DESCRIZIONE -> cercaPerDescrizione();
+            case CERCARE_INSERITI -> cercaInseriti();
             case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
@@ -139,6 +143,39 @@ public class ViewUtente {
                 System.exit(0);
             }
         }
+    }
+
+    // A0205
+    private static void cercaInseriti() {
+        Boolean confirmOp = null;
+        do {
+            System.out.print("""
+                                        
+                    Trovare tutti gli annunci inseriti.
+                    """);
+
+            switch (ScannerUtility.askFirstChar("Procedere? (S)i, (N)o o (A)nnulla")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+                case "a", "A" -> {
+                    return;
+                }
+            }
+        } while (confirmOp == null || !confirmOp);
+
+        List<Annuncio> foundAnnunciList = new ArrayList<>();
+
+        System.out.print("Ricerca degli annunci... ");
+
+        DBResult dbResult = ViewController.cercareInseriti(foundAnnunciList);
+
+        printResult(dbResult, () -> {
+            for (Annuncio annuncio : foundAnnunciList) {
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
+            }
+        });
+
+        ScannerUtility.askAny();
     }
 
     // A0204
