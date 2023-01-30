@@ -10,3 +10,4 @@ SQL CODES
 45009	-> 	Messaggio non valido
 45010	->	Categoria non valida
 45011	->	Annuncio non valido
+45012	->	Informazioni registrazione non valide
