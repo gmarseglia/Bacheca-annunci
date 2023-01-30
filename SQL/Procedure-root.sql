@@ -316,40 +316,42 @@ GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `gestore`!
 DROP PROCEDURE IF EXISTS `vendere_annuncio`!
 CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED, in var_utente_id VARCHAR(30))
 BEGIN
-	declare counter INT;
+    declare counter_inserzionista INT;
+    declare counter_disponibile INT;
 
-	declare exit handler for sqlexception
-	begin
-		rollback;
-		resignal;
-	end;
+    declare exit handler for sqlexception
+    begin
+        rollback;
+        resignal;
+    end;
 
-	start transaction;
+    start transaction;
 
-	select count(`numero`) into counter
-		from `annuncio`
-		where `numero`=var_annuncio_id and `venduto` is not null;
+    SELECT COUNT(*), COUNT(`ad`.`annuncio`)
+    FROM `annuncio` AS `a`
+    LEFT JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
+    WHERE `a`.`inserzionista`=var_utente_id AND `a`.`numero`=var_annuncio_id
+    INTO counter_inserzionista, counter_disponibile;
 
-	if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
-	end if;
+    IF (counter_inserzionista <> 1) THEN
+        SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT="Utente non è inserzionista";
+    END IF;
 
-	select count(`numero`) into counter
-		from `annuncio`
-		where `numero`=var_annuncio_id AND `inserzionista`=var_utente_id;
+    IF (counter_disponibile <> 1) THEN
+        SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT="Annuncio già venduto o inesistente";
+    END IF;
 
-	IF (counter<>1) THEN
-		SIGNAL SQLSTATE "45002" SET message_text="Utente non è inserzionista";
-	END IF;
+    INSERT INTO `annuncio_venduto` (`annuncio`) VALUES
+        (var_annuncio_id);
 
-	update `annuncio`
-		set `venduto`=CURRENT_TIMESTAMP
-		where `numero`=var_annuncio_id;
+    DELETE FROM `annuncio_disponibile`
+    WHERE `annuncio`=var_annuncio_id;
 
-	update `utente`
-		set `annunci_venduti`=`annunci_venduti`+1
-		where `username`=var_utente_id;
+    update `utente`
+        set `annunci_venduti`=`annunci_venduti`+1
+        where `username`=var_utente_id;
 
-	commit;
+    commit;
 END!
 GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`!
