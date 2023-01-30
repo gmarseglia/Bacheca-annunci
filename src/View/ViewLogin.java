@@ -228,7 +228,7 @@ public class ViewLogin {
                 switch (ScannerUtility.askFirstChar("Confermi recapito preferito? (S)i o (N)o")) {
                     case "s", "S" -> {
                         confirmRecapitoPreferito = true;
-                        recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, codiceFiscale));
+                        recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, username));
                     }
                     case "n", "N" -> confirmRecapitoPreferito = false;
                 }
@@ -279,7 +279,7 @@ public class ViewLogin {
                             case "s", "S" -> {
                                 recapitiCounter++;
                                 confirmRecapito = true;
-                                recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, codiceFiscale));
+                                recapitoList.add(new Recapito(valoreRecapito, tipoRecapito, username));
                             }
                             case "n", "N" -> confirmRecapito = false;
                         }

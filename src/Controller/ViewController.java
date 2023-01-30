@@ -20,9 +20,11 @@ public class ViewController {
         String message;
         if (customMessage != null) {
             message = customMessage;
-        } else if (Objects.equals(e.getSQLState(), "42000")) {
+        }
+        else if (false && Objects.equals(e.getSQLState(), "42000")) {
             message = "L'utente non dispone dei permessi necessari";
-        } else {
+        }
+        else {
             message = e.getMessage();
         }
 
@@ -36,22 +38,25 @@ public class ViewController {
             registrationDbResult.setResult(DAO.callRegistrazioneUtente(utente, credenziali, anagrafica, recapitoList.get(0)));
         } catch (SQLException e) {
             registrationDbResult.setMessage(switch (e.getSQLState()) {
-                case "23000" -> getExceptionMessage("Username, codice fiscale o recapito preferito già registrati", e);
+                // case "23000" -> getExceptionMessage("Username, codice fiscale o recapito preferito già registrati", e);
                 default -> getGenericSQLExceptionMessage(e);
             });
         }
 
         DBResultBatch finalResult = new DBResultBatch(false);
-        try {
-            finalResult.setBatchResult(DAO.insertBatchRecapito(recapitoList.subList(1, recapitoList.size())));
-        } catch (SQLException e) {
-            finalResult.setBatchMessage(switch (e.getSQLState()) {
-                case "23000" -> getExceptionMessage("Recapito già registrato", e);
-                default -> getGenericSQLExceptionMessage(e);
-            });
-        }
         finalResult.setExtraResult(registrationDbResult.getResult());
         finalResult.setExtraMessage(registrationDbResult.getMessage());
+
+        if (registrationDbResult.getResult()) {
+            try {
+                finalResult.setBatchResult(DAO.insertBatchRecapito(recapitoList.subList(1, recapitoList.size())));
+            } catch (SQLException e) {
+                finalResult.setBatchMessage(switch (e.getSQLState()) {
+                    case "23000" -> getExceptionMessage("Recapito già registrato", e);
+                    default -> getGenericSQLExceptionMessage(e);
+                });
+            }
+        }
         return finalResult;
     }
 

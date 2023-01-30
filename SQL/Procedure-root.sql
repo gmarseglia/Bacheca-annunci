@@ -18,12 +18,11 @@ GRANT EXECUTE ON PROCEDURE `login` TO `registratore`!
 DROP PROCEDURE IF EXISTS `registrazione_utente`!
 CREATE PROCEDURE `registrazione_utente` (
     in var_username VARCHAR(30), in var_password VARCHAR(30), in var_ruolo ENUM('base', 'gestore'),
-    in var_codice_fiscale CHAR(16), in var_nome VARCHAR(100), in var_cognome VARCHAR(100),
-    in var_sesso ENUM('donna', 'uomo'),
+    in var_codice_fiscale CHAR(16), in var_nome VARCHAR(100), in var_cognome VARCHAR(100), in var_sesso ENUM('donna', 'uomo'),
     in var_data_nascita DATE, in var_comune_nascita VARCHAR(100),
-    in var_indirizzo_residenza VARCHAR(100), in var_indirizzo_fatturazione VARCHAR(100),
-    in var_valore_recapito_preferito VARCHAR(60),
-    in var_tipo_recapito_preferito ENUM('telefono', 'cellulare', 'email') )
+    in var_via_residenza VARCHAR(100), IN var_civico_residenza VARCHAR(100), IN var_cap_residenza VARCHAR(100),
+    IN var_via_fatturazione VARCHAR(100), IN var_civico_fatturazione VARCHAR(100), IN var_cap_fatturazione VARCHAR(100),
+    in var_valore_recapito_preferito VARCHAR(60), in var_tipo_recapito_preferito ENUM('telefono', 'cellulare', 'email') )
 BEGIN
     declare exit handler for sqlexception
     begin
@@ -34,32 +33,39 @@ BEGIN
 	set transaction isolation level read uncommitted; 
 	start transaction;
 
+        IF (NOT (var_via_fatturazione IS NOT NULL AND var_civico_fatturazione IS NOT NULL AND var_cap_fatturazione IS NOT NULL)
+            AND
+            NOT (var_via_fatturazione IS NULL AND var_civico_fatturazione IS NULL AND var_cap_fatturazione IS NULL)) THEN
+            SIGNAL SQLSTATE  "45012" SET MESSAGE_TEXT="Informazioni registrazione non valide";
+        END IF;
+
 		insert into `utente` (`username`)
 			values (var_username);
 
 		insert into `credenziali` (`username`, `password`, `ruolo`)
 			values (var_username, SHA1(var_password), var_ruolo);
 
-		insert into `anagrafica` (`codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`,
-			`comune_nascita`, `indirizzo_residenza`, `indirizzo_fatturazione`, `utente`)
-			values (var_codice_fiscale, var_nome, var_cognome, var_sesso, var_data_nascita,
-			var_comune_nascita, var_indirizzo_residenza, var_indirizzo_fatturazione, var_username);
+		insert into `anagrafica` (`username`, `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`,
+            `via_residenza`, `civico_residenza`, `cap_residenza`, `via_fatturazione`, `civico_fatturazione`, `cap_fatturazione`)
+			values (var_username ,var_codice_fiscale, var_nome, var_cognome, var_sesso, var_data_nascita, var_comune_nascita,
+                var_via_residenza, var_civico_residenza, var_cap_residenza,
+                var_via_fatturazione, var_civico_fatturazione, var_cap_fatturazione);
 
-		insert into `recapito` (`valore`, `anagrafica`, `tipo`)
-			values (var_valore_recapito_preferito, var_codice_fiscale, var_tipo_recapito_preferito);
+		insert into `recapito` (`valore`, `tipo`, `anagrafica`)
+			values (var_valore_recapito_preferito, var_tipo_recapito_preferito, var_username);
 
-		insert `recapito_preferito` (`anagrafica`, `recapito`)
-			values (var_codice_fiscale, var_valore_recapito_preferito);
+		insert `recapito_preferito` (`valore`, `tipo`, `anagrafica`)
+			values (var_valore_recapito_preferito, var_tipo_recapito_preferito, var_username);
 	commit;
 END!
 GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`!
 
 -- U0001
 DROP PROCEDURE IF EXISTS `inserire_recapito`!
-CREATE PROCEDURE `inserire_recapito` (IN var_valore VARCHAR(60), IN var_anagrafica CHAR(16), IN var_tipo ENUM('telefono', 'cellulare', 'email'))
+CREATE PROCEDURE `inserire_recapito` (IN var_valore VARCHAR(60), IN var_anagrafica VARCHAR(30), IN var_tipo ENUM('telefono', 'cellulare', 'email'))
 BEGIN
-    INSERT IGNORE INTO `recapito` (`valore`, `anagrafica`, `tipo`)
-    VALUES (var_valore, var_anagrafica, var_tipo);
+    INSERT IGNORE INTO `recapito` (`valore`, `tipo`, `anagrafica`)
+    VALUES (var_valore, var_tipo, var_anagrafica);
 END!
 GRANT EXECUTE ON PROCEDURE `inserire_recapito` TO `registratore`!
 

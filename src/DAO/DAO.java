@@ -96,7 +96,12 @@ public class DAO {
 
         // #2: create statement
         String callQuery = "{call `registrazione_utente` (" +
-                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+                "?, ?, ?," +
+                "?, ?, ?, ?," +
+                "?, ?," +
+                "?, ?, ?," +
+                "?, ?, ?," +
+                "?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
 
         // Prepare call
@@ -108,6 +113,7 @@ public class DAO {
             default -> throw new RuntimeException("Invalid role");
         };
         cs.setString(3, userRole);
+
         cs.setString(4, anagrafica.getCodiceFiscale());
         cs.setString(5, anagrafica.getNome());
         cs.setString(6, anagrafica.getCognome());
@@ -116,18 +122,25 @@ public class DAO {
             case DONNA -> "donna";
         };
         cs.setString(7, userSesso);
+
         cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
         cs.setString(9, anagrafica.getComuneNascita());
-        cs.setString(10, anagrafica.getIndirizzoResidenza());
-        cs.setString(11, anagrafica.getIndirizzoFatturazione());
 
-        cs.setString(12, recapitoPreferito.getValore());
+        cs.setString(10, anagrafica.getViaResidenza());
+        cs.setString(11, anagrafica.getCivicoResidenza());
+        cs.setString(12, anagrafica.getCapResidenza());
+
+        cs.setString(13, anagrafica.getViaFatturazione());
+        cs.setString(14, anagrafica.getCivicoFatturazione());
+        cs.setString(15, anagrafica.getCapFatturazione());
+
+        cs.setString(16, recapitoPreferito.getValore());
         String tipoRecapito = switch (recapitoPreferito.getTipo()) {
             case EMAIL -> "email";
             case TELEFONO -> "telefono";
             case CELLULARE -> "cellulare";
         };
-        cs.setString(13, tipoRecapito);
+        cs.setString(17, tipoRecapito);
         cs.closeOnCompletion();
 
         cs.execute();
@@ -490,7 +503,7 @@ public class DAO {
     }
 
     //      A0205
-    public static boolean selectInseriti(Role role, String username, List<Annuncio> annuncioList) throws SQLException{
+    public static boolean selectInseriti(Role role, String username, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
         String call = "{CALL `select_annunci_inseriti`(?)};";
@@ -510,7 +523,7 @@ public class DAO {
     }
 
     //      A0205
-    public static boolean selectSeguiti(Role role, String username, List<Annuncio> annuncioList) throws SQLException{
+    public static boolean selectSeguiti(Role role, String username, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
         String call = "{CALL `select_annunci_seguiti`(?)};";
@@ -528,8 +541,7 @@ public class DAO {
 
         return true;
     }
-    
-    
+
 
     // SEGUE
     //      A0300
