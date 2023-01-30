@@ -489,7 +489,7 @@ public class DAO {
     }
 
     //      A0205
-    public static boolean selectInserti(Role role, String username, List<Annuncio> annuncioList) throws SQLException{
+    public static boolean selectInseriti(Role role, String username, List<Annuncio> annuncioList) throws SQLException{
         openRoleConnection(role);
 
         String call = "{CALL `select_annunci_inseriti`(?)};";
@@ -507,6 +507,28 @@ public class DAO {
 
         return true;
     }
+
+    //      A0205
+    public static boolean selectSeguiti(Role role, String username, List<Annuncio> annuncioList) throws SQLException{
+        openRoleConnection(role);
+
+        String call = "{CALL `select_annunci_seguiti`(?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, username);
+        cs.closeOnCompletion();
+
+        ResultSet rs = cs.executeQuery();
+
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
+            } while (rs.next());
+        }
+
+        return true;
+    }
+    
+    
 
     // SEGUE
     //      A0300

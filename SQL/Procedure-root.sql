@@ -229,6 +229,19 @@ END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_inseriti` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_annunci_inseriti` TO `gestore`!
 
+-- A0206
+DROP PROCEDURE IF EXISTS `select_annunci_seguiti`!
+CREATE PROCEDURE `select_annunci_seguiti` (IN var_utente_id VARCHAR (30))
+BEGIN
+    SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`
+    FROM `segue` AS `s`
+        INNER JOIN `annuncio` `a` ON `s`.`annuncio`=`a`.`numero`
+        INNER JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
+    WHERE `s`.`utente`=var_utente_id;
+END!
+GRANT EXECUTE ON PROCEDURE `select_annunci_seguiti` TO `base`!
+GRANT EXECUTE ON PROCEDURE `select_annunci_seguiti` TO `gestore`!
+
 -- A0300
 DROP PROCEDURE IF EXISTS `seguire_annuncio`!
 CREATE PROCEDURE `seguire_annuncio` (IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED)
@@ -273,7 +286,6 @@ GRANT EXECUTE ON PROCEDURE `delete_segue` TO `gestore`!
 DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`!
 CREATE PROCEDURE `controllare_annunci_seguiti` (IN var_utente_id VARCHAR (30))
 BEGIN
-    DECLARE start_timestamp TIMESTAMP;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -282,8 +294,6 @@ BEGIN
 
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
-
-        SET start_timestamp = CURRENT_TIMESTAMP;
 
         SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`, `av`.`venduto`
         FROM `segue` AS `s`

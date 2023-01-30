@@ -325,7 +325,20 @@ public class ViewController {
     public static DBResult cercareInseriti(List<Annuncio> foundAnnunciList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectInserti(ActiveUser.getRole(), ActiveUser.getUsername(), foundAnnunciList));
+            dbResult.setResult(DAO.selectInseriti(ActiveUser.getRole(), ActiveUser.getUsername(), foundAnnunciList));
+        } catch (SQLException e) {
+            dbResult.setMessage(switch (e.getSQLState()) {
+                default -> getGenericSQLExceptionMessage(e);
+            });
+        }
+        return dbResult;
+    }
+
+    // A0206
+    public static DBResult cercareSeguiti(List<Annuncio> foundAnnunciList) {
+        DBResult dbResult = new DBResult(false);
+        try {
+            dbResult.setResult(DAO.selectSeguiti(ActiveUser.getRole(), ActiveUser.getUsername(), foundAnnunciList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 default -> getGenericSQLExceptionMessage(e);
