@@ -194,4 +194,7 @@ CREATE FULLTEXT INDEX by_descrizione
 CREATE INDEX by_anagrafica
 	ON recapito(anagrafica);
 
+CREATE INDEX by_padre
+	ON categoria(padre);
+
 COMMIT;
