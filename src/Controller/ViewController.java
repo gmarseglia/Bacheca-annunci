@@ -217,7 +217,7 @@ public class ViewController {
     public static DBResult controllareAnnunciSeguiti(List<Annuncio> annunciSegutiModificatiList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectAnnunciSeguitiModificati(ActiveUser.getRole(), ActiveUser.getUsername(), annunciSegutiModificatiList, true, true));
+            dbResult.setResult(DAO.selectAnnunciSeguitiModificati(ActiveUser.getRole(), ActiveUser.getUsername(), annunciSegutiModificatiList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 default -> getGenericSQLExceptionMessage(e);

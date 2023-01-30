@@ -271,10 +271,7 @@ GRANT EXECUTE ON PROCEDURE `delete_segue` TO `gestore`!
 
 -- A0400
 DROP PROCEDURE IF EXISTS `controllare_annunci_seguiti`!
-CREATE PROCEDURE `controllare_annunci_seguiti` (
-    IN var_utente_id VARCHAR (30),
-    IN var_aggiornare_contr BOOLEAN, IN var_eliminare_venduti BOOLEAN
-)
+CREATE PROCEDURE `controllare_annunci_seguiti` (IN var_utente_id VARCHAR (30))
 BEGIN
     DECLARE start_timestamp TIMESTAMP;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -288,24 +285,17 @@ BEGIN
 
         SET start_timestamp = CURRENT_TIMESTAMP;
 
-        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` ,
-            `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
-        FROM `utente` as `u`
-            INNER JOIN `segue` as `s` ON `u`.`username`=`s`.`utente`
-            INNER JOIN `annuncio` as `a` ON `s`.`annuncio`=`a`.`numero`
-        WHERE `u`.`username`=var_utente_id AND `a`.`modificato`>=`u`.`contr_seguiti`;
+        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`, `av`.`venduto`
+        FROM `segue` AS `s`
+            INNER JOIN `annuncio` `a` ON `s`.`annuncio`=`a`.`numero`
+            LEFT JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
+            LEFT JOIN `annuncio_venduto` AS `av` ON `a`.`numero`=`av`.`annuncio`
+        WHERE `s`.`utente`=var_utente_id AND (`ad`.`modificato`>=`s`.`controllato` OR `av`.`venduto`>=`s`.`controllato`);
 
-        IF(var_eliminare_venduti=true) THEN
-            DELETE `s`
-            FROM `segue` AS `s` INNER JOIN `annuncio` AS `a` ON `s`.`annuncio`=`a`.`numero`
-            WHERE `s`.`utente`=var_utente_id AND `a`.`venduto` IS NOT NULL;
-        END IF;
-
-        IF(var_aggiornare_contr=true) THEN
-            UPDATE `utente`
-            SET `contr_seguiti`=start_timestamp
-            WHERE `username`=var_utente_id;
-        END IF;
+        DELETE `s`
+        FROM `segue` AS `s`
+        INNER JOIN `annuncio_venduto` AS `av` ON `s`.`annuncio`=`av`.`annuncio`
+        WHERE `s`.`utente`=var_utente_id;
 
     COMMIT;
 END!

@@ -545,14 +545,12 @@ public class DAO {
     }
 
     // A0400
-    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList, boolean updateLastCheck, boolean deleteSold) throws SQLException {
+    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `controllare_annunci_seguiti` (?, ?, ?)};";
+        String call = "{CALL `controllare_annunci_seguiti` (?)};";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, utenteID);
-        cs.setBoolean(2, updateLastCheck);
-        cs.setBoolean(3, deleteSold);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
