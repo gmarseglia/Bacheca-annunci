@@ -432,22 +432,22 @@ BEGIN
     	resignal;
     end;
 
-	set transaction isolation level read uncommitted;
+	set transaction isolation level read committed;
 	start transaction;
 
-		select count(`numero`) into counter
-			from `annuncio`
-			where `numero`=var_annuncio and `venduto` is not null;
+		select count(`annuncio`) into counter
+			from `annuncio_disponibile`
+			where `annuncio`=var_annuncio;
 
-		if(counter=1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
+		if(counter<>1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
 		end if;
 
 		insert into `commento` (`utente`, `annuncio`, `testo`)
 			values (var_utente, var_annuncio, var_testo);
 
-		update `annuncio`
+		update `annuncio_disponibile`
 			set `modificato`=CURRENT_TIMESTAMP
-			where `numero`=var_annuncio;
+			where `annuncio`=var_annuncio;
 	commit;
 END!
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`!
