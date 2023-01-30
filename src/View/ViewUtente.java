@@ -85,10 +85,12 @@ public class ViewUtente {
             (F) Visualizzare tutti i [MESSAGGI PRIVATI scambiati CON un UTENTE].
             (G) [INVIARE un MESSAGGIO PRIVATO] ad un utente.
             (H) [VISUALIZZARE le CATEGORIE].
-            (I) [CREARE una CATEGORIA].
-            (J) [GENERARE REPORT] sulla percentuale di vendita degli utenti.
+            (I) [CREARE una CATEGORIA]*.
+            (J) [GENERARE REPORT] sulla percentuale di vendita degli utenti*.
             (L) [LOGOUT].
             (U) [USCIRE] dall'applicazione.
+            
+            Le operazioni indicate con '*' richiedono i permessi di gestore.
             """;
 
     private static final String DATETIME_FORMAT = "dd-MM-yyyy 'alle' HH:mm:ss";

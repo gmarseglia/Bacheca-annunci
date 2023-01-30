@@ -28,6 +28,8 @@ public class ViewLogin {
 
             MODE selectedMode;
 
+            System.out.println("[Premere CTRL+D per interrompere inserimento.]");
+
             while (true) {
                 selectedMode = null;
                 do {
