@@ -114,7 +114,7 @@ GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `gestore`!
 
 -- A0200
 DROP PROCEDURE IF EXISTS `select_annunci_categorie_figlie`!
-CREATE PROCEDURE `select_annunci_categorie_figlie` (IN var_categoria_id VARCHAR(60), IN var_solo_disponibili boolean)
+CREATE PROCEDURE `select_annunci_categorie_figlie` (IN var_categoria_id VARCHAR(60))
 BEGIN
     DECLARE counter INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -125,38 +125,43 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-    	SELECT COUNT(*) INTO counter
-    	FROM `categoria`
-    	WHERE `nome`=var_categoria_id;
+        SELECT COUNT(*) INTO counter
+        FROM `categoria`
+        WHERE `nome`=var_categoria_id;
 
-    	IF (counter <> 1) THEN
-    		SIGNAL SQLSTATE "45003" SET message_text="ategoria non esistente";
-		END IF;
+        IF (counter <> 1) THEN
+                SIGNAL SQLSTATE "45003" SET message_text="Categoria non esistente";
+        END IF;
 
         CREATE TEMPORARY TABLE `temp_categoria`
-        SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
+                SELECT * FROM `categoria` WHERE `nome`=var_categoria_id OR `padre`=var_categoria_id;
 
         WHILE counter > 0 DO
             CREATE TEMPORARY TABLE `temp_categoria_2` SELECT * FROM `temp_categoria`;
+
             SELECT count(*) INTO counter
             FROM `categoria`
             WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_2`);
 
             IF (counter > 0) THEN
                 CREATE TEMPORARY TABLE `temp_categoria_3` SELECT * FROM `temp_categoria`;
+
                 INSERT INTO `temp_categoria`
                 SELECT *
                 FROM `categoria`
                 WHERE `nome` NOT IN (SELECT `nome` FROM `temp_categoria_2`) AND `padre` IN (SELECT `nome` FROM `temp_categoria_3`);
+                
                 DROP TEMPORARY TABLE `temp_categoria_3`;
             END IF;
 
             DROP TEMPORARY TABLE `temp_categoria_2`;
         END WHILE;
 
-        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `a`.`modificato`, `a`.`venduto`
-        FROM `annuncio` as `a`
-        WHERE `categoria` IN (SELECT `nome` FROM `temp_categoria`) AND ((NOT var_solo_disponibili) OR `venduto` IS NULL);
+        SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione`, `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`
+        FROM `annuncio` AS `a`
+        INNER JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
+        INNER JOIN `temp_categoria` AS `tc` ON `a`.`categoria`=`tc`.`nome`
+        ORDER BY `numero` ASC;
 
         DROP TEMPORARY TABLE `temp_categoria`;
     COMMIT;

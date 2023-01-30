@@ -309,24 +309,16 @@ public class ViewUtente {
 
     private static void cercaPerCategoria() {
         String categoriaID;
-        Boolean onlyAvailable;
         Boolean confirmOp;
 
         do {
             confirmOp = null;
             categoriaID = ScannerUtility.askString("Categoria", 30);
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
+
             System.out.printf("""
                                         
-                    Trovare tutti gli annunci della categoria %s e delle sue categorie figlie
-                    Filtrare per solo disponibili: %s.
-                    """, categoriaID, onlyAvailable ? "Vero" : "Falso");
+                    Trovare tutti gli annunci della categoria %s e delle sue categorie figlie.
+                    """, categoriaID);
 
             do {
                 switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
@@ -341,7 +333,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci della categoria \"%s\" e delle categorie figlie... ", categoriaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = ViewController.cercareAnnunciPerCategoria(categoriaID, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerCategoria(categoriaID, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");

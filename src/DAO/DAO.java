@@ -410,20 +410,19 @@ public class DAO {
 
 
     //      A0200
-    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
+        String call = "{CALL `select_annunci_categorie_figlie` (?)}";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, categoriaID);
-        cs.setBoolean(2, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
-                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
             } while (rs.next());
         }
 

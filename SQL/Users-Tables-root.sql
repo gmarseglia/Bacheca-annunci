@@ -1,3 +1,5 @@
+START TRANSACTION;
+
 -- RECREATE USERS -----------------------------------------------------------------------------------------
 
 -- Drop users
@@ -191,3 +193,5 @@ CREATE FULLTEXT INDEX by_descrizione
 
 CREATE INDEX by_anagrafica
 	ON recapito(anagrafica);
+
+COMMIT;

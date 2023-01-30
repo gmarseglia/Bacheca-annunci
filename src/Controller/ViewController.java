@@ -239,12 +239,11 @@ public class ViewController {
         return dbResult;
     }
 
-    public static DBResult cercareAnnunciPerCategoria(String categoriaID, Boolean
-            onlyAvailable, List<Annuncio> annuncioList) {
+    public static DBResult cercareAnnunciPerCategoria(String categoriaID, List<Annuncio> annuncioList) {
         DBResult dbResult = new DBResult(false);
 
         try {
-            dbResult.setResult(DAO.selectAnnuncioByCategoria(ActiveUser.getRole(), categoriaID, onlyAvailable, annuncioList));
+            dbResult.setResult(DAO.selectAnnuncioByCategoria(ActiveUser.getRole(), categoriaID, annuncioList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45003" -> getExceptionMessage("Categoria non esistente", e);
