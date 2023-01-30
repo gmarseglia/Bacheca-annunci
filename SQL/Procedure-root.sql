@@ -360,34 +360,26 @@ GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`!
 DROP PROCEDURE IF EXISTS `dettagli_utente`!
 CREATE PROCEDURE `dettagli_utente` (in var_utente_id VARCHAR(30))
 BEGIN
-	declare exit handler for sqlexception
+    declare exit handler for sqlexception
     begin
-    	rollback;
-    	resignal;
+        rollback;
+        resignal;
     end;
 
-	set transaction isolation level read committed;
-	start transaction;
+    set transaction isolation level read committed;
+    start transaction;
 
-		select `u`.`annunci_inseriti`, `u`.`annunci_venduti`,
-			`a`.`codice_fiscale`, `a`.`nome` ,`a`.`cognome`, `a`.`sesso`, `a`.`data_nascita`, `a`.`comune_nascita`, `a`.`indirizzo_residenza`, `a`.`indirizzo_fatturazione`,
-			`r`.`valore`, `r`.`tipo`
-		from `utente` as `u`
-			inner join `anagrafica` as `a` on `u`.`username` = `a`.`utente`
-			inner join `recapito_preferito` as `rp` on `a`.`codice_fiscale` = `rp`.`anagrafica`
-			inner join `recapito` as `r` on `rp`.`recapito` = `r`.`valore`
-		where `username`=var_utente_id;
+        SELECT `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`, `via_residenza`, `civico_residenza`, `cap_residenza`, `via_fatturazione`, `civico_fatturazione`, `cap_fatturazione`,
+            `recapito_preferito`.`valore` AS `valore_preferito`, `recapito_preferito`.`tipo` AS `tipo_preferito`
+        FROM `anagrafica`
+        LEFT JOIN `recapito_preferito` ON `anagrafica`.`username`=`recapito_preferito`.`anagrafica`
+        WHERE `username`=var_utente_id;
+  
+        SELECT `valore`, `tipo`
+        FROM `recapito`
+        WHERE `anagrafica`=var_utente_id AND (`valore`, `tipo`) NOT IN (SELECT `valore`, `tipo` FROM `recapito_preferito` WHERE `anagrafica`=var_utente_id);
 
-		select `r`.`valore`, `r`.`tipo`
-		from `recapito` as `r`
-			inner join `anagrafica` as a on `r`.`anagrafica` = `a`.`codice_fiscale`
-		where `a`.`utente`=var_utente_id and `r`.`valore` not in (
-			select `recapito`
-			from `recapito_preferito` as `rp`
-				inner join `anagrafica` as `a` on `rp`.`anagrafica` = `a`.`codice_fiscale`
-			where `a`.`utente`=var_utente_id);
-
-	commit;
+    commit;
 END!
 GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `base`!
 GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `gestore`!

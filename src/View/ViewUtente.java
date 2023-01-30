@@ -508,10 +508,9 @@ public class ViewUtente {
         } while (confirmOp == null);
 
         System.out.printf("Ricerca dei dettagli di \"%s\"... ", targetUsername);
-        Utente targetUtente = new Utente(targetUsername);
         Anagrafica anagrafica = new Anagrafica();
         List<Recapito> recapitoList = new ArrayList<>();
-        DBResult dbResult = ViewController.dettagliUtente(targetUtente, anagrafica, recapitoList);
+        DBResult dbResult = ViewController.dettagliUtente(targetUsername, anagrafica, recapitoList);
 
         printResult(dbResult, () -> {
             System.out.println("\nDati di " + targetUsername + ":");

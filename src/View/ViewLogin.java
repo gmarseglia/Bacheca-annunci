@@ -92,7 +92,11 @@ public class ViewLogin {
         String nome, cognome;
         Sesso sesso;
         LocalDate dataNascita;
-        String comuneNascita, indirizzoResidenza, indirizzoFatturazione;
+        String comuneNascita;
+        String viaResidenza, civicoResidenza, capResidenza;
+        String viaFatturazione = null;
+        String civicoFatturazione = null;
+        String capFatturazione = null;
         Anagrafica anagrafica = null;
         String valoreRecapito;
         TipoRecapito tipoRecapito;
@@ -150,18 +154,23 @@ public class ViewLogin {
             } while (sesso == null);
             dataNascita = ScannerUtility.askLocalDate("Data di nascita");
             comuneNascita = ScannerUtility.askText("Comune di nascita", 100);
-            indirizzoResidenza = ScannerUtility.askText("Indirizzo di residenza", 100);
-            indirizzoFatturazione = null;
+            viaResidenza = ScannerUtility.askString("Via dell'indirizzo di residenza", 100);
+            civicoResidenza = ScannerUtility.askString("Civico dell'indirizzo di residenza", 100);
+            capResidenza = ScannerUtility.askString("CAP dell'indirizzo di residenza", 100);
             Boolean askFatturazione = null;
             do {
                 switch (ScannerUtility.askFirstChar("Indirizzo di fatturazione è diverso da indirizzo di residenza? (S)i o (N)o")) {
                     case "s", "S" -> {
-                        indirizzoFatturazione = ScannerUtility.askText("Indirizzo di fatturazione", 100);
+                        viaFatturazione = ScannerUtility.askString("Via dell'indirizzo di fatturazione", 100);
+                        civicoFatturazione = ScannerUtility.askString("Civico dell'indirizzo di fatturazione", 100);
+                        capFatturazione = ScannerUtility.askString("CAP dell'indirizzo di fatturazione", 100);
                         askFatturazione = true;
                     }
                     case "n", "N" -> askFatturazione = false;
                 }
             } while (askFatturazione == null);
+
+            anagrafica = new Anagrafica(codiceFiscale, nome, cognome, sesso, dataNascita, comuneNascita, viaResidenza, civicoResidenza, capResidenza, viaFatturazione, civicoFatturazione, capFatturazione);
 
             System.out.printf("""
 
@@ -176,7 +185,8 @@ public class ViewLogin {
                             """,
                     codiceFiscale, nome, cognome, (sesso == Sesso.DONNA) ? "Donna" : "Uomo",
                     dataNascita.format(DateTimeFormatter.ofPattern(ScannerUtility.DATE_FORMAT)),
-                    comuneNascita, indirizzoResidenza, (indirizzoFatturazione == null) ? "" : indirizzoFatturazione
+                    comuneNascita, anagrafica.getIndirizzoResidenza(),
+                    (anagrafica.getIndirizzoFatturazione() == null) ? anagrafica.getIndirizzoResidenza() : anagrafica.getIndirizzoFatturazione()
             );
 
             confirmAnagrafica = null;
@@ -184,7 +194,6 @@ public class ViewLogin {
                 switch (ScannerUtility.askFirstChar("Confermi? (S)i o (N)o?")) {
                     case "s", "S" -> {
                         confirmAnagrafica = true;
-                        anagrafica = new Anagrafica(codiceFiscale, nome, cognome, sesso, dataNascita, comuneNascita, indirizzoResidenza, indirizzoFatturazione);
                     }
                     case "n", "N" -> confirmAnagrafica = false;
                 }

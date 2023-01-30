@@ -170,10 +170,10 @@ public class ViewController {
     }
 
     // N0001
-    public static DBResult dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
+    public static DBResult dettagliUtente(String targetUsername, Anagrafica anagrafica, List<Recapito> recapitoList) {
         DBResult dbResult = new DBResult(false);
         try {
-            dbResult.setResult(DAO.selectDettagliUtente(ActiveUser.getRole(), utente, anagrafica, recapitoList));
+            dbResult.setResult(DAO.selectDettagliUtente(ActiveUser.getRole(), targetUsername, anagrafica, recapitoList));
         } catch (SQLException e) {
             dbResult.setMessage(switch (e.getSQLState()) {
                 case "45006" -> getExceptionMessage("Utente non trovato", e);

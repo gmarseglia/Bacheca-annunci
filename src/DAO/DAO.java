@@ -136,12 +136,12 @@ public class DAO {
     }
 
     //      N0001
-    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
+    public static boolean selectDettagliUtente(Role role, String targetUsername, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
         openRoleConnection(role);
 
         String call = "{CALL `dettagli_utente`(?)}";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        cs.setString(1, utente.getID());
+        cs.setString(1, targetUsername);
 
         ResultSet rs = cs.executeQuery();
 
@@ -152,25 +152,26 @@ public class DAO {
             throw e;
         }
 
-        utente.setAnnunci_inseriti(rs.getInt(1));
-        utente.setAnnunci_venduti(rs.getInt(2));
-
-        anagrafica.setCodiceFiscale(rs.getString(3));
-        anagrafica.setNome(rs.getString(4));
-        anagrafica.setCognome(rs.getString(5));
-        anagrafica.setSesso(switch (rs.getString(6)) {
+        anagrafica.setCodiceFiscale(rs.getString(1));
+        anagrafica.setNome(rs.getString(2));
+        anagrafica.setCognome(rs.getString(3));
+        anagrafica.setSesso(switch (rs.getString(4)) {
             case "uomo", "Uomo" -> Sesso.UOMO;
             case "donna", "Donna" -> Sesso.DONNA;
             default -> null;
         });
-        anagrafica.setDataNascita(rs.getTimestamp(7).toLocalDateTime().toLocalDate());
-        anagrafica.setComuneNascita(rs.getString(8));
-        anagrafica.setIndirizzoResidenza(rs.getString(9));
-        anagrafica.setIndirizzoFatturazione(rs.getString(10));
+        anagrafica.setDataNascita(rs.getTimestamp(5).toLocalDateTime().toLocalDate());
+        anagrafica.setComuneNascita(rs.getString(6));
+        anagrafica.setViaResidenza(rs.getString(7));
+        anagrafica.setCivicoResidenza(rs.getString(8));
+        anagrafica.setCapResidenza(rs.getString(9));
+        anagrafica.setViaFatturazione(rs.getString(10));
+        anagrafica.setCivicoFatturazione(rs.getString(11));
+        anagrafica.setCapFatturazione(rs.getString(12));
 
         Recapito recapitoPreferito = new Recapito();
-        recapitoPreferito.setValore(rs.getString(11));
-        recapitoPreferito.setTipo(switch (rs.getString(12)) {
+        recapitoPreferito.setValore(rs.getString(13));
+        recapitoPreferito.setTipo(switch (rs.getString(14)) {
             case "telefono" -> TipoRecapito.TELEFONO;
             case "cellulare" -> TipoRecapito.CELLULARE;
             case "email" -> TipoRecapito.EMAIL;
