@@ -356,7 +356,7 @@ END!
 GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`!
 
--- A0600
+-- N0001
 DROP PROCEDURE IF EXISTS `dettagli_utente`!
 CREATE PROCEDURE `dettagli_utente` (in var_utente_id VARCHAR(30))
 BEGIN

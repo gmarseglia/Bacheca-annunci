@@ -135,7 +135,7 @@ public class DAO {
         return true;
     }
 
-    //      A0600
+    //      N0001
     public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
         openRoleConnection(role);
 

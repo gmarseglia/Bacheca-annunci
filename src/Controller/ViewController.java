@@ -169,7 +169,7 @@ public class ViewController {
         return dbResult;
     }
 
-    // A0600
+    // N0001
     public static DBResult dettagliUtente(Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) {
         DBResult dbResult = new DBResult(false);
         try {

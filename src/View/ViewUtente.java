@@ -24,7 +24,7 @@ public class ViewUtente {
         STOP_SEGUIRE_ANNUNCIO,              //A0301
         CONTROLLARE_SEGUITI,                //A0400
         VENDERE_ANNUNCIO,                   //A0500
-        DETTAGLI_UTENTE,                    //A0600
+        DETTAGLI_UTENTE,                    //N0001
         INVIARE_MESSAGGIO,                  //M0000
         MESSAGGI_CON_UTENTE,                //M0100
         VISUALIZZARE_UTENTI_CON_MESSAGGI,   //M0101
@@ -485,7 +485,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // A0600
+    // N0001
     private static void dettagliUtente() {
         Boolean confirmOp;
         String targetUsername;
