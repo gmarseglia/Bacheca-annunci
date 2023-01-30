@@ -97,16 +97,31 @@ GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`!
 DROP PROCEDURE IF EXISTS `dettagli_annuncio`!
 CREATE PROCEDURE `dettagli_annuncio` (in var_utente VARCHAR(30), in var_annuncio_id INT UNSIGNED)
 BEGIN
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-    select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`categoria`, `annuncio`.`inserito`,
-    `annuncio_disponibile`.`modificato`, `annuncio_venduto`.`venduto`,
-    `commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
-    from `annuncio`
-    left join `annuncio_disponibile` on `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
-    left join `annuncio_venduto` on `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
-    left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
-    where `annuncio`.`numero`=var_annuncio_id AND (`annuncio_disponibile`.`annuncio` OR `annuncio`.`inserzionista`=var_utente)
-    ORDER BY `commento`.`scritto` ASC;
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    START TRANSACTION;
+
+        select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`categoria`, `annuncio`.`inserito`,
+        `annuncio_disponibile`.`modificato`, `annuncio_venduto`.`venduto`,
+        `commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
+        from `annuncio`
+        left join `annuncio_disponibile` on `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
+        left join `annuncio_venduto` on `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
+        left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
+        where `annuncio`.`numero`=var_annuncio_id AND (`annuncio_disponibile`.`annuncio` OR `annuncio`.`inserzionista`=var_utente)
+        ORDER BY `commento`.`scritto` ASC;
+
+        UPDATE `segue`
+        SET `controllato`=CURRENT_TIMESTAMP
+        WHERE `utente`=var_utente AND `annuncio`=var_annuncio_id;
+
+    COMMIT;
 
 END!
 GRANT EXECUTE ON PROCEDURE `dettagli_annuncio` TO `base`!

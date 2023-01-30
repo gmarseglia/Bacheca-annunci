@@ -120,9 +120,9 @@ INSERT INTO `commento` (`utente`, `annuncio`, `scritto`,  `testo`) VALUES
 
 -- INSERIMENTO DEI SEGUE
 DELETE FROM `segue`;
-INSERT INTO `segue` (`utente`, `annuncio`) VALUES
-	('user1', 2),
-	('user1', 3),
-	('GioAma', 1);
+INSERT INTO `segue` (`utente`, `annuncio`, `controllato`) VALUES
+	('user1', 2, '2023-01-02 12:10:00'),
+	('user1', 3, '2023-01-02 09:00:00'),
+	('GioAma', 1, '2023-01-02 12:00:00');
 
 COMMIT;
