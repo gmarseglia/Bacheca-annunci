@@ -410,17 +410,6 @@ GRANT EXECUTE ON PROCEDURE `select_messaggi_con_utente` TO `gestore`!
 DROP PROCEDURE IF EXISTS `select_utenti_con_messaggi`!
 CREATE PROCEDURE `select_utenti_con_messaggi` (IN var_target_utente VARCHAR(30))
 BEGIN
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
-
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-
-    START TRANSACTION;
-
     SELECT `destinatario`
     FROM `messaggio_privato`
     WHERE `mittente`=var_target_utente
@@ -428,8 +417,6 @@ BEGIN
     SELECT `mittente`
     FROM `messaggio_privato`
     WHERE `destinatario`=var_target_utente;
-
-    COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `select_utenti_con_messaggi` TO `base`!
 GRANT EXECUTE ON PROCEDURE `select_utenti_con_messaggi` TO `gestore`!
