@@ -17,21 +17,21 @@ GRANT EXECUTE ON PROCEDURE `login` TO `registratore`!
 -- U0000
 DROP PROCEDURE IF EXISTS `registrazione_utente`!
 CREATE PROCEDURE `registrazione_utente` (
-    in var_username VARCHAR(30), in var_password VARCHAR(30), in var_ruolo ENUM('base', 'gestore'),
-    in var_codice_fiscale CHAR(16), in var_nome VARCHAR(100), in var_cognome VARCHAR(100), in var_sesso ENUM('donna', 'uomo'),
-    in var_data_nascita DATE, in var_comune_nascita VARCHAR(100),
-    in var_via_residenza VARCHAR(100), IN var_civico_residenza VARCHAR(100), IN var_cap_residenza VARCHAR(100),
+    IN var_username VARCHAR(30), IN var_password VARCHAR(30), IN var_ruolo ENUM('base', 'gestore'),
+    IN var_codice_fiscale CHAR(16), IN var_nome VARCHAR(100), IN var_cognome VARCHAR(100), IN var_sesso ENUM('donna', 'uomo'),
+    IN var_data_nascita DATE, IN var_comune_nascita VARCHAR(100),
+    IN var_via_residenza VARCHAR(100), IN var_civico_residenza VARCHAR(100), IN var_cap_residenza VARCHAR(100),
     IN var_via_fatturazione VARCHAR(100), IN var_civico_fatturazione VARCHAR(100), IN var_cap_fatturazione VARCHAR(100),
-    in var_valore_recapito_preferito VARCHAR(60), in var_tipo_recapito_preferito ENUM('telefono', 'cellulare', 'email') )
+    IN var_valore_recapito_preferito VARCHAR(60), IN var_tipo_recapito_preferito ENUM('telefono', 'cellulare', 'email') )
 BEGIN
-    declare exit handler for sqlexception
-    begin
-    	rollback;
-    	resignal;
-    end;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    	ROLLBACK;
+    	RESIGNAL;
+    END;
 
-	set transaction isolation level read uncommitted; 
-	start transaction;
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
+	start TRANSACTION;
 
         IF (NOT (var_via_fatturazione IS NOT NULL AND var_civico_fatturazione IS NOT NULL AND var_cap_fatturazione IS NOT NULL)
             AND
@@ -39,24 +39,24 @@ BEGIN
             SIGNAL SQLSTATE  "45012" SET MESSAGE_TEXT="Informazioni registrazione non valide";
         END IF;
 
-		insert into `utente` (`username`)
-			values (var_username);
+		INSERT INTO `utente` (`username`)
+			VALUES (var_username);
 
-		insert into `credenziali` (`username`, `password`, `ruolo`)
-			values (var_username, SHA1(var_password), var_ruolo);
+		INSERT INTO `credenziali` (`username`, `password`, `ruolo`)
+			VALUES (var_username, SHA1(var_password), var_ruolo);
 
-		insert into `anagrafica` (`username`, `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`,
+		INSERT INTO `anagrafica` (`username`, `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`,
             `via_residenza`, `civico_residenza`, `cap_residenza`, `via_fatturazione`, `civico_fatturazione`, `cap_fatturazione`)
-			values (var_username ,var_codice_fiscale, var_nome, var_cognome, var_sesso, var_data_nascita, var_comune_nascita,
+			VALUES (var_username ,var_codice_fiscale, var_nome, var_cognome, var_sesso, var_data_nascita, var_comune_nascita,
                 var_via_residenza, var_civico_residenza, var_cap_residenza,
                 var_via_fatturazione, var_civico_fatturazione, var_cap_fatturazione);
 
-		insert into `recapito` (`valore`, `tipo`, `anagrafica`)
-			values (var_valore_recapito_preferito, var_tipo_recapito_preferito, var_username);
+		INSERT INTO `recapito` (`valore`, `tipo`, `anagrafica`)
+			VALUES (var_valore_recapito_preferito, var_tipo_recapito_preferito, var_username);
 
-		insert `recapito_preferito` (`valore`, `tipo`, `anagrafica`)
-			values (var_valore_recapito_preferito, var_tipo_recapito_preferito, var_username);
-	commit;
+		INSERT `recapito_preferito` (`valore`, `tipo`, `anagrafica`)
+			VALUES (var_valore_recapito_preferito, var_tipo_recapito_preferito, var_username);
+	COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `registrazione_utente` TO `registratore`!
 
@@ -71,16 +71,16 @@ GRANT EXECUTE ON PROCEDURE `inserire_recapito` TO `registratore`!
 
 -- A0000
 DROP PROCEDURE IF EXISTS `inserire_annuncio`!
-CREATE PROCEDURE `inserire_annuncio` (in var_inserzionista VARCHAR(30), in var_descrizione TEXT, in var_categoria VARCHAR(60), out var_numero INT UNSIGNED)
+CREATE PROCEDURE `inserire_annuncio` (IN var_inserzionista VARCHAR(30), IN var_descrizione TEXT, IN var_categoria VARCHAR(60), out var_numero INT UNSIGNED)
 BEGIN
-    declare exit handler for sqlexception
-    begin
-        rollback;
-        resignal;
-    end;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-    set transaction isolation level read uncommitted;
-    start transaction;
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+    start TRANSACTION;
 
         INSERT INTO `annuncio` (`descrizione`, `categoria`, `inserzionista`) VALUES
             (var_descrizione, var_categoria, var_inserzionista);
@@ -90,18 +90,18 @@ BEGIN
         INSERT INTO `annuncio_disponibile` (`annuncio`) VALUES
             (var_numero);
 
-        update `utente`
-            set `annunci_inseriti`=`annunci_inseriti`+1
-            where `username`=var_inserzionista;
+        UPDATE `utente`
+            SET `annunci_inseriti`=`annunci_inseriti`+1
+            WHERE `username`=var_inserzionista;
 
-    commit;
+    COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `inserire_annuncio` TO `gestore`!
 
 -- A0100
 DROP PROCEDURE IF EXISTS `dettagli_annuncio`!
-CREATE PROCEDURE `dettagli_annuncio` (in var_utente VARCHAR(30), in var_annuncio_id INT UNSIGNED)
+CREATE PROCEDURE `dettagli_annuncio` (IN var_utente VARCHAR(30), IN var_annuncio_id INT UNSIGNED)
 BEGIN
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -113,14 +113,14 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-        select `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`categoria`, `annuncio`.`inserito`,
+        SELECT `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`categoria`, `annuncio`.`inserito`,
         `annuncio_disponibile`.`modificato`, `annuncio_venduto`.`venduto`,
         `commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
-        from `annuncio`
-        left join `annuncio_disponibile` on `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
-        left join `annuncio_venduto` on `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
-        left join `commento` on `annuncio`.`numero`=`commento`.`annuncio`
-        where `annuncio`.`numero`=var_annuncio_id AND (`annuncio_disponibile`.`annuncio` OR `annuncio`.`inserzionista`=var_utente)
+        FROM `annuncio`
+        LEFT JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
+        LEFT JOIN `annuncio_venduto` ON `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
+        LEFT JOIN `commento` ON `annuncio`.`numero`=`commento`.`annuncio`
+        WHERE `annuncio`.`numero`=var_annuncio_id AND (`annuncio_disponibile`.`annuncio` OR `annuncio`.`inserzionista`=var_utente)
         ORDER BY `commento`.`scritto` ASC;
 
         UPDATE `segue`
@@ -320,18 +320,18 @@ GRANT EXECUTE ON PROCEDURE `controllare_annunci_seguiti` TO `gestore`!
 
 -- A0500
 DROP PROCEDURE IF EXISTS `vendere_annuncio`!
-CREATE PROCEDURE `vendere_annuncio` (in var_annuncio_id INT UNSIGNED, in var_utente_id VARCHAR(30))
+CREATE PROCEDURE `vendere_annuncio` (IN var_annuncio_id INT UNSIGNED, IN var_utente_id VARCHAR(30))
 BEGIN
-    declare counter_inserzionista INT;
-    declare counter_disponibile INT;
+    DECLARE counter_inserzionista INT;
+    DECLARE counter_disponibile INT;
 
-    declare exit handler for sqlexception
-    begin
-        rollback;
-        resignal;
-    end;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-    start transaction;
+    start TRANSACTION;
 
     SELECT COUNT(*), COUNT(`ad`.`annuncio`)
     FROM `annuncio` AS `a`
@@ -353,27 +353,27 @@ BEGIN
     DELETE FROM `annuncio_disponibile`
     WHERE `annuncio`=var_annuncio_id;
 
-    update `utente`
-        set `annunci_venduti`=`annunci_venduti`+1
-        where `username`=var_utente_id;
+    UPDATE `utente`
+        SET `annunci_venduti`=`annunci_venduti`+1
+        WHERE `username`=var_utente_id;
 
-    commit;
+    COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `base`!
 GRANT EXECUTE ON PROCEDURE `vendere_annuncio` TO `gestore`!
 
 -- N0001
 DROP PROCEDURE IF EXISTS `dettagli_utente`!
-CREATE PROCEDURE `dettagli_utente` (in var_utente_id VARCHAR(30))
+CREATE PROCEDURE `dettagli_utente` (IN var_utente_id VARCHAR(30))
 BEGIN
-    declare exit handler for sqlexception
-    begin
-        rollback;
-        resignal;
-    end;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-    set transaction isolation level read committed;
-    start transaction;
+    SET TRANSACTION ISOLATION LEVEL READ committed;
+    start TRANSACTION;
 
         SELECT `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`, `via_residenza`, `civico_residenza`, `cap_residenza`, `via_fatturazione`, `civico_fatturazione`, `cap_fatturazione`,
             `recapito_preferito`.`valore` AS `valore_preferito`, `recapito_preferito`.`tipo` AS `tipo_preferito`
@@ -385,7 +385,7 @@ BEGIN
         FROM `recapito`
         WHERE `anagrafica`=var_utente_id AND (`valore`, `tipo`) NOT IN (SELECT `valore`, `tipo` FROM `recapito_preferito` WHERE `anagrafica`=var_utente_id);
 
-    commit;
+    COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `base`!
 GRANT EXECUTE ON PROCEDURE `dettagli_utente` TO `gestore`!
@@ -429,32 +429,32 @@ GRANT EXECUTE ON PROCEDURE `select_utenti_con_messaggi` TO `gestore`!
 
 -- C0000
 DROP PROCEDURE IF EXISTS `scrivere_commento`!
-CREATE PROCEDURE `scrivere_commento` (in var_utente VARCHAR(30), in var_annuncio INT UNSIGNED, in var_testo VARCHAR(250))
+CREATE PROCEDURE `scrivere_commento` (IN var_utente VARCHAR(30), IN var_annuncio INT UNSIGNED, IN var_testo VARCHAR(250))
 BEGIN
-	declare counter INT;
-	declare exit handler for sqlexception
-    begin
-    	rollback;
-    	resignal;
-    end;
+	DECLARE counter INT;
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    	ROLLBACK;
+    	RESIGNAL;
+    END;
 
-	set transaction isolation level read committed;
-	start transaction;
+	SET TRANSACTION ISOLATION LEVEL READ committed;
+	start TRANSACTION;
 
-		select count(`annuncio`) into counter
-			from `annuncio_disponibile`
-			where `annuncio`=var_annuncio;
+		SELECT count(`annuncio`) INTO counter
+			FROM `annuncio_disponibile`
+			WHERE `annuncio`=var_annuncio;
 
-		if(counter<>1) then signal sqlstate '45001' set message_text="Annuncio già venduto";
-		end if;
+		if(counter<>1) then signal sqlstate '45001' SET message_text="Annuncio già venduto";
+		END if;
 
-		insert into `commento` (`utente`, `annuncio`, `testo`)
-			values (var_utente, var_annuncio, var_testo);
+		INSERT INTO `commento` (`utente`, `annuncio`, `testo`)
+			VALUES (var_utente, var_annuncio, var_testo);
 
-		update `annuncio_disponibile`
-			set `modificato`=CURRENT_TIMESTAMP
-			where `annuncio`=var_annuncio;
-	commit;
+		UPDATE `annuncio_disponibile`
+			SET `modificato`=CURRENT_TIMESTAMP
+			WHERE `annuncio`=var_annuncio;
+	COMMIT;
 END!
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `base`!
 GRANT EXECUTE ON PROCEDURE `scrivere_commento` TO `gestore`!
