@@ -218,8 +218,7 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_inseriti` TO `gestore`!
 DROP PROCEDURE IF EXISTS `seguire_annuncio`!
 CREATE PROCEDURE `seguire_annuncio` (IN var_utente_id VARCHAR (30), IN var_annuncio_id INT UNSIGNED)
 BEGIN
-    DECLARE counter_totale INT;
-    DECLARE counter_venduto INT;
+    DECLARE counter INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -230,17 +229,13 @@ BEGIN
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
 
-        SELECT COUNT(*), COUNT(`venduto`)
-        INTO counter_totale, counter_venduto
-        FROM `annuncio`
-        WHERE `numero`=var_annuncio_id;
+        SELECT COUNT(*)
+        FROM `annuncio_disponibile`
+        WHERE `annuncio`=var_annuncio_id
+        INTO counter;
 
-        IF (counter_totale <> 1) THEN
-        	SIGNAL SQLSTATE '45004' SET message_text="Annuncio non esistente.";
-        END IF;
-
-        IF (counter_venduto = 1) THEN
-        	SIGNAL SQLSTATE '45001' SET message_text="Annuncio gia venduto.";
+        IF (counter <> 1) THEN
+            SIGNAL SQLSTATE '45011' SET message_text="Annuncio gia venduto o non esistente.";
         END IF;
 
         INSERT INTO `segue` (`utente`, `annuncio`) VALUES (var_utente_id, var_annuncio_id);
