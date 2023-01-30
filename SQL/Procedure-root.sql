@@ -31,7 +31,7 @@ BEGIN
     END;
 
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
-	start TRANSACTION;
+	START TRANSACTION;
 
         IF (NOT (var_via_fatturazione IS NOT NULL AND var_civico_fatturazione IS NOT NULL AND var_cap_fatturazione IS NOT NULL)
             AND
@@ -80,7 +80,7 @@ BEGIN
     END;
 
     SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
-    start TRANSACTION;
+    START TRANSACTION;
 
         INSERT INTO `annuncio` (`descrizione`, `categoria`, `inserzionista`) VALUES
             (var_descrizione, var_categoria, var_inserzionista);
@@ -331,7 +331,7 @@ BEGIN
         RESIGNAL;
     END;
 
-    start TRANSACTION;
+    START TRANSACTION;
 
     SELECT COUNT(*), COUNT(`ad`.`annuncio`)
     FROM `annuncio` AS `a`
@@ -373,7 +373,7 @@ BEGIN
     END;
 
     SET TRANSACTION ISOLATION LEVEL READ committed;
-    start TRANSACTION;
+    START TRANSACTION;
 
         SELECT `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`, `via_residenza`, `civico_residenza`, `cap_residenza`, `via_fatturazione`, `civico_fatturazione`, `cap_fatturazione`,
             `recapito_preferito`.`valore` AS `valore_preferito`, `recapito_preferito`.`tipo` AS `tipo_preferito`
@@ -439,7 +439,7 @@ BEGIN
     END;
 
 	SET TRANSACTION ISOLATION LEVEL READ committed;
-	start TRANSACTION;
+	START TRANSACTION;
 
 		SELECT count(`annuncio`) INTO counter
 			FROM `annuncio_disponibile`
