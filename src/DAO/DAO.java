@@ -96,7 +96,12 @@ public class DAO {
 
         // #2: create statement
         String callQuery = "{call `registrazione_utente` (" +
-                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+                "?, ?, ?," +
+                "?, ?, ?, ?," +
+                "?, ?," +
+                "?, ?, ?," +
+                "?, ?, ?," +
+                "?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
 
         // Prepare call
@@ -108,6 +113,7 @@ public class DAO {
             default -> throw new RuntimeException("Invalid role");
         };
         cs.setString(3, userRole);
+
         cs.setString(4, anagrafica.getCodiceFiscale());
         cs.setString(5, anagrafica.getNome());
         cs.setString(6, anagrafica.getCognome());
@@ -116,18 +122,25 @@ public class DAO {
             case DONNA -> "donna";
         };
         cs.setString(7, userSesso);
+
         cs.setDate(8, Date.valueOf(anagrafica.getDataNascita()));
         cs.setString(9, anagrafica.getComuneNascita());
-        cs.setString(10, anagrafica.getIndirizzoResidenza());
-        cs.setString(11, anagrafica.getIndirizzoFatturazione());
 
-        cs.setString(12, recapitoPreferito.getValore());
+        cs.setString(10, anagrafica.getViaResidenza());
+        cs.setString(11, anagrafica.getCivicoResidenza());
+        cs.setString(12, anagrafica.getCapResidenza());
+
+        cs.setString(13, anagrafica.getViaFatturazione());
+        cs.setString(14, anagrafica.getCivicoFatturazione());
+        cs.setString(15, anagrafica.getCapFatturazione());
+
+        cs.setString(16, recapitoPreferito.getValore());
         String tipoRecapito = switch (recapitoPreferito.getTipo()) {
             case EMAIL -> "email";
             case TELEFONO -> "telefono";
             case CELLULARE -> "cellulare";
         };
-        cs.setString(13, tipoRecapito);
+        cs.setString(17, tipoRecapito);
         cs.closeOnCompletion();
 
         cs.execute();
@@ -135,13 +148,13 @@ public class DAO {
         return true;
     }
 
-    //      A0600
-    public static boolean selectDettagliUtente(Role role, Utente utente, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
+    //      N0001
+    public static boolean selectDettagliUtente(Role role, String targetUsername, Anagrafica anagrafica, List<Recapito> recapitoList) throws SQLException {
         openRoleConnection(role);
 
         String call = "{CALL `dettagli_utente`(?)}";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        cs.setString(1, utente.getID());
+        cs.setString(1, targetUsername);
 
         ResultSet rs = cs.executeQuery();
 
@@ -152,25 +165,26 @@ public class DAO {
             throw e;
         }
 
-        utente.setAnnunci_inseriti(rs.getInt(1));
-        utente.setAnnunci_venduti(rs.getInt(2));
-
-        anagrafica.setCodiceFiscale(rs.getString(3));
-        anagrafica.setNome(rs.getString(4));
-        anagrafica.setCognome(rs.getString(5));
-        anagrafica.setSesso(switch (rs.getString(6)) {
+        anagrafica.setCodiceFiscale(rs.getString(1));
+        anagrafica.setNome(rs.getString(2));
+        anagrafica.setCognome(rs.getString(3));
+        anagrafica.setSesso(switch (rs.getString(4)) {
             case "uomo", "Uomo" -> Sesso.UOMO;
             case "donna", "Donna" -> Sesso.DONNA;
             default -> null;
         });
-        anagrafica.setDataNascita(rs.getTimestamp(7).toLocalDateTime().toLocalDate());
-        anagrafica.setComuneNascita(rs.getString(8));
-        anagrafica.setIndirizzoResidenza(rs.getString(9));
-        anagrafica.setIndirizzoFatturazione(rs.getString(10));
+        anagrafica.setDataNascita(rs.getTimestamp(5).toLocalDateTime().toLocalDate());
+        anagrafica.setComuneNascita(rs.getString(6));
+        anagrafica.setViaResidenza(rs.getString(7));
+        anagrafica.setCivicoResidenza(rs.getString(8));
+        anagrafica.setCapResidenza(rs.getString(9));
+        anagrafica.setViaFatturazione(rs.getString(10));
+        anagrafica.setCivicoFatturazione(rs.getString(11));
+        anagrafica.setCapFatturazione(rs.getString(12));
 
         Recapito recapitoPreferito = new Recapito();
-        recapitoPreferito.setValore(rs.getString(11));
-        recapitoPreferito.setTipo(switch (rs.getString(12)) {
+        recapitoPreferito.setValore(rs.getString(13));
+        recapitoPreferito.setTipo(switch (rs.getString(14)) {
             case "telefono" -> TipoRecapito.TELEFONO;
             case "cellulare" -> TipoRecapito.CELLULARE;
             case "email" -> TipoRecapito.EMAIL;
@@ -351,7 +365,7 @@ public class DAO {
         String callQuery = "{CALL `inserire_annuncio`(?, ?, ?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery);
 
-        cs.setString(1, annuncio.getInserzionista());
+        cs.setString(1, ActiveUser.getUsername());
         cs.setString(2, annuncio.getDescrizione());
         cs.setString(3, annuncio.getCategoria());
         cs.registerOutParameter(4, Types.INTEGER);
@@ -359,19 +373,21 @@ public class DAO {
 
         cs.execute();
 
+        annuncio.setInserzionista(ActiveUser.getUsername());
         annuncio.setNumero(cs.getLong(4));
 
         return true;
     }
 
     //      A0100
-    public static boolean getDettagliAnnuncio(Role role, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
+    public static boolean getDettagliAnnuncio(Role role, String utenteRichiesta, Annuncio annuncio, List<Commento> commentoList) throws SQLException {
         openRoleConnection(role);
 
-        String callQuery = "{CALL `dettagli_annuncio`(?)}";
+        String callQuery = "{CALL `dettagli_annuncio`(?, ?)}";
         CallableStatement cs = conn.prepareCall(callQuery, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-        cs.setLong(1, annuncio.getID());
+        cs.setString(1, utenteRichiesta);
+        cs.setLong(2, annuncio.getID());
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
@@ -382,7 +398,7 @@ public class DAO {
             annuncio.setDescrizione(rs.getString(3));
             annuncio.setCategoria(rs.getString(4));
             annuncio.setInserito(rs.getTimestamp(5).toLocalDateTime());
-            annuncio.setModificato(rs.getTimestamp(6).toLocalDateTime());
+            annuncio.setModificato((rs.getTimestamp(6) == null) ? null : rs.getTimestamp(6).toLocalDateTime());
             annuncio.setVenduto((rs.getTimestamp(7) == null) ? null : rs.getTimestamp(7).toLocalDateTime());
 
             do {
@@ -396,41 +412,31 @@ public class DAO {
                     commentoList.add(commento);
                 }
             } while (rs.next());
+        } else {
+            CustomSQLException e = new CustomSQLException();
+            e.setMessage("Annuncio non disponibile o non esistente");
+            e.setSQLState("45011");
+            throw e;
         }
 
         return true;
     }
 
-    //      A0500
-    public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
-        openRoleConnection(role);
-
-        String call = "{CALL `vendere_annuncio`(?, ?)};";
-        CallableStatement cs = conn.prepareCall(call);
-        cs.setLong(1, annuncioID);
-        cs.setString(2, utenteID);
-        cs.closeOnCompletion();
-
-        cs.executeUpdate();
-
-        return true;
-    }
 
     //      A0200
-    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncioByCategoria(Role role, String categoriaID, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_categorie_figlie` (?, ?)}";
+        String call = "{CALL `select_annunci_categorie_figlie` (?)}";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, categoriaID);
-        cs.setBoolean(2, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
-                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
             } while (rs.next());
         }
 
@@ -438,20 +444,19 @@ public class DAO {
     }
 
     //      A0202
-    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncioByInserzionista(Role role, String inserzionistaID, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_by_inserzionista` (?, ?)};";
+        String call = "{CALL `select_annunci_by_inserzionista` (?)};";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, inserzionistaID);
-        cs.setBoolean(2, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
-                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
             } while (rs.next());
         }
 
@@ -459,20 +464,19 @@ public class DAO {
     }
 
     //      A0203
-    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncioByDescrizione(Role role, String descrizione, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_by_descrizione` (?, ?)}";
+        String call = "{CALL `select_annunci_by_descrizione` (?)}";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, descrizione);
-        cs.setBoolean(2, onlyAvailable);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
 
         if (rs.first()) {
             do {
-                annuncioList.add(BuilderAnnuncio.newFromResultSet(rs));
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
             } while (rs.next());
         }
 
@@ -480,12 +484,31 @@ public class DAO {
     }
 
     //      A0204
-    public static boolean selectAnnuncio(Role role, Boolean onlyAvailable, List<Annuncio> annuncioList) throws SQLException {
+    public static boolean selectAnnuncio(Role role, List<Annuncio> annuncioList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `select_annunci_without_clauses`(?)};";
-        PreparedStatement cs = conn.prepareStatement(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        cs.setBoolean(1, onlyAvailable);
+        String call = "{CALL `select_annunci_without_clauses`()};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.closeOnCompletion();
+
+        ResultSet rs = cs.executeQuery();
+
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
+            } while (rs.next());
+        }
+
+        return true;
+    }
+
+    //      A0205
+    public static boolean selectInseriti(Role role, String username, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
+
+        String call = "{CALL `select_annunci_inseriti`(?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, username);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
@@ -498,6 +521,27 @@ public class DAO {
 
         return true;
     }
+
+    //      A0205
+    public static boolean selectSeguiti(Role role, String username, List<Annuncio> annuncioList) throws SQLException {
+        openRoleConnection(role);
+
+        String call = "{CALL `select_annunci_seguiti`(?)};";
+        CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        cs.setString(1, username);
+        cs.closeOnCompletion();
+
+        ResultSet rs = cs.executeQuery();
+
+        if (rs.first()) {
+            do {
+                annuncioList.add(BuilderAnnuncio.newAvailableFromResultSet(rs));
+            } while (rs.next());
+        }
+
+        return true;
+    }
+
 
     // SEGUE
     //      A0300
@@ -536,14 +580,12 @@ public class DAO {
     }
 
     // A0400
-    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList, boolean updateLastCheck, boolean deleteSold) throws SQLException {
+    public static boolean selectAnnunciSeguitiModificati(Role role, String utenteID, List<Annuncio> annunciSeguitiModificatiList) throws SQLException {
         openRoleConnection(role);
 
-        String call = "{CALL `controllare_annunci_seguiti` (?, ?, ?)};";
+        String call = "{CALL `controllare_annunci_seguiti` (?)};";
         CallableStatement cs = conn.prepareCall(call, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         cs.setString(1, utenteID);
-        cs.setBoolean(2, updateLastCheck);
-        cs.setBoolean(3, deleteSold);
         cs.closeOnCompletion();
 
         ResultSet rs = cs.executeQuery();
@@ -553,6 +595,21 @@ public class DAO {
                 annunciSeguitiModificatiList.add(BuilderAnnuncio.newFromResultSet(rs));
             } while (rs.next());
         }
+
+        return true;
+    }
+
+    //      A0500
+    public static boolean updateAnnuncioVendere(Role role, long annuncioID, String utenteID) throws SQLException {
+        openRoleConnection(role);
+
+        String call = "{CALL `vendere_annuncio`(?, ?)};";
+        CallableStatement cs = conn.prepareCall(call);
+        cs.setLong(1, annuncioID);
+        cs.setString(2, utenteID);
+        cs.closeOnCompletion();
+
+        cs.executeUpdate();
 
         return true;
     }

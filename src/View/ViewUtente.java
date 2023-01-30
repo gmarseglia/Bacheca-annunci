@@ -18,11 +18,13 @@ public class ViewUtente {
         CERCARE_PER_UTENTE,                 //A0202
         CERCARE_PER_DESCRIZIONE,            //A0203
         CERCARE_TUTTI_ANNUNCI,              //A0204
+        CERCARE_INSERITI,                   //A0205
+        CERCARE_SEGUITI,                    //A0206
         SEGUIRE_ANNUNCIO,                   //A0300
         STOP_SEGUIRE_ANNUNCIO,              //A0301
         CONTROLLARE_SEGUITI,                //A0400
         VENDERE_ANNUNCIO,                   //A0500
-        DETTAGLI_UTENTE,                    //A0600
+        DETTAGLI_UTENTE,                    //N0001
         INVIARE_MESSAGGIO,                  //M0000
         MESSAGGI_CON_UTENTE,                //M0100
         VISUALIZZARE_UTENTI_CON_MESSAGGI,   //M0101
@@ -42,18 +44,20 @@ public class ViewUtente {
                 case "3" -> CERCARE_PER_UTENTE;
                 case "4" -> CERCARE_PER_CATEGORIA;
                 case "5" -> CERCARE_PER_DESCRIZIONE;
-                case "6" -> DETTAGLI_ANNUNCIO;
-                case "7" -> SEGUIRE_ANNUNCIO;
-                case "8" -> STOP_SEGUIRE_ANNUNCIO;
-                case "9" -> CONTROLLARE_SEGUITI;
-                case "a", "A" -> DETTAGLI_UTENTE;
-                case "b", "B" -> SCRIVERE_COMMENTO;
-                case "c", "C" -> VISUALIZZARE_UTENTI_CON_MESSAGGI;
-                case "d", "D" -> MESSAGGI_CON_UTENTE;
-                case "e", "E" -> INVIARE_MESSAGGIO;
-                case "f", "F" -> VISUALIZZARE_CATEGORIE;
-                case "g", "G" -> CREARE_CATEGORIA;
-                case "h", "H" -> CREARE_REPORT;
+                case "6" -> CERCARE_INSERITI;
+                case "7" -> CERCARE_SEGUITI;
+                case "8" -> DETTAGLI_ANNUNCIO;
+                case "9" -> SEGUIRE_ANNUNCIO;
+                case "a", "A" -> STOP_SEGUIRE_ANNUNCIO;
+                case "b", "B" -> CONTROLLARE_SEGUITI;
+                case "c", "C" -> DETTAGLI_UTENTE;
+                case "d", "D" -> SCRIVERE_COMMENTO;
+                case "e", "E" -> VISUALIZZARE_UTENTI_CON_MESSAGGI;
+                case "f", "F" -> MESSAGGI_CON_UTENTE;
+                case "g", "G" -> INVIARE_MESSAGGIO;
+                case "h", "H" -> VISUALIZZARE_CATEGORIE;
+                case "i", "I" -> CREARE_CATEGORIA;
+                case "j", "J" -> CREARE_REPORT;
                 case "l", "L" -> LOGOUT;
                 case "u", "U" -> TERMINARE_APPLICAZIONE;
                 default -> null;
@@ -65,22 +69,24 @@ public class ViewUtente {
             Operazioni possibili:
             (0) [INSERIRE] un ANNUNCIO.
             (1) [INDICARE come VENDUTO] un annuncio inserito.
-            (2) [CERCARE TUTTI] gli annunci.
-            (3) [CERCARE per UTENTE] gli annunci.
-            (4) [CERCARE per CATEGORIA] gli annunci.
+            (2) [CERCARE TUTTI] gli annunci disponibili.
+            (3) [CERCARE per UTENTE] gli annunci disponibili.
+            (4) [CERCARE per CATEGORIA] gli annunci disponibili.
             (5) [CERCARE per DESCRIZIONE] gli annunci disponibili.
-            (6) Visualizzare i [DETTAGLI di un ANNUNCIO].
-            (7) [AGGIUNGERE ai "SEGUITI"] un annuncio disponibile .
-            (8) [RIMUOVERE dai "SEGUITI"] un annuncio.
-            (9) [CONTROLLARE fra i "SEGUITI"] quali annunci hanno subito modifiche.
-            (A) Visualizzare i [DETTAGLI di un UTENTE].
-            (B) [SCRIVERE un COMMENTO] sotto un annuncio disponibile.
-            (C) Visualizzare utenti con cui sono stati [SCAMBIATI MESSAGGI PRIVATI].
-            (D) Visualizzare tutti i [MESSAGGI PRIVATI scambiati CON un UTENTE].
-            (E) [INVIARE un MESSAGGIO PRIVATO] ad un utente.
-            (F) [VISUALIZZARE le CATEGORIE].
-            (G) [CREARE una CATEGORIA].
-            (H) [GENERARE REPORT] sulla percentuale di vendita degli utenti.
+            (6) [CERCARE gli annunci INSERITI].
+            (7) [CERCARE gli annunci SEGUITI] disponibili.
+            (8) Visualizzare i [DETTAGLI di un ANNUNCIO].
+            (9) [AGGIUNGERE ai "SEGUITI"] un annuncio disponibile .
+            (A) [RIMUOVERE dai "SEGUITI"] un annuncio.
+            (B) [CONTROLLARE fra i "SEGUITI"] quali annunci hanno subito modifiche.
+            (C) Visualizzare i [DETTAGLI di un UTENTE].
+            (D) [SCRIVERE un COMMENTO] sotto un annuncio disponibile.
+            (E) Visualizzare utenti con cui sono stati [SCAMBIATI MESSAGGI PRIVATI].
+            (F) Visualizzare tutti i [MESSAGGI PRIVATI scambiati CON un UTENTE].
+            (G) [INVIARE un MESSAGGIO PRIVATO] ad un utente.
+            (H) [VISUALIZZARE le CATEGORIE].
+            (I) [CREARE una CATEGORIA].
+            (J) [GENERARE REPORT] sulla percentuale di vendita degli utenti.
             (L) [LOGOUT].
             (U) [USCIRE] dall'applicazione.
             """;
@@ -118,6 +124,8 @@ public class ViewUtente {
             case CERCARE_PER_UTENTE -> cercaPerUtente();
             case CERCARE_PER_CATEGORIA -> cercaPerCategoria();
             case CERCARE_PER_DESCRIZIONE -> cercaPerDescrizione();
+            case CERCARE_INSERITI -> cercaInseriti();
+            case CERCARE_SEGUITI -> cercaSeguiti();
             case DETTAGLI_ANNUNCIO -> dettagliAnnuncio();
             case SEGUIRE_ANNUNCIO -> seguireAnnuncio();
             case STOP_SEGUIRE_ANNUNCIO -> stopSeguireAnnuncio();
@@ -141,24 +149,47 @@ public class ViewUtente {
         }
     }
 
-    // A0204
-    private static void cercareAnnunci() {
+    // A0206
+    private static void cercaSeguiti() {
         Boolean confirmOp = null;
-        Boolean onlyAvailable;
         do {
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
-
-            System.out.printf("""
+            System.out.print("""
                                         
-                    Trovare tutti gli annunci.
-                    Filtrare per solo disponibili: %s.
-                    """, onlyAvailable ? "Vero" : "Falso");
+                    Trovare tutti gli annunci seguiti disponibili.
+                    """);
+
+            switch (ScannerUtility.askFirstChar("Procedere? (S)i, (N)o o (A)nnulla")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+                case "a", "A" -> {
+                    return;
+                }
+            }
+        } while (confirmOp == null || !confirmOp);
+
+        List<Annuncio> foundAnnunciList = new ArrayList<>();
+
+        System.out.print("Ricerca degli annunci seguiti... ");
+
+        DBResult dbResult = ViewController.cercareSeguiti(foundAnnunciList);
+
+        printResult(dbResult, () -> {
+            for (Annuncio annuncio : foundAnnunciList) {
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
+            }
+        });
+
+        ScannerUtility.askAny();
+    }
+
+    // A0205
+    private static void cercaInseriti() {
+        Boolean confirmOp = null;
+        do {
+            System.out.print("""
+                                        
+                    Trovare tutti gli annunci inseriti.
+                    """);
 
             switch (ScannerUtility.askFirstChar("Procedere? (S)i, (N)o o (A)nnulla")) {
                 case "s", "S" -> confirmOp = true;
@@ -173,7 +204,40 @@ public class ViewUtente {
 
         System.out.print("Ricerca degli annunci... ");
 
-        DBResult dbResult = ViewController.cercareAnnunci(onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareInseriti(foundAnnunciList);
+
+        printResult(dbResult, () -> {
+            for (Annuncio annuncio : foundAnnunciList) {
+                System.out.println(annuncio.toPrettyString(DATETIME_FORMAT));
+            }
+        });
+
+        ScannerUtility.askAny();
+    }
+
+    // A0204
+    private static void cercareAnnunci() {
+        Boolean confirmOp = null;
+        do {
+            System.out.print("""
+                                        
+                    Trovare tutti gli annunci disponibili.
+                    """);
+
+            switch (ScannerUtility.askFirstChar("Procedere? (S)i, (N)o o (A)nnulla")) {
+                case "s", "S" -> confirmOp = true;
+                case "n", "N" -> confirmOp = false;
+                case "a", "A" -> {
+                    return;
+                }
+            }
+        } while (confirmOp == null || !confirmOp);
+
+        List<Annuncio> foundAnnunciList = new ArrayList<>();
+
+        System.out.print("Ricerca degli annunci... ");
+
+        DBResult dbResult = ViewController.cercareAnnunci(foundAnnunciList);
 
         printResult(dbResult, () -> {
             for (Annuncio annuncio : foundAnnunciList) {
@@ -241,25 +305,17 @@ public class ViewUtente {
     // A0203
     private static void cercaPerDescrizione() {
         String descrizione;
-        Boolean onlyAvailable;
         Boolean confirmOp;
 
         do {
             confirmOp = null;
             descrizione = ScannerUtility.askText("Testo nella descrizione", 5000);
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
+
             System.out.printf("""
                                         
-                    Trovare tutti gli annunci la cui descrizione contiene:
+                    Trovare tutti gli annunci disponibili la cui descrizione contiene:
                     "%s"
-                    Filtrare per solo disponibili: %s.
-                    """, descrizione, onlyAvailable ? "Vero" : "Falso");
+                    """, descrizione);
 
             do {
                 switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
@@ -274,7 +330,7 @@ public class ViewUtente {
 
         System.out.print("\nRicerca degli annunci per descrizione... ");
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = ViewController.cercareAnnunciPerDescrizione(descrizione, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerDescrizione(descrizione, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -290,24 +346,16 @@ public class ViewUtente {
 
     private static void cercaPerCategoria() {
         String categoriaID;
-        Boolean onlyAvailable;
         Boolean confirmOp;
 
         do {
             confirmOp = null;
             categoriaID = ScannerUtility.askString("Categoria", 30);
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
+
             System.out.printf("""
                                         
-                    Trovare tutti gli annunci della categoria %s e delle sue categorie figlie
-                    Filtrare per solo disponibili: %s.
-                    """, categoriaID, onlyAvailable ? "Vero" : "Falso");
+                    Trovare tutti gli annunci della categoria %s e delle sue categorie figlie.
+                    """, categoriaID);
 
             do {
                 switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
@@ -322,7 +370,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci della categoria \"%s\" e delle categorie figlie... ", categoriaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = ViewController.cercareAnnunciPerCategoria(categoriaID, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerCategoria(categoriaID, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\n");
@@ -339,24 +387,16 @@ public class ViewUtente {
     // A0202
     private static void cercaPerUtente() {
         String inserzionistaID;
-        Boolean onlyAvailable;
         Boolean confirmOp;
 
         do {
             confirmOp = null;
             inserzionistaID = ScannerUtility.askString("Username", 30);
-            onlyAvailable = null;
-            do {
-                switch (ScannerUtility.askFirstChar("Filtrare per solo disponibili? (S)i o (N)o")) {
-                    case "s", "S" -> onlyAvailable = true;
-                    case "n", "N" -> onlyAvailable = false;
-                }
-            } while (onlyAvailable == null);
+
             System.out.printf("""
                                         
-                    Trovare tutti gli annunci di %s
-                    Filtrare per solo disponibili: %s.
-                    """, inserzionistaID, onlyAvailable ? "Vero" : "Falso");
+                    Trovare tutti gli annunci disponibili di %s.
+                    """, inserzionistaID);
 
             do {
                 switch (ScannerUtility.askFirstChar("Confermare? (S)i, (N)o o (A)nnullare")) {
@@ -371,7 +411,7 @@ public class ViewUtente {
 
         System.out.printf("\nRicerca degli annunci di \"%s\"... ", inserzionistaID);
         List<Annuncio> foundAnnunciList = new ArrayList<>();
-        DBResult dbResult = ViewController.cercareAnnunciPerInserzionista(inserzionistaID, onlyAvailable, foundAnnunciList);
+        DBResult dbResult = ViewController.cercareAnnunciPerInserzionista(inserzionistaID, foundAnnunciList);
 
         if (dbResult.getResult()) {
             System.out.print("terminata con successo.\nLista degli annunci:\n\n");
@@ -445,7 +485,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
-    // A0600
+    // N0001
     private static void dettagliUtente() {
         Boolean confirmOp;
         String targetUsername;
@@ -468,10 +508,9 @@ public class ViewUtente {
         } while (confirmOp == null);
 
         System.out.printf("Ricerca dei dettagli di \"%s\"... ", targetUsername);
-        Utente targetUtente = new Utente(targetUsername);
         Anagrafica anagrafica = new Anagrafica();
         List<Recapito> recapitoList = new ArrayList<>();
-        DBResult dbResult = ViewController.dettagliUtente(targetUtente, anagrafica, recapitoList);
+        DBResult dbResult = ViewController.dettagliUtente(targetUsername, anagrafica, recapitoList);
 
         printResult(dbResult, () -> {
             System.out.println("\nDati di " + targetUsername + ":");
@@ -662,6 +701,7 @@ public class ViewUtente {
         ScannerUtility.askAny();
     }
 
+    // A0000
     private static void inserireAnnuncio() {
         String descrizione;
         String categoria;

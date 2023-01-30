@@ -78,6 +78,12 @@ public class Annuncio {
     }
 
     public LocalDateTime getModificato() {
+        if (modificato == null) {
+            if (venduto == null)
+                return inserito;
+            else
+                return venduto;
+        }
         return modificato;
     }
 
@@ -95,31 +101,17 @@ public class Annuncio {
 
     @Override
     public String toString() {
-        return "Annuncio{" +
-                "numero=" + numero +
-                ", inserzionista='" + inserzionista + '\'' +
-                ", descrizione='" + descrizione + '\'' +
-                ", categoria='" + categoria + '\'' +
-                ", inserito=" + inserito +
-                ", modificato=" + modificato +
-                ", venduto=" + venduto +
-                '}';
+        return "Annuncio{" + "numero=" + numero + ", inserzionista='" + inserzionista + '\'' + ", descrizione='" + descrizione + '\'' + ", categoria='" + categoria + '\'' + ", inserito=" + inserito + ", modificato=" + modificato + ", venduto=" + venduto + '}';
     }
 
     public String toPrettyString(String dateTimeFormat) {
         return String.format("""
-                        Annuncio #%d inserito da "%s":
-                        Stato: %s
-                        Descrizione: %s
-                        Categoria: %s
-                        Inserito il: %s
-                        Ultima modifica: %s
-                        """,
-                numero, inserzionista,
-                (venduto == null) ? "Disponibile" : "Venduto il " + ((dateTimeFormat == null) ? venduto : venduto.format(DateTimeFormatter.ofPattern(dateTimeFormat))),
-                descrizione,
-                categoria,
-                (dateTimeFormat == null) ? inserito : inserito.format(DateTimeFormatter.ofPattern(dateTimeFormat)),
-                (dateTimeFormat == null) ? modificato : modificato.format(DateTimeFormatter.ofPattern(dateTimeFormat)));
+                Annuncio #%d inserito da "%s":
+                Stato: %s
+                Descrizione: %s
+                Categoria: %s
+                Inserito il: %s
+                Ultima modifica: %s
+                """, numero, inserzionista, (venduto == null) ? "Disponibile" : "Venduto il " + ((dateTimeFormat == null) ? venduto : venduto.format(DateTimeFormatter.ofPattern(dateTimeFormat))), descrizione, categoria, (dateTimeFormat == null) ? inserito : inserito.format(DateTimeFormatter.ofPattern(dateTimeFormat)), (dateTimeFormat == null) ? this.getModificato() : this.getModificato().format(DateTimeFormatter.ofPattern(dateTimeFormat)));
     }
 }
