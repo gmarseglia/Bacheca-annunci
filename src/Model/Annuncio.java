@@ -78,6 +78,12 @@ public class Annuncio {
     }
 
     public LocalDateTime getModificato() {
+        if (modificato == null) {
+            if (venduto == null)
+                return inserito;
+            else
+                return venduto;
+        }
         return modificato;
     }
 
@@ -106,6 +112,6 @@ public class Annuncio {
                 Categoria: %s
                 Inserito il: %s
                 Ultima modifica: %s
-                """, numero, inserzionista, (venduto == null) ? "Disponibile" : "Venduto il " + ((dateTimeFormat == null) ? venduto : venduto.format(DateTimeFormatter.ofPattern(dateTimeFormat))), descrizione, categoria, (dateTimeFormat == null) ? inserito : inserito.format(DateTimeFormatter.ofPattern(dateTimeFormat)), (modificato == null) ? "" : (dateTimeFormat == null) ? modificato : modificato.format(DateTimeFormatter.ofPattern(dateTimeFormat)));
+                """, numero, inserzionista, (venduto == null) ? "Disponibile" : "Venduto il " + ((dateTimeFormat == null) ? venduto : venduto.format(DateTimeFormatter.ofPattern(dateTimeFormat))), descrizione, categoria, (dateTimeFormat == null) ? inserito : inserito.format(DateTimeFormatter.ofPattern(dateTimeFormat)), (dateTimeFormat == null) ? this.getModificato() : this.getModificato().format(DateTimeFormatter.ofPattern(dateTimeFormat)));
     }
 }
