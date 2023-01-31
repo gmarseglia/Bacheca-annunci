@@ -114,7 +114,7 @@ BEGIN
 	START TRANSACTION;
 
 		SELECT `annuncio`.`numero`, `annuncio`.`inserzionista`, `annuncio`.`descrizione`, `annuncio`.`categoria`, `annuncio`.`inserito`,
-		`annuncio_disponibile`.`modificato`, `annuncio_venduto`.`venduto`,
+		`annuncio_disponibile`.`modIFicato`, `annuncio_venduto`.`venduto`,
 		`commento`.`utente`, `commento`.`scritto`, `commento`.`testo`
 		FROM `annuncio`
 		LEFT JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
@@ -143,7 +143,7 @@ BEGIN
 		ROLLBACK;
 		RESIGNAL;
 	END;
-	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 	START TRANSACTION;
 
 		SELECT COUNT(*) INTO counter
@@ -151,7 +151,7 @@ BEGIN
 		WHERE `nome`=var_categoria_id;
 
 		IF (counter <> 1) THEN
-				SIGNAL SQLSTATE "45003" SET message_text="Categoria non esistente";
+				SIGNAL SQLSTATE "45003" SET MESSAGE_TEXT="Categoria non esistente";
 		END IF;
 
 		CREATE TEMPORARY TABLE `temp_categoria`
@@ -178,7 +178,7 @@ BEGIN
 			DROP TEMPORARY TABLE `temp_categoria_2`;
 		END WHILE;
 
-		SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione`, `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`
+		SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione`, `a`.`categoria`, `a`.`inserito`, `ad`.`modIFicato`
 		FROM `annuncio` AS `a`
 		INNER JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
 		INNER JOIN `temp_categoria` AS `tc` ON `a`.`categoria`=`tc`.`nome`
@@ -194,7 +194,7 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_categorie_figlie` TO `gestore`!
 DROP PROCEDURE IF EXISTS `select_annunci_by_inserzionista`!
 CREATE PROCEDURE `select_annunci_by_inserzionista` (IN var_inserzionista_id VARCHAR(30))
 BEGIN
-		SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`
+		SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modIFicato`
 		FROM `annuncio` INNER JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
 		WHERE `inserzionista`=var_inserzionista_id;
 END!
@@ -205,7 +205,7 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_by_inserzionista` TO `gestore`!
 DROP PROCEDURE IF EXISTS `select_annunci_by_descrizione`!
 CREATE PROCEDURE `select_annunci_by_descrizione` (IN var_descrizione TEXT)
 BEGIN
-		SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`
+		SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modIFicato`
 		FROM `annuncio` INNER JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
 		WHERE MATCH(`descrizione`) AGAINST (var_descrizione IN NATURAL LANGUAGE MODE);
 END!
@@ -216,7 +216,7 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_by_descrizione` TO `gestore`!
 DROP PROCEDURE IF EXISTS `select_annunci_without_clauses`!
 CREATE PROCEDURE `select_annunci_without_clauses` ()
 BEGIN
-	SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`
+	SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modIFicato`
 	FROM `annuncio` INNER JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`;
 END!
 GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `base`!
@@ -226,7 +226,7 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_without_clauses` TO `gestore`!
 DROP PROCEDURE IF EXISTS `select_annunci_inseriti`!
 CREATE PROCEDURE `select_annunci_inseriti` (IN var_inserzionista_id VARCHAR(30))
 BEGIN
-		SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modificato`, `venduto`
+		SELECT `numero`, `inserzionista`, `descrizione`, `categoria`, `inserito`, `modIFicato`, `venduto`
 		FROM `annuncio`
 		LEFT JOIN `annuncio_disponibile` ON `annuncio`.`numero`=`annuncio_disponibile`.`annuncio`
 		LEFT JOIN `annuncio_venduto` ON `annuncio`.`numero`=`annuncio_venduto`.`annuncio`
@@ -239,7 +239,7 @@ GRANT EXECUTE ON PROCEDURE `select_annunci_inseriti` TO `gestore`!
 DROP PROCEDURE IF EXISTS `select_annunci_seguiti`!
 CREATE PROCEDURE `select_annunci_seguiti` (IN var_utente_id VARCHAR (30))
 BEGIN
-	SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`
+	SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modIFicato`
 	FROM `segue` AS `s`
 		INNER JOIN `annuncio` `a` ON `s`.`annuncio`=`a`.`numero`
 		INNER JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
@@ -269,7 +269,7 @@ BEGIN
 		INTO counter;
 
 		IF (counter <> 1) THEN
-			SIGNAL SQLSTATE '45011' SET message_text="Annuncio gia venduto o non esistente.";
+			SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT="Annuncio gia venduto o non esistente.";
 		END IF;
 
 		INSERT INTO `segue` (`utente`, `annuncio`) VALUES (var_utente_id, var_annuncio_id);
@@ -298,15 +298,15 @@ BEGIN
 		RESIGNAL;
 	END;
 
-	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+	SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 	START TRANSACTION;
 
-		SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modificato`, `av`.`venduto`
+		SELECT `a`.`numero`, `a`.`inserzionista`, `a`.`descrizione` , `a`.`categoria`, `a`.`inserito`, `ad`.`modIFicato`, `av`.`venduto`
 		FROM `segue` AS `s`
 			INNER JOIN `annuncio` `a` ON `s`.`annuncio`=`a`.`numero`
 			LEFT JOIN `annuncio_disponibile` AS `ad` ON `a`.`numero`=`ad`.`annuncio`
 			LEFT JOIN `annuncio_venduto` AS `av` ON `a`.`numero`=`av`.`annuncio`
-		WHERE `s`.`utente`=var_utente_id AND (`ad`.`modificato`>=`s`.`controllato` OR `av`.`venduto`>=`s`.`controllato`);
+		WHERE `s`.`utente`=var_utente_id AND (`ad`.`modIFicato`>=`s`.`controllato` OR `av`.`venduto`>=`s`.`controllato`);
 
 		DELETE `s`
 		FROM `segue` AS `s`
@@ -331,6 +331,7 @@ BEGIN
 		RESIGNAL;
 	END;
 
+	SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 	START TRANSACTION;
 
 	SELECT COUNT(*), COUNT(`ad`.`annuncio`)
@@ -354,8 +355,8 @@ BEGIN
 	WHERE `annuncio`=var_annuncio_id;
 
 	UPDATE `utente`
-		SET `annunci_venduti`=`annunci_venduti`+1
-		WHERE `username`=var_utente_id;
+	SET `annunci_venduti`=`annunci_venduti`+1
+	WHERE `username`=var_utente_id;
 
 	COMMIT;
 END!
@@ -372,7 +373,7 @@ BEGIN
 		RESIGNAL;
 	END;
 
-	SET TRANSACTION ISOLATION LEVEL READ committed;
+	SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 	START TRANSACTION;
 
 		SELECT `codice_fiscale`, `nome`, `cognome`, `sesso`, `data_nascita`, `comune_nascita`, `via_residenza`, `civico_residenza`, `cap_residenza`, `via_fatturazione`, `civico_fatturazione`, `cap_fatturazione`,
@@ -438,21 +439,21 @@ BEGIN
 		RESIGNAL;
 	END;
 
-	SET TRANSACTION ISOLATION LEVEL READ committed;
+	SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 	START TRANSACTION;
 
 		SELECT count(`annuncio`) INTO counter
 			FROM `annuncio_disponibile`
 			WHERE `annuncio`=var_annuncio;
 
-		if(counter<>1) then signal sqlstate '45001' SET message_text="Annuncio già venduto";
-		END if;
+		IF(counter<>1) THEN SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT="Annuncio già venduto";
+		END IF;
 
 		INSERT INTO `commento` (`utente`, `annuncio`, `testo`)
 			VALUES (var_utente, var_annuncio, var_testo);
 
 		UPDATE `annuncio_disponibile`
-			SET `modificato`=CURRENT_TIMESTAMP
+			SET `modIFicato`=CURRENT_TIMESTAMP
 			WHERE `annuncio`=var_annuncio;
 	COMMIT;
 END!
