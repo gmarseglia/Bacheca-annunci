@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="Bacheca-annunci:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/Bacheca_annunci_jar</output-path>
-    <root id="archive" name="Bacheca-annunci.jar">
-      <element id="module-output" name="Bacheca-annunci" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/SQL/mysql-connector-j-8.0.31.jar" path-in-jar="/" />
-    </root>
-  </artifact>
-</component>
