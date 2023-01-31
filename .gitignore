@@ -1,5 +1,4 @@
 # Ignore output dir
-.idea/
 out/
 SQL/Script/
 SQL/Script/develop.sql
